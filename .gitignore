@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.vitest/
+**/bin/
+**/obj/
+TestResults/
+.env
+.env.*
+!.env.example
+!**/.env.example
+.DS_Store
+*.user
+*.suo
+.vs/
+artifacts/

@@ -1,0 +1,70 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm audit --audit-level=low
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_DB: travel_agency_tests
+      POSTGRES_USER: travel_agency_ci
+      POSTGRES_PORT: 5432
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: services/api/**/packages.lock.json
+      - name: Configure isolated CI database
+        shell: bash
+        run: |
+          ci_password=$(openssl rand -hex 24)
+          echo "::add-mask::$ci_password"
+          echo "POSTGRES_PASSWORD=$ci_password" >> "$GITHUB_ENV"
+          echo "ConnectionStrings__TravelAgency=Host=127.0.0.1;Port=5432;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$ci_password;Timeout=3;Command Timeout=5" >> "$GITHUB_ENV"
+      - run: docker compose up -d --wait postgres
+      - run: dotnet restore TravelAgency.sln --locked-mode -warnaserror
+      - run: dotnet tool restore
+      - run: dotnet format TravelAgency.sln --no-restore --verify-no-changes
+      - run: dotnet build TravelAgency.sln --configuration Release --no-restore -warnaserror
+      - run: dotnet ef database update --project services/api/TravelAgency.Infrastructure --configuration Release --no-build
+      - run: dotnet ef migrations has-pending-model-changes --project services/api/TravelAgency.Infrastructure --configuration Release --no-build
+      - name: Test including real PostgreSQL integration
+        shell: bash
+        run: TEST_DATABASE_CONNECTION="$ConnectionStrings__TravelAgency" dotnet test --solution TravelAgency.sln --configuration Release --no-build --no-restore
+      - run: dotnet list TravelAgency.sln package --vulnerable --include-transitive
+      - name: Stop local CI database
+        if: always()
+        run: docker compose down
