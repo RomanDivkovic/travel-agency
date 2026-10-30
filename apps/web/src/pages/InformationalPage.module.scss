@@ -1,0 +1,18 @@
+.page {
+  min-height: 60vh;
+  h1,
+  p {
+    max-width: 55rem;
+  }
+  p {
+    margin-block: var(--space-5);
+    font-size: var(--text-large);
+    color: var(--color-muted);
+  }
+  .note {
+    font-size: var(--text-body);
+  }
+  a {
+    margin-top: var(--space-4);
+  }
+}

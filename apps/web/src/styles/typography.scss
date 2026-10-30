@@ -1,0 +1,28 @@
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--text-h1);
+}
+h2 {
+  font-size: var(--text-h2);
+}
+h3 {
+  font-size: var(--text-h3);
+  letter-spacing: -0.02em;
+}
+h4 {
+  font-size: var(--text-h4);
+}
+p {
+  margin: 0;
+}

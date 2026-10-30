@@ -2,7 +2,7 @@
 
 ## Scope
 
-Phase 0 creates a modular monolith with a separate React frontend and a single ASP.NET Core API backed by PostgreSQL. There are no microservices, background queues, customer models, authentication, or payment integrations. The Domain project intentionally contains no speculative entities.
+Phase 0 creates a modular monolith with a separate React frontend and a single ASP.NET Core API backed by PostgreSQL. Phase 1 builds the public homepage on that foundation without changing the backend. There are no microservices, background queues, customer models, authentication, or payment integrations. The Domain project intentionally contains no speculative entities.
 
 ## Dependency direction
 
@@ -19,13 +19,19 @@ Application and Domain stay free of ASP.NET Core and EF dependencies. Future wor
 
 ## Frontend
 
-`main.tsx` initializes React, a top-level error boundary, BrowserRouter, and global styles. `app/App.tsx` declares the landing and not-found routes within a shared layout. `FoundationPage` uses a focused health hook rather than embedding network handling in the view.
+`main.tsx` initializes React, a top-level error boundary, BrowserRouter, self-hosted fonts, and global styles. `app/App.tsx` declares the homepage, two honest informational fallback routes, and the not-found route within the public layout. The Phase 0 `FoundationPage` remains on the development-only `/_dev/health` route with its original health hook and success/failure/pending tests.
+
+`app/config` owns branding and destinations; `content/sv.ts` owns Swedish UI copy; `content/images.ts` owns responsive media references. `components/ui` provides Button/ButtonLink, Container, Section, Card, and Icon; `components/layout` owns header, brand, mobile disclosure navigation, and footer. `features/home` composes separate section components, keeping the router and page composition small.
+
+Global SCSS is limited to tokens, typography, resets, focus, and reduced-motion rules. SCSS Modules own component layouts and states. Shared SCSS breakpoints provide consistent service grids and navigation. Stateful behavior stays local: header disclosure state and route/anchor focus management. There is no global state or animation framework.
+
+Travel imagery is bundled locally, with responsive WebP and an AVIF hero plus fallback. The hero is prioritized/preloaded; below-the-fold images lazy-load with stable dimensions. Fonts and icons ship their license notices. See [the design system](DESIGN_SYSTEM.md) and [asset provenance](ASSETS.md).
 
 `services/apiClient.ts` centralizes the Axios base URL, timeout, and safe error conversion. `services/health.ts` validates the runtime health payload instead of trusting a TypeScript cast. The hook cancels in-flight work on unmount and handles rejections. SCSS Modules own layout styling; global styles cover typography and basic document defaults.
 
 `VITE_API_BASE_URL` is public configuration embedded at build time. If unset, Axios uses same-origin URLs, suitable for a future reverse proxy. Local development uses the explicit URL in `apps/web/.env`. There is no production API host hardcoded in components.
 
-Swedish is the placeholder UI language. Complete bilingual public content and SEO are Phase 2 concerns. This SPA foundation does not settle future prerendering/SSR requirements; revisit those for public-page SEO before production deployment.
+Swedish is the default UI language and all homepage copy is translation-ready without adding an i18n framework. Title, description, Open Graph text/locale, favicon, and semantic headings establish homepage metadata. Public indexing is intentionally disabled in both metadata and robots.txt. Complete bilingual pages, approved launch indexing, and SPA prerendering/SSR decisions remain future work; no unconfirmed public domain or structured company details are invented.
 
 ## API and persistence
 

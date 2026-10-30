@@ -1,5 +1,11 @@
 # Development
 
+## Phase branch workflow
+
+Never implement changes directly on `main`. Before each phase, inspect Git status and preserve any existing work. When the previous phase is merged and the working tree is clean, switch to `main`, pull with `git pull --ff-only origin main`, then create the assigned phase branch before editing files. Phase 1 uses `phase-1-branding-homepage`.
+
+Do not discard changes, force-push, delete unmerged branches, or merge a phase automatically. Staging and committing require explicit user authorization. Keep each phase reviewable so it can be tested independently or rolled back through Git history.
+
 ## Initial setup
 
 Use Node 24.19 or later within major 24 (`nvm use` reads `.nvmrc`), .NET SDK 10.0.402 or a compatible later patch in that feature band, Docker Desktop, and Docker Compose v2. Bash is required for `scripts/with-env.sh` (WSL/Git Bash on Windows).
@@ -47,6 +53,8 @@ npm --prefix apps/web run dev
 ```
 
 Open <http://localhost:5173>. The API listens on <http://localhost:5000>. Vite refuses a busy port instead of silently switching to an origin that CORS does not allow. Use `npm --prefix apps/web run preview` after a frontend build for a local build preview; configure its origin explicitly if testing API calls on another port.
+
+The public homepage makes no health requests. Use `/_dev/health` on the development server for API diagnostics; that route is absent from the production build. `/plan-your-trip` and `/about-preview` are informational fallbacks for future phases, not functioning forms or full public pages. Use homepage anchors for current services/process/about/contact navigation.
 
 ```bash
 curl -i http://localhost:5000/api/health

@@ -62,6 +62,36 @@
 
 The .NET 10 SDK uses Microsoft Testing Platform through `global.json`, and the xUnit test project enables its native runner. Commands use `dotnet test --solution TravelAgency.sln`; VSTest compatibility dependencies are omitted because this project standardizes on .NET 10.
 
+## 007 — Provisional editorial identity and reusable primitives
+
+**Decision:** A centrally configured provisional brand, ivory/navy/sand tokens, self-hosted Cormorant Garamond and DM Sans, one Lucide icon family, semantic UI primitives, and section-level homepage components.
+
+**Reason:** Provide a warm personal travel identity and a reusable basis for later public pages without building a large design-system framework.
+
+**Alternatives:** External font/CDN calls, multiple icon systems, utility CSS, or an all-in-one homepage component.
+
+**Consequences:** The brand can change in one place, typography/colors remain consistent, and local licenses accompany bundled fonts/icons. SVG compass branding is explicitly provisional. The owner's portrait remains a labeled placeholder.
+
+## 008 — Local generated imagery and responsive loading
+
+**Decision:** Original AI-generated illustrative travel images stored locally, responsive WebP variants, AVIF hero variants with a WebP fallback, explicit dimensions, prioritized hero loading, and lazy loading below the fold.
+
+**Reason:** Avoid random hotlinked photography and reduce transfer size while matching the generated visual direction.
+
+**Alternatives:** Third-party hotlinks, unoptimized PNGs, stock photos without established permissions.
+
+**Consequences:** Scenes do not establish destination/supplier availability. An inspiration caption discloses generated imagery. Asset prompts and sources are documented in ASSETS.md; visual concepts are in docs/design. No generated text is shipped as UI.
+
+## 009 — Translation-ready copy, safe future routes, and preserved diagnostics
+
+**Decision:** Centralize Swedish copy without an i18n package. Use real section anchors and small labeled future-page fallbacks. Retain Phase 0 health handling at a development-only route. Keep prelaunch indexing disabled.
+
+**Reason:** Every visible interaction needs an honest outcome without implementing later phases or displaying technical diagnostics on the public homepage.
+
+**Alternatives:** Dead links, fake forms, premature full Services/About pages, a nonfunctional language selector, or a public health widget.
+
+**Consequences:** Full translations and workflows remain deferred. Browser focus follows navigation, mobile navigation uses a disclosure pattern without a modal focus trap, and production excludes diagnostics. Noindex prevents reaching the suggested SEO score until an actual launch is approved; this is deliberate rather than a missing metadata implementation.
+
 ## Research references
 
 Official references consulted during implementation:
@@ -75,3 +105,7 @@ Official references consulted during implementation:
 - [EF migrations](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/) and [Npgsql EF provider](https://www.npgsql.org/efcore/)
 - [PostgreSQL support policy](https://www.postgresql.org/support/versioning/) and [official container](https://hub.docker.com/_/postgres)
 - [Compose variable interpolation](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
+- [Fontsource installation](https://fontsource.org/docs/getting-started/install)
+- [Lucide React](https://lucide.dev/guide/react/getting-started)
+- [WAI disclosure navigation](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/)
+- [LCP optimization](https://web.dev/articles/optimize-lcp) and [Lighthouse](https://developer.chrome.com/docs/lighthouse/overview)

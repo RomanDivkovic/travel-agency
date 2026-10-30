@@ -10,7 +10,7 @@ beforeEach(() => {
   vi.mocked(getApiHealth).mockResolvedValue(undefined);
 });
 
-function renderRoute(path = '/') {
+function renderRoute(path = '/_dev/health') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <App />
@@ -18,7 +18,7 @@ function renderRoute(path = '/') {
   );
 }
 
-it('renders the landing route and connected API status', async () => {
+it('preserves the foundation diagnostics route and connected API status', async () => {
   renderRoute();
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
     'applikation körs',
@@ -43,7 +43,9 @@ it('shows a checking state while the request is pending', () => {
 
 it('renders a not-found route with a way home', () => {
   renderRoute('/missing');
-  expect(screen.getByRole('heading')).toHaveTextContent('Sidan hittades inte');
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+    'Sidan hittades inte',
+  );
   expect(screen.getByRole('link', { name: 'Till startsidan' })).toHaveAttribute(
     'href',
     '/',
