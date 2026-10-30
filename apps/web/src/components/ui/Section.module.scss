@@ -1,0 +1,16 @@
+.section {
+  padding-block: var(--section-space);
+}
+.default {
+  background: var(--color-background);
+}
+.sand {
+  background: var(--color-sand);
+}
+.navy {
+  background: var(--color-primary);
+  color: var(--color-background);
+  h2 {
+    color: inherit;
+  }
+}

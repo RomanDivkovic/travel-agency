@@ -1,6 +1,6 @@
 # Personal Travel Agency & Booking Platform
 
-A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. This change implements **Phase 0: project foundation** only. Branding, customer requests, authentication, bookings, and payments are deferred.
+A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 0 provides the foundation; Phase 1 adds the provisional brand, design system, and responsive Swedish homepage.** Customer requests, authentication, bookings, and payments remain deferred.
 
 ## Stack
 
@@ -55,7 +55,9 @@ Start the frontend in another:
 npm --prefix apps/web run dev
 ```
 
-Visit <http://localhost:5173>. The placeholder displays **API anslutet** when it receives a valid health response. This is a development screen, not the Phase 1 homepage.
+Visit <http://localhost:5173> for the homepage. The original API diagnostics remain at <http://localhost:5173/_dev/health> in development and display **API anslutet** when a valid health response is received. Diagnostics are excluded from production routing.
+
+The provisional name is configured in `apps/web/src/app/config/branding.ts`; Swedish text is centralized in `apps/web/src/content/sv.ts`. Request and about CTAs lead to clearly labeled informational fallbacks. The request form is not implemented yet. Contact details, legal pages, and the agent portrait are explicit placeholders.
 
 API checks:
 
@@ -89,6 +91,9 @@ The database integration test explicitly skips unless `TEST_DATABASE_CONNECTION`
 - [Development, migrations, configuration, and troubleshooting](docs/DEVELOPMENT.md)
 - [Architectural decisions](docs/DECISIONS.md)
 - [Phase 0 verification and limitations](docs/PHASE_0_VERIFICATION.md)
+- [Phase 1 completion and verification](docs/PHASE_1_COMPLETION.md)
+- [Design system and visual references](docs/DESIGN_SYSTEM.md)
+- [Image provenance and asset prompts](docs/ASSETS.md)
 - [Earlier requirements review](docs/REQUIREMENTS_REVIEW.md)
 
-CI runs on pull requests and pushes to `main`. Deployment is outside Phase 0. Do not expose this development configuration as a production service or enable real bookings/payments before the master plan's launch gates are satisfied.
+CI runs on pull requests and pushes to `main`. Work always happens on a separate phase branch; merge only after explicit approval. Deployment is outside the current scope. The site retains prelaunch `noindex` and a disallowing `robots.txt`; revisit both before an approved public launch.

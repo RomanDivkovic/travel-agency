@@ -1,0 +1,3 @@
+# Prelaunch site. Revisit alongside branding.isPublicLaunch before deployment.
+User-agent: *
+Disallow: /

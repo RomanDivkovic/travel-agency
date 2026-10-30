@@ -1,0 +1,79 @@
+@use '../../styles/breakpoints' as bp;
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+.row {
+  display: flex;
+  min-height: var(--header-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.desktop,
+.desktopCta {
+  display: none;
+}
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  border-radius: var(--radius-button);
+}
+.mobile {
+  position: absolute;
+  width: 100%;
+  background: var(--color-background);
+  padding-block: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  max-height: calc(100dvh - var(--header-height));
+  overflow-y: auto;
+}
+.mobile[hidden] {
+  display: none;
+}
+.mobile nav {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-4);
+  a {
+    padding-block: var(--space-3);
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+}
+@media (min-width: bp.$desktop) {
+  .desktop {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.8rem, 1.7vw, 1.8rem);
+    a {
+      padding-block: var(--space-3);
+      color: var(--color-primary);
+      font-size: var(--text-small);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    a:hover,
+    a[aria-current] {
+      text-decoration: underline;
+    }
+  }
+  .desktopCta {
+    display: inline-flex;
+  }
+  .toggle,
+  .mobile {
+    display: none;
+  }
+}

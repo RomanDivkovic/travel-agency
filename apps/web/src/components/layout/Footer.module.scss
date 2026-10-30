@@ -1,0 +1,63 @@
+@use '../../styles/breakpoints' as bp;
+.footer {
+  padding-block: var(--space-8) var(--space-6);
+}
+.columns {
+  display: grid;
+  gap: var(--space-7);
+  h2 {
+    font-size: var(--text-h4);
+    margin-bottom: var(--space-5);
+    letter-spacing: -0.01em;
+  }
+  p,
+  a {
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  a {
+    text-decoration: none;
+  }
+  nav a:hover {
+    text-decoration: underline;
+  }
+}
+.brand p {
+  margin-top: var(--space-5);
+  max-width: 30ch;
+}
+.bottom {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+  }
+}
+@media (min-width: bp.$tablet) {
+  .columns {
+    grid-template-columns: 1.4fr 1fr;
+  }
+  .bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+@media (min-width: bp.$desktop) {
+  .columns {
+    grid-template-columns: 1.5fr 0.8fr 1.2fr 1fr;
+    gap: var(--space-6);
+  }
+}

@@ -1,0 +1,95 @@
+@use '../../../styles/breakpoints' as bp;
+.hero {
+  padding-block: var(--space-7) var(--space-8);
+}
+.grid {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+.copy {
+  h1 {
+    font-size: var(--text-display);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    span {
+      display: block;
+    }
+  }
+  p {
+    font-size: var(--text-large);
+    color: var(--color-muted);
+    max-width: 48ch;
+    margin-top: var(--space-6);
+    line-height: 1.7;
+  }
+}
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-6);
+}
+.visual {
+  position: relative;
+  padding-bottom: var(--space-4);
+}
+.coast {
+  width: 100%;
+  aspect-ratio: 6 / 7;
+  object-fit: cover;
+  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+}
+.inset {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .copy {
+    animation: arrive 650ms ease both;
+  }
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+@media (min-width: bp.$tablet) {
+  .visual {
+    width: 75%;
+    margin-inline: auto;
+  }
+}
+@media (min-width: bp.$desktop) {
+  .hero {
+    padding-block: var(--space-6);
+  }
+  .grid {
+    grid-template-columns: 1.12fr 1fr;
+    gap: var(--space-6);
+    min-height: 42rem;
+  }
+  .copy {
+    padding-bottom: var(--space-5);
+  }
+  .visual {
+    width: 100%;
+    padding-left: var(--space-4);
+  }
+  .inset {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: -22%;
+    width: 48%;
+    aspect-ratio: 1.15;
+    object-fit: cover;
+    border: 5px solid var(--color-background);
+    border-radius: var(--radius-image);
+  }
+}

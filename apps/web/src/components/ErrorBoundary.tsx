@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { sv } from '../content/sv';
 
 export class ErrorBoundary extends Component<
   { children: ReactNode },
@@ -14,9 +15,11 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <main>
-          <h1>Något gick fel</h1>
-          <p role="alert">Sidan kunde inte visas. Försök ladda om sidan.</p>
-          <button onClick={() => window.location.reload()}>Ladda om</button>
+          <h1>{sv.errors.title}</h1>
+          <p role="alert">{sv.errors.description}</p>
+          <button onClick={() => window.location.reload()}>
+            {sv.errors.reload}
+          </button>
         </main>
       );
     }
