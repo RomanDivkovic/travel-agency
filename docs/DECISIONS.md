@@ -92,6 +92,16 @@ The .NET 10 SDK uses Microsoft Testing Platform through `global.json`, and the x
 
 **Consequences:** Full translations and workflows remain deferred. Browser focus follows navigation, mobile navigation uses a disclosure pattern without a modal focus trap, and production excludes diagnostics. Noindex prevents reaching the suggested SEO score until an actual launch is approved; this is deliberate rather than a missing metadata implementation.
 
+## 010 — Patched minimatch override for the lint toolchain
+
+**Decision:** Override transitive `minimatch` versions below 11.0.1 to exact version 11.0.3. Keep the existing CI audit threshold and direct tooling versions.
+
+**Reason:** [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), published to the advisory database after the original dependency checks, flags the installed 10.2.6 version. Its audit findings propagate through ESLint and typescript-eslint. Current upstream releases still constrain minimatch to 10.x, so a normal in-range update cannot resolve the advisory.
+
+**Alternatives:** Upgrading only ESLint (still depends on vulnerable minimatch), forced audit downgrades, or weakening/disabling the audit. None addresses this dependency chain appropriately.
+
+**Consequences:** This is a deliberate transitive major-version override, supported by the project's Node 24 runtime and verified with a clean install, the full frontend quality checks, and npm audit. Remove the override once all upstream consumers require a patched version. The version selector leaves newer, already-patched dependencies alone.
+
 ## Research references
 
 Official references consulted during implementation:
