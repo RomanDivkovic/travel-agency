@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { NavLink } from 'react-router';
 import { routes } from '../../app/config/routes';
-import { sv } from '../../content/sv';
+import { useTranslations } from '../../localization/useLanguage';
 import { ButtonLink } from '../ui/Button';
 import { Container } from '../ui/Container';
 import { Icon } from '../ui/Icon';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { BrandLogo } from './BrandLogo';
 import styles from './Header.module.scss';
 
 export function Header() {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const header = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
-  const location = useLocation();
 
   useEffect(() => {
     const close = () => setOpen(false);
@@ -32,21 +33,15 @@ export function Header() {
   }, []);
 
   function links(onSelect?: () => void) {
-    return sv.navigation.items.map(({ label, destination }) => (
-      <Link
+    return t.navigation.items.map(({ label, destination }) => (
+      <NavLink
         key={destination}
         to={routes[destination]}
         onClick={onSelect}
-        aria-current={
-          location.pathname === routes.home &&
-          ((destination === 'home' && !location.hash) ||
-            routes[destination] === `/${location.hash}`)
-            ? 'location'
-            : undefined
-        }
+        end
       >
         {label}
-      </Link>
+      </NavLink>
     ));
   }
 
@@ -66,7 +61,7 @@ export function Header() {
     >
       <Container className={styles.row}>
         <BrandLogo />
-        <nav className={styles.desktop} aria-label={sv.navigation.label}>
+        <nav className={styles.desktop} aria-label={t.navigation.label}>
           {links()}
         </nav>
         <ButtonLink
@@ -74,15 +69,16 @@ export function Header() {
           className={styles.desktopCta}
           icon={<Icon name="arrow" size={18} />}
         >
-          {sv.actions.plan}
+          {t.actions.plan}
         </ButtonLink>
+        <LanguageSwitcher />
         <button
           ref={trigger}
           className={styles.toggle}
           type="button"
           aria-expanded={open}
           aria-controls="mobile-navigation"
-          aria-label={open ? sv.navigation.close : sv.navigation.open}
+          aria-label={open ? t.navigation.close : t.navigation.open}
           onClick={() => setOpen(!open)}
         >
           <Icon name={open ? 'close' : 'menu'} />
@@ -90,7 +86,7 @@ export function Header() {
       </Container>
       <div id="mobile-navigation" className={styles.mobile} hidden={!open}>
         <Container>
-          <nav aria-label={sv.navigation.mobileLabel}>
+          <nav aria-label={t.navigation.mobileLabel}>
             {links(() => setOpen(false))}
           </nav>
           <ButtonLink
@@ -98,7 +94,7 @@ export function Header() {
             onClick={() => setOpen(false)}
             icon={<Icon name="arrow" size={18} />}
           >
-            {sv.actions.plan}
+            {t.actions.plan}
           </ButtonLink>
         </Container>
       </div>

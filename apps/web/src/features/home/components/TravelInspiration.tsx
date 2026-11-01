@@ -1,17 +1,18 @@
-import { sv } from '../../../content/sv';
+import { useTranslations } from '../../../localization/useLanguage';
 import { images } from '../../../content/images';
 import { Section } from '../../../components/ui/Section';
 import styles from './HomeSections.module.scss';
 
 export function TravelInspiration() {
+  const t = useTranslations();
   return (
     <Section aria-labelledby="inspiration-title">
       <div className={`${styles.sectionHeading} ${styles.center}`}>
-        <h2 id="inspiration-title">{sv.inspiration.title}</h2>
-        <p>{sv.inspiration.description}</p>
+        <h2 id="inspiration-title">{t.inspiration.title}</h2>
+        <p>{t.inspiration.description}</p>
       </div>
       <div className={styles.inspiration}>
-        {sv.inspiration.items.map((item) => (
+        {t.inspiration.items.map((item) => (
           <article key={item.image}>
             <img
               {...images[item.image]}
@@ -25,7 +26,7 @@ export function TravelInspiration() {
           </article>
         ))}
       </div>
-      <p className={styles.imageNote}>{sv.inspiration.note}</p>
+      <p className={styles.imageNote}>{t.inspiration.note}</p>
     </Section>
   );
 }

@@ -1,4 +1,4 @@
-import { sv } from '../../content/sv';
+import { useTranslations } from '../../localization/useLanguage';
 import { usePageMetadata } from '../../hooks/usePageMetadata';
 import { Hero } from './components/Hero';
 import { Services } from './components/Services';
@@ -9,7 +9,8 @@ import { TravelInspiration } from './components/TravelInspiration';
 import { FinalCTA } from './components/FinalCTA';
 
 export function HomePage() {
-  usePageMetadata(sv.meta.homeTitle);
+  const t = useTranslations();
+  usePageMetadata(t.meta.homeTitle);
   return (
     <>
       <Hero />

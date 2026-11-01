@@ -1,5 +1,5 @@
 import { routes } from '../../../app/config/routes';
-import { sv } from '../../../content/sv';
+import { useTranslations } from '../../../localization/useLanguage';
 import { ButtonLink } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Icon } from '../../../components/ui/Icon';
@@ -7,6 +7,7 @@ import { Section } from '../../../components/ui/Section';
 import styles from './HomeSections.module.scss';
 
 export function Services() {
+  const t = useTranslations();
   return (
     <Section
       id="tjanster"
@@ -14,11 +15,11 @@ export function Services() {
       className={styles.servicesSection}
     >
       <div className={styles.sectionHeading}>
-        <h2 id="services-title">{sv.services.title}</h2>
-        <p>{sv.services.description}</p>
+        <h2 id="services-title">{t.services.title}</h2>
+        <p>{t.services.description}</p>
       </div>
       <div className={styles.services}>
-        {sv.services.items.map((service) => (
+        {t.services.items.map((service) => (
           <Card
             key={service.id}
             id={service.id}
@@ -29,7 +30,7 @@ export function Services() {
             <h3>{service.title}</h3>
             <p>{service.description}</p>
             <ButtonLink
-              to={routes.planTrip}
+              to={`${routes.services}#${service.id}`}
               variant="text"
               icon={<Icon name="arrow" size={18} />}
             >

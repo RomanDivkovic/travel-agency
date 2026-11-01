@@ -6,6 +6,7 @@ import { App } from '../../app/App';
 import { branding } from '../../app/config/branding';
 import { routes } from '../../app/config/routes';
 import { sv } from '../../content/sv';
+import { publicCopy } from '../../content/public';
 
 function renderHome() {
   return render(
@@ -46,7 +47,7 @@ it('renders exactly four service cards with useful links and no invented prices'
       within(services).getByRole('link', {
         name: service.action,
       }),
-    ).toHaveAttribute('href', routes.planTrip);
+    ).toHaveAttribute('href', `${routes.services}#${service.id}`);
   }
   expect(services).not.toHaveTextContent(/\d+\s*(SEK|kr)/);
 });
@@ -73,7 +74,7 @@ it('provides a clearly labeled about preview without inventing an identity', asy
   expect(screen.getByText(sv.about.portrait)).toBeInTheDocument();
   await user.click(screen.getByRole('link', { name: sv.actions.about }));
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-    sv.comingSoon.aboutTitle,
+    publicCopy.sv.about.title,
   );
 });
 

@@ -1,15 +1,16 @@
 import { Fragment } from 'react';
-import { sv } from '../../../content/sv';
+import { useTranslations } from '../../../localization/useLanguage';
 import { Icon } from '../../../components/ui/Icon';
 import { Section } from '../../../components/ui/Section';
 import styles from './HomeSections.module.scss';
 
 export function Benefits() {
+  const t = useTranslations();
   return (
     <Section aria-labelledby="benefits-title">
       <div className={styles.benefits}>
         <h2 id="benefits-title">
-          {sv.benefits.title.map((line, index) => (
+          {t.benefits.title.map((line, index) => (
             <Fragment key={line}>
               {index > 0 ? ' ' : ''}
               <span>{line}</span>
@@ -17,7 +18,7 @@ export function Benefits() {
           ))}
         </h2>
         <ul>
-          {sv.benefits.items.map((item) => (
+          {t.benefits.items.map((item) => (
             <li key={item.title}>
               <Icon name={item.icon} size={30} />
               <h3>{item.title}</h3>

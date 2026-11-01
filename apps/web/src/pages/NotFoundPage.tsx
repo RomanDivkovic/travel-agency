@@ -1,17 +1,18 @@
 import { routes } from '../app/config/routes';
-import { sv } from '../content/sv';
+import { useTranslations } from '../localization/useLanguage';
 import { ButtonLink } from '../components/ui/Button';
 import { Section } from '../components/ui/Section';
 import { usePageMetadata } from '../hooks/usePageMetadata';
 import styles from './InformationalPage.module.scss';
 
 export function NotFoundPage() {
-  usePageMetadata(sv.notFound.title);
+  const t = useTranslations();
+  usePageMetadata(t.notFound.title);
   return (
     <Section className={styles.page}>
-      <h1>{sv.notFound.title}</h1>
-      <p>{sv.notFound.description}</p>
-      <ButtonLink to={routes.home}>{sv.actions.home}</ButtonLink>
+      <h1>{t.notFound.title}</h1>
+      <p>{t.notFound.description}</p>
+      <ButtonLink to={routes.home}>{t.actions.home}</ButtonLink>
     </Section>
   );
 }
