@@ -1,6 +1,6 @@
 # Personal Travel Agency & Booking Platform
 
-A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 5 adds administrator authentication and a bilingual dashboard for managing travel enquiries.** Phase 4 submission, PostgreSQL persistence and durable email notifications remain operational. The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Customer accounts, quotations, bookings and payments remain deferred.
+A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 6 adds versioned service quotations and secure, account-free customer approval.** The Phase 5 administrator dashboard remains available. Phase 4 submission, PostgreSQL persistence and durable email notifications remain operational. The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Customer accounts, invoicing, bookings and payments remain deferred.
 
 ## Stack
 
@@ -83,6 +83,14 @@ Liveness verifies only the API process. Readiness verifies PostgreSQL connectivi
 Open `/admin/login` after explicitly provisioning the initial administrator. Protected routes are `/admin`, `/admin/requests` and `/admin/requests/:id`. The dashboard shows real PostgreSQL statistics; the list uses server-side search, filters, pagination and sorting. Details show customer travel requirements, controlled status changes, private notes and activity history in Swedish/English.
 
 Authentication uses ASP.NET Core Identity and HttpOnly cookies, independent API authorization, antiforgery tokens, lockout and login rate limiting. There is no public administrator registration or default account/password. See [the provisioning instructions](docs/DEVELOPMENT.md#administrator-provisioning) before attempting login. MFA, secure production key management and an operational credential-recovery process are production prerequisites; this phase does not claim production readiness.
+
+## Service quotations
+
+Administrators can create a quotation from an open enquiry, edit its draft, preview saved terms/prices, issue it, create revisions and withdraw eligible versions. `/admin/quotations` provides server-side search, status filters, sorting and pagination. Issued content is immutable; acceptance, decline and expiry are recorded without changing the enquiry status or starting paid work.
+
+**Issuance is disabled by default.** Configure owner/adviser-approved tax treatment, rates, bilingual terms, acceptance wording and the approved frontend origin before enabling it. Drafts are usable without that approval. No legal terms or Swedish VAT rate are assumed. See [quotation configuration](docs/DEVELOPMENT.md#quotation-configuration-and-operation).
+
+Customers receive a private `/quote#…` link scoped to one version. The fragment credential is sent to fixed public API routes through a header, never a request URL or browser storage. Customers can read the service fee/terms and explicitly accept or decline without an account. Expiry and revocation are enforced by the server. Acceptance records no payment, booking or automatic research activation. Local email capture remains the verified delivery boundary.
 
 ## Quality commands
 

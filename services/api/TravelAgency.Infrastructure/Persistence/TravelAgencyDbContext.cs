@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Domain.Admin;
+using TravelAgency.Domain.Quotations;
 using TravelAgency.Domain.Requests;
 using TravelAgency.Infrastructure.Admin;
+using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
 
 namespace TravelAgency.Infrastructure.Persistence;
@@ -14,9 +16,13 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
     public DbSet<NotificationRecord> NotificationOutbox => Set<NotificationRecord>();
     public DbSet<RequestNote> RequestNotes => Set<RequestNote>();
     public DbSet<RequestActivity> RequestActivities => Set<RequestActivity>();
+    public DbSet<QuotationSeries> QuotationSeries => Set<QuotationSeries>();
+    public DbSet<Quotation> Quotations => Set<Quotation>();
+    public DbSet<QuotationAccessToken> QuotationTokens => Set<QuotationAccessToken>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        model.ConfigureQuotations();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);
@@ -26,6 +32,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         note.HasOne<Administrator>().WithMany().HasForeignKey(n => n.AdministratorId).OnDelete(DeleteBehavior.Restrict);
         var activity = model.Entity<RequestActivity>();
         activity.HasKey(a => a.Id);
+        activity.HasOne<Quotation>().WithMany().HasForeignKey(a => a.QuotationId).OnDelete(DeleteBehavior.Cascade);
         activity.Property(a => a.Type).HasMaxLength(20).IsRequired();
         activity.Property(a => a.PreviousValue).HasMaxLength(24);
         activity.Property(a => a.NewValue).HasMaxLength(24);
@@ -79,8 +86,10 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         key.HasOne<TravelInquiry>().WithMany().HasForeignKey(k => k.RequestId).OnDelete(DeleteBehavior.Cascade);
         var notification = model.Entity<NotificationRecord>();
         notification.HasKey(n => n.Id);
-        notification.Property(n => n.Kind).HasMaxLength(12).IsRequired();
-        notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique();
+        notification.Property(n => n.Kind).HasMaxLength(32).IsRequired();
+        notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NULL");
+        notification.HasIndex(n => new { n.QuotationId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NOT NULL");
+        notification.HasOne<Quotation>().WithMany().HasForeignKey(n => n.QuotationId).OnDelete(DeleteBehavior.Cascade);
         notification.HasIndex(n => n.NextAttemptAt).HasFilter("\"SentAt\" IS NULL AND \"DeadLetterAt\" IS NULL");
         notification.HasOne<TravelInquiry>().WithMany().HasForeignKey(n => n.RequestId).OnDelete(DeleteBehavior.Cascade);
     }

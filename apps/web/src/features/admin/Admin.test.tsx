@@ -5,6 +5,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { App } from '../../app/App';
 import { ApiError } from '../../services/apiClient';
 import { adminApi } from './api';
+import { quotationApi } from '../quotations/api';
 import { safeAdminReturn, useAdminAuth } from './authContext';
 import { AuthProvider } from './AuthProvider';
 import type { AdminUser, RequestDetail, RequestItem } from './model';
@@ -23,6 +24,7 @@ vi.mock('./api', () => ({
     addNote: vi.fn(),
   },
 }));
+vi.mock('../quotations/api', () => ({ quotationApi: { forRequest: vi.fn() } }));
 const admin: AdminUser = {
   id: 'qa',
   displayName: 'QA Agent',
@@ -90,6 +92,13 @@ function mount(path = '/admin') {
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(quotationApi.forRequest).mockResolvedValue({
+    items: [],
+    page: 1,
+    pageSize: 20,
+    totalCount: 0,
+    totalPages: 0,
+  });
   vi.mocked(adminApi.me).mockResolvedValue(admin);
   vi.mocked(adminApi.dashboard).mockResolvedValue({
     total: 7,

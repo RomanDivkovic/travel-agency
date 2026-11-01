@@ -18,7 +18,7 @@ export function useAdminAuth() {
 }
 export function safeAdminReturn(value: unknown) {
   return typeof value === 'string' &&
-    /^\/admin(?:\/requests(?:\/[0-9a-f-]{36})?)?$/i.test(value)
+    /^\/admin(?:\/(?:requests|quotations)(?:\/[0-9a-f-]{36})?)?$/i.test(value)
     ? value
     : '/admin';
 }

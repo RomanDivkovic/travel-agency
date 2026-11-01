@@ -7,6 +7,7 @@ import { useAdminCopy } from './copy';
 import { adminApi } from './api';
 import { useAdminResource } from './useAdminResource';
 import { ErrorState, StatusBadge } from './AdminShared';
+import { RequestQuotations } from '../quotations/RequestQuotations';
 import { RequestFields } from './RequestFields';
 import { RequestActions } from './RequestActions';
 import { RequestTimeline } from './RequestTimeline';
@@ -55,6 +56,7 @@ export function RequestDetailPage() {
             </p>
           </section>
           <RequestFields request={r} />
+          <RequestQuotations requestId={id} closed={r.status === 'Closed'} />
           <RequestActions
             key={r.version}
             request={r}

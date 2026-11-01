@@ -13,7 +13,9 @@ export function usePageMetadata(title: string, description?: string) {
     const tags: Record<string, string> = {
       description: text,
       robots:
-        !pathname.startsWith('/admin') && branding.isPublicLaunch
+        !pathname.startsWith('/admin') &&
+        pathname !== '/quote' &&
+        branding.isPublicLaunch
           ? 'index, follow'
           : 'noindex, nofollow',
       'og:title': document.title,
@@ -45,6 +47,7 @@ export function usePageMetadata(title: string, description?: string) {
       const origin = new URL(String(import.meta.env.VITE_SITE_URL));
       if (
         pathname.startsWith('/admin') ||
+        pathname === '/quote' ||
         origin.protocol !== 'https:' ||
         origin.username ||
         origin.password

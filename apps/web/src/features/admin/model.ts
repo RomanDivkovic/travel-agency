@@ -88,11 +88,12 @@ export interface Note {
   createdAt: string;
 }
 export interface Activity {
+  quotationVersion?: number | null;
   id: string;
-  type: 'Submitted' | 'StatusChanged' | 'NoteAdded';
+  type: string;
   author: string | null;
-  previousValue: RequestStatus | null;
-  newValue: RequestStatus | null;
+  previousValue: string | null;
+  newValue: string | null;
   createdAt: string;
 }
 export interface Filters {

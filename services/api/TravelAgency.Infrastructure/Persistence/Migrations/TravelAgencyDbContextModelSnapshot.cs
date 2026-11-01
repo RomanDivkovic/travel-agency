@@ -22,6 +22,8 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("quotation_reference");
+
             modelBuilder.HasSequence("travel_request_reference");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -176,6 +178,9 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasMaxLength(24)
                         .HasColumnType("character varying(24)");
 
+                    b.Property<Guid?>("QuotationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid");
 
@@ -187,6 +192,8 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ActorId");
+
+                    b.HasIndex("QuotationId");
 
                     b.HasIndex("RequestId", "CreatedAt", "Id");
 
@@ -221,6 +228,223 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasIndex("RequestId", "CreatedAt", "Id");
 
                     b.ToTable("RequestNotes");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.Quotation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcceptanceTextSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AcceptedTermsVersion")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByAdministratorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CustomerNotes")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("DeclinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ExcludedServices")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("IncludedServices")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<long>("SubtotalMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TaxMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TaxTreatment")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("TermsSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(6000)
+                        .HasColumnType("character varying(6000)");
+
+                    b.Property<string>("TermsVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<long>("TotalMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ValidUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CreatedByAdministratorId");
+
+                    b.HasIndex("SeriesId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Quotation_ActiveVersion")
+                        .HasFilter("\"Status\" IN ('Draft', 'Sent', 'Accepted')");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.HasIndex("SeriesId", "Version")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "ValidUntil");
+
+                    b.ToTable("Quotations", t =>
+                        {
+                            t.HasCheckConstraint("CK_Quotation_Money", "\"SubtotalMinorUnits\" >= 0 AND \"TaxMinorUnits\" >= 0 AND \"TotalMinorUnits\" = \"SubtotalMinorUnits\" + \"TaxMinorUnits\" AND \"TotalMinorUnits\" <= 10000000000");
+
+                            t.HasCheckConstraint("CK_Quotation_Status", "\"Status\" IN ('Draft','Sent','Accepted','Declined','Expired','Superseded','Cancelled')");
+
+                            t.HasCheckConstraint("CK_Quotation_Version", "\"Version\" >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.QuotationLineItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("QuotationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("SubtotalMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TaxMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TaxRateBasisPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TotalMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UnitPriceMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuotationId", "SortOrder");
+
+                    b.ToTable("QuotationLineItem", t =>
+                        {
+                            t.HasCheckConstraint("CK_QuotationLine_Money", "\"Quantity\" BETWEEN 1 AND 100 AND \"UnitPriceMinorUnits\" BETWEEN 0 AND 10000000000 AND \"TaxRateBasisPoints\" BETWEEN 0 AND 10000 AND \"SubtotalMinorUnits\" >= 0 AND \"TaxMinorUnits\" >= 0 AND \"TotalMinorUnits\" = \"SubtotalMinorUnits\" + \"TaxMinorUnits\" AND \"TotalMinorUnits\" <= 10000000000");
+                        });
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.QuotationSeries", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Number")
+                        .IsUnique();
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("QuotationSeries");
                 });
 
             modelBuilder.Entity("TravelAgency.Domain.Requests.TravelInquiry", b =>
@@ -351,6 +575,39 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TravelAgency.Infrastructure.Quotations.QuotationAccessToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("QuotationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("Hash")
+                        .IsUnique();
+
+                    b.HasIndex("QuotationId")
+                        .IsUnique();
+
+                    b.ToTable("QuotationTokens");
+                });
+
             modelBuilder.Entity("TravelAgency.Infrastructure.Requests.IdempotencyRecord", b =>
                 {
                     b.Property<string>("KeyHash")
@@ -391,11 +648,17 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Kind")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("character varying(12)");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("NextAttemptAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProtectedLink")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("QuotationId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid");
@@ -408,8 +671,13 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasIndex("NextAttemptAt")
                         .HasFilter("\"SentAt\" IS NULL AND \"DeadLetterAt\" IS NULL");
 
+                    b.HasIndex("QuotationId", "Kind")
+                        .IsUnique()
+                        .HasFilter("\"QuotationId\" IS NOT NULL");
+
                     b.HasIndex("RequestId", "Kind")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"QuotationId\" IS NULL");
 
                     b.ToTable("NotificationOutbox");
                 });
@@ -472,6 +740,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ActorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("TravelAgency.Domain.Quotations.Quotation", null)
+                        .WithMany()
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
                         .WithMany()
                         .HasForeignKey("RequestId")
@@ -487,6 +760,39 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.Quotation", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByAdministratorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Quotations.QuotationSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.QuotationLineItem", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Quotations.Quotation", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.QuotationSeries", b =>
+                {
                     b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
                         .WithMany()
                         .HasForeignKey("RequestId")
@@ -618,6 +924,15 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TravelAgency.Infrastructure.Quotations.QuotationAccessToken", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Quotations.Quotation", null)
+                        .WithMany()
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TravelAgency.Infrastructure.Requests.IdempotencyRecord", b =>
                 {
                     b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
@@ -629,11 +944,21 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TravelAgency.Infrastructure.Requests.NotificationRecord", b =>
                 {
+                    b.HasOne("TravelAgency.Domain.Quotations.Quotation", null)
+                        .WithMany()
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
                         .WithMany()
                         .HasForeignKey("RequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Quotations.Quotation", b =>
+                {
+                    b.Navigation("Lines");
                 });
 #pragma warning restore 612, 618
         }

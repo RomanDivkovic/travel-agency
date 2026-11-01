@@ -1,3 +1,4 @@
+using TravelAgency.Application.Quotations;
 using TravelAgency.Application.Requests;
 using TravelAgency.Infrastructure.Email;
 using TravelAgency.Infrastructure.Requests;
@@ -20,6 +21,8 @@ public sealed class NotificationWorker(IServiceScopeFactory scopes, EmailSetting
                     await maintenanceScope.ServiceProvider.GetRequiredService<SubmissionMaintenance>().RunAsync(stoppingToken);
                     nextMaintenance = DateTimeOffset.UtcNow.AddHours(1);
                 }
+                await using (var expiryScope = scopes.CreateAsyncScope())
+                    await expiryScope.ServiceProvider.GetRequiredService<IQuotationExpiration>().ExpireBatchAsync(stoppingToken);
                 for (var i = 0; i < 10; i++)
                 {
                     await using var scope = scopes.CreateAsyncScope();
