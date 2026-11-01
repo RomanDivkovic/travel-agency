@@ -77,17 +77,17 @@ async function toReview(service: Service) {
   await next();
 }
 for (const service of services)
-  it(`completes the ${service} journey, reviews answers and never enables submission`, async () => {
+  it(`completes the ${service} journey, reviews answers and enables explicit submission`, async () => {
     await toReview(service);
     expect(
       screen.getByRole('heading', { level: 2, name: 'Review your journey' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Nothing has been sent',
+      'Review your answers before sending',
     );
     expect(
-      screen.getByRole('button', { name: 'Send enquiry – available later' }),
-    ).toBeDisabled();
+      screen.getByRole('button', { name: 'Send free enquiry' }),
+    ).toBeEnabled();
     expect(screen.getByText('anna@example.com')).toBeInTheDocument();
     expect(screen.getByText('Near a station')).toBeInTheDocument();
     const review =

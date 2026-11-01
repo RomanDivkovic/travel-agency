@@ -2,7 +2,7 @@
 
 ## Scope
 
-Phase 0 creates a modular monolith with a separate React frontend and a single ASP.NET Core API backed by PostgreSQL. Phase 1 builds the public homepage; Phase 2 adds bilingual public information pages, and Phase 3 adds a local travel request wizard without changing the backend. There are no microservices, background queues, customer models, authentication, or payment integrations. The Domain project intentionally contains no speculative entities.
+Phase 0 creates a modular monolith with a separate React frontend and a single ASP.NET Core API backed by PostgreSQL. Phase 1 builds the public homepage; Phase 2 adds bilingual public information pages, Phase 3 adds a local travel request wizard, and Phase 4 connects it to an independently validated submission API, PostgreSQL and a durable notification outbox. There are no microservices, customer accounts, authentication or payment integrations.
 
 ## Dependency direction
 
@@ -19,7 +19,7 @@ Application and Domain stay free of ASP.NET Core and EF dependencies. Future wor
 
 ## Frontend
 
-`main.tsx` initializes React, BrowserRouter, self-hosted fonts and global styles. `app/App.tsx` places the localized error boundary inside LanguageProvider, and declares the homepage, five public pages, the future-request notice, a legacy about redirect and the not-found route within the public layout. The Phase 0 `FoundationPage` remains on the development-only `/_dev/health` route with its original health hook and success/failure/pending tests.
+`main.tsx` initializes React, BrowserRouter, self-hosted fonts and global styles. `app/App.tsx` places the localized error boundary inside LanguageProvider, and declares the homepage, five public pages, the travel wizard and confirmation route, a legacy about redirect and the not-found route within the public layout. The Phase 0 `FoundationPage` remains on the development-only `/_dev/health` route with its original health hook and success/failure/pending tests.
 
 `app/config` owns branding and destinations; `content/sv.ts` and `content/en.ts` own typed homepage/shared copy; `content/public.ts` owns bilingual page resources; `content/images.ts` owns responsive media references. `components/ui` provides Button/ButtonLink, Container, Section, Card, and Icon; `components/layout` owns header, brand, mobile disclosure navigation, and footer. `features/home` composes separate section components, keeping the router and page composition small.
 
@@ -43,7 +43,8 @@ Swedish is the default language. `localization/LanguageProvider.tsx` initializes
 | `/about` | Approach and experience, with explicit owner/portrait placeholders |
 | `/contact` | Public contact configuration and honest draft-only form |
 | `/faq` | Native details/summary disclosures, keyboard accessible |
-| `/plan-your-trip` | Bilingual travel request wizard with local review; no submission |
+| `/plan-your-trip` | Bilingual travel request wizard with explicit server submission |
+| `/plan-your-trip/success` | Confirmed receipt only; direct visits without context show an honest missing-receipt state |
 | `/about-preview` | Replace redirect to `/about` for existing links |
 | other paths | Localized not-found content |
 | `/_dev/health` | Existing diagnostics in development only |
@@ -52,7 +53,7 @@ Swedish is the default language. `localization/LanguageProvider.tsx` initializes
 
 The contact form accepts a public mailbox from build-time `VITE_CONTACT_EMAIL`, validates it, and disables all fields without one. Configured mode uses native constraints plus trimmed-value validation, then exposes an encoded mailto link. It does not automatically open an email client on form submission, send HTTP requests, save personal data or assert delivery. Editing clears the prepared draft. Actual delivery requires the visitor's configured email client and mailbox infrastructure, outside this phase.
 
-Localized page titles, descriptions, Open Graph locale/content and Twitter summary metadata update on navigation and language changes. Canonical links require a configured HTTPS `VITE_SITE_URL` and use its origin plus the current path. The provisional site retains noindex/nofollow and disallowing robots.txt. The same URLs serve both languages, so no misleading hreflang alternate URLs are emitted. Approved domain, locale-specific indexing, prerendering/SSR, sitemap, company schema and legal launch content remain deferred. No backend models, request endpoints, authentication, payments or bookings are introduced.
+Localized page titles, descriptions, Open Graph locale/content and Twitter summary metadata update on navigation and language changes. Canonical links require a configured HTTPS `VITE_SITE_URL` and use its origin plus the current path. The provisional site retains noindex/nofollow and disallowing robots.txt. The same URLs serve both languages, so no misleading hreflang alternate URLs are emitted. Approved domain, locale-specific indexing, prerendering/SSR, sitemap, company schema and legal launch content remain deferred. Authentication, payments and bookings remain deferred; Phase 4 enquiry persistence is described below.
 
 ## Travel request wizard (Phase 3)
 
@@ -71,13 +72,13 @@ All journeys contain service → destination → dates → travellers → budget
 
 ### Validation and accessibility
 
-`validation.ts` provides pure field-key/error-code maps for each step plus whole-request validation. It checks trimmed required text and lengths; real calendar dates, local today and a ten-year horizon; ordered date windows; integer duration, counts, ages and rooms; positive bounded budgets with at most two decimals; allowed choice values; email and conditional phone validity. Limits are stated in the UI. Step navigation is blocked on errors, and the payload builder repeats whole-request validation. Phase 4 must independently validate untrusted requests server-side; these checks do not establish a server security boundary.
+`validation.ts` provides pure field-key/error-code maps for each step plus whole-request validation. It checks trimmed required text and lengths; real calendar dates, local today and a ten-year horizon; ordered date windows; integer duration, counts, ages and rooms; positive bounded budgets with at most two decimals; allowed choice values; email and conditional phone validity. Limits are stated in the UI. Step navigation is blocked on errors, and the payload builder repeats whole-request validation. Phase 4 independently validates untrusted requests server-side; these checks do not establish a server security boundary.
 
-The current step has an accessible heading and aria-current progress. Advancing moves focus to the step heading; errors move focus to a linked summary and use aria-invalid/aria-describedby on fields. Native radio, select, checkbox and fieldset controls support keyboard operation. Start over uses an inline confirmation and restores focus on cancel. The mobile progress view shows the current step, while the full step list remains available on desktop. There is no submit-success screen.
+The current step has an accessible heading and aria-current progress. Advancing moves focus to the step heading; errors move focus to a linked summary and use aria-invalid/aria-describedby on fields. Native radio, select, checkbox and fieldset controls support keyboard operation. Start over uses an inline confirmation and restores focus on cancel. The mobile progress view shows the current step, while the full step list remains available on desktop. The confirmation route requires a confirmed receipt; it never invents one.
 
 ### Payload boundary
 
-`buildTravelRequest(data, language)` returns `undefined` if any applicable step is invalid. Otherwise it returns an independent normalized `TravelRequest` object: schema version, language, discriminated service/preferences, trimmed destination/origin/optional stops, fixed or flexible dates, numeric adults/child ages/optional rooms, numeric budget/currency/scope, activity assistance, optional special requests and normalized contact details. An omitted return date represents a one-way fixed flight. No request ID, server status, timestamp claiming receipt, quotation or booking is manufactured. Review constructs this object in memory but never serializes it to storage or sends it.
+`buildTravelRequest(data, language)` returns `undefined` if any applicable step is invalid. Otherwise it returns an independent normalized `TravelRequest` object: schema version, language, discriminated service/preferences, trimmed destination/origin/optional stops, fixed or flexible dates, numeric adults/child ages/optional rooms, numeric budget/currency/scope, activity assistance, optional special requests and normalized contact details. An omitted return date represents a one-way fixed flight. No request ID, server status, timestamp claiming receipt, quotation or booking is manufactured. Review constructs this object in memory. Explicit send passes it to the API adapter; it is never serialized to browser draft storage.
 
 ### Permitted draft persistence
 
@@ -85,9 +86,11 @@ The current step has an accessible heading and aria-current progress. Advancing 
 
 A small `useSyncExternalStore` subscription observes storage-write availability. Blocked access/quota failures show an honest message while in-memory editing continues. Start over clears in-memory answers, disables opt-in and removes this draft key; if browser storage denies removal, the UI explicitly says it cannot remove the draft and advises clearing site data. Language preference is a separate key and is preserved. Local storage is not encrypted or cross-device storage.
 
-### Future Phase 4 integration
+### Phase 4 submission boundary
 
-The only intended future handoff is the validated `TravelRequest` object. A later authorized phase can introduce an API contract adapter, independent server validation, database persistence and real receipt/error handling. This phase has no request service/client, endpoint, database entity/migration, email, reference generator, authentication or administration. The send control is visibly disabled and the review explicitly states that nothing has been sent.
+`services/travelRequests.ts` uses the existing Axios client and validates HTTP 201 and the runtime receipt. `useRequestSubmission` owns pending, validation, uncertain-network, server, rate-limit and conflict states; a synchronous in-flight guard prevents duplicate clicks. Navigation and editing are locked while pending. Server field codes map back to wizard steps. Retry-After controls retry availability; there is no automatic new submission after an error.
+
+`submissionStorage.ts` persists only a UUID and timestamp under `travel-agency.submission-attempt.v1`. It reuses this key after uncertain failures, including remounts. Expired (seven-day), corrupt or unavailable attempt storage blocks sending rather than silently creating a new identity. Start over explicitly warns before discarding an attempt: doing so can create another enquiry if an earlier response was lost. Confirmation clears the matching attempt and permitted draft, with a warning if browser cleanup fails. Receipt-only sessionStorage expires after 24 hours. The success route also accepts the confirmed router receipt when session storage is unavailable. These browser guards are usability controls, not authorization.
 
 ## API and persistence
 
@@ -97,7 +100,7 @@ The only intended future handoff is the validated `TravelRequest` object. A late
 - Development CORS permits configured loopback origins only. Production does not register this policy; a future production origin must be approved and explicitly configured when deployment is implemented.
 - The API adds `nosniff`, `DENY` frame protection, and a no-referrer policy. Production uses HTTPS redirection and HSTS. A future reverse proxy must configure trusted forwarded headers and HTTPS correctly.
 
-`TravelAgencyDbContext` has no business tables. The baseline migration establishes EF migration history only. Migrations run explicitly through the pinned EF tool; API startup never applies migrations automatically. Design-time tooling reads an environment connection string without inventing fallback credentials.
+`TravelAgencyDbContext` maps travel enquiries, hashed idempotency records and notification outbox entries. The original baseline remains intact; the additive `TravelRequestSubmission` migration adds three tables and a reference sequence. Migrations run explicitly through the pinned EF tool; API startup never applies migrations automatically. Design-time tooling reads an environment connection string without inventing fallback credentials.
 
 PostgreSQL Compose configuration is local-only: loopback port binding, persistent named volume, generated local password, and container health check. It is not production infrastructure.
 
@@ -106,3 +109,27 @@ PostgreSQL Compose configuration is local-only: loopback port binding, persisten
 Vitest/Testing Library verify routes, pending/success/failure health states, runtime response validation, and error-boundary recovery. xUnit/WebApplicationFactory verify startup, DI, liveness, readiness success/failure, CORS, safe responses, and headers. The real database test applies the baseline twice against a dedicated test database and checks readiness.
 
 CI uses pinned action commits, dependency lockfiles, isolated PostgreSQL, formatting/linting/type checks, builds, tests, migration checks, and package audits. No production secrets are required.
+
+## Phase 4 persistence and notification architecture
+
+HTTP mapping lives in Api; DTO normalization/validation and orchestration live in Application; the enquiry, contact and travel-plan records live in Domain; EF and transports live in Infrastructure. No additional runtime package was needed.
+
+The accepted schema is version 1 of the existing TypeScript `TravelRequest`: language/service, destination, fixed or flexible dates, travellers, budget, conditional preferences, activity assistance, optional special requests and contact. An optional hidden `website` field must be empty. Unknown JSON members, invalid types and irrelevant service fields are rejected. Dates use the Swedish business calendar; audit timestamps are UTC, rounded to PostgreSQL microseconds. Contact and plan are owned values flattened into the enquiry table; child ages and stops use native arrays, while conditional preferences use JSONB. Status starts as `Submitted`. No customer account is created.
+
+`POST /api/travel-requests` requires a UUID `Idempotency-Key`. Success and identical replays return HTTP 201 with only `referenceNumber`, `status: submitted` and `submittedAt`. The endpoint exposes no request lookup or private database ID. Invalid input returns coded Problem Details (400); a reused key with different normalized content returns 409; oversized input 413; non-JSON 415; throttling 429 with Retry-After; database failure a safe 503. The reader bounds even chunked input at 32 KiB and depth 16. No response includes submitted personal data.
+
+A SHA-256 key hash and canonical typed-payload hash provide replay detection. A PostgreSQL transaction-scoped advisory lock serializes a key, then rechecks it inside the transaction. One commit creates the enquiry, key record and two uniquely constrained notification jobs. An injected failure test proves rollback. References use a configurable uppercase prefix plus UTC year and a global PostgreSQL sequence (`TRV-2026-000001`); gaps are expected and the sequence does not reset annually. A unique index remains authoritative. A reference is not an access credential.
+
+The worker uses `FOR UPDATE SKIP LOCKED` to claim due jobs across workers, holds the row lock through a bounded transport call, then records its outcome. Failures retry exponentially from 30 seconds up to one hour; eight attempts by default, with permanent errors or exhaustion moved to dead-letter state. Saving an enquiry never depends on email availability. HTML output escapes user content and has a plain-text alternative. Customer templates follow the requested Swedish/English language; the agent receives an English operational summary. Notification logs contain IDs and outcomes, not message bodies or contact details.
+
+Development Capture writes one owner-readable JSON file per notification under the API content root `.local-mail`; duplicate IDs reuse the same file. Production rejects Capture. The Resend adapter uses a ten-second HTTP timeout and the stable outbox ID as the provider idempotency key. Delivery is at least once: provider deduplication lasts 24 hours, so a crash after provider acceptance before database acknowledgement can still cause later duplicates. `SentAt` means transport acceptance/capture, not inbox delivery. No external delivery or verified sending domain has been demonstrated locally.
+
+Idempotency records expire after 30 days by default (minimum seven); replay after expiry can become a new request. Hourly worker maintenance removes expired records. Request retention defaults to 365 days, but request deletion is disabled until `Requests__PurgeExpiredRequests=true` is explicitly approved/configured. Enabled deletion cascades notification and key rows. Capture files, backups and provider retention require separate policies. Disabling the worker also disables this maintenance. Production requires explicit retention configuration; legal basis, notices and the approved retention period remain owner decisions.
+
+The fixed-window limiter defaults to ten submissions per IP per minute per API instance. CORS and the honeypot do not replace abuse controls. Deployment must configure trusted proxies, shared edge limits if needed, TLS, private database access and least-privilege credentials. The API never trusts arbitrary forwarded headers. Default logging excludes payloads, email addresses, connection strings and provider response bodies; sensitive-data logging must remain disabled.
+
+Tests cover normalized validation, domain invariants, templates, real PostgreSQL concurrency/replay/rollback, worker retries/dead letters, API failures/rate limiting, frontend submission states and browser-to-database flows. Phase 5 administration, authentication, quotations, invoices, payments, bookings and deployment remain outside this phase.
+
+### Personal data and purpose
+
+Enquiries collect name, email, optional phone, preferred contact/language and the requested destinations, travel dates, traveller counts/child ages, budget, preferences and optional free text. These support responding to and preparing the requested travel assistance; they do not create an account or authorize bookings. The UI discourages passport, card and sensitive information. Access is restricted to the backend/database operator and configured email recipients; no public request retrieval exists. Before launch the owner must approve a privacy notice covering controller/contact identity, lawful basis, purposes, processors/transfers, retention, deletion and data-subject rights. Database deletion must be coordinated with backups, capture files and provider copies; the technical defaults alone do not establish GDPR compliance.

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TravelAgency.Api.Health;
+using TravelAgency.Api.Requests;
 using TravelAgency.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ var connectionString = builder.Configuration.GetConnectionString("TravelAgency")
     ?? throw new InvalidOperationException("Configure ConnectionStrings__TravelAgency before starting the API.");
 
 builder.Services.AddInfrastructure(connectionString);
+builder.AddRequestFeature();
 builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
@@ -26,7 +28,7 @@ if (builder.Environment.IsDevelopment())
     {
         if (origins.Length > 0)
         {
-            policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+            policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("Retry-After");
         }
     }));
 }
@@ -57,7 +59,9 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseRateLimiter();
 app.MapHealthEndpoints();
+app.MapTravelRequestEndpoints();
 app.Run();
 
 public partial class Program;

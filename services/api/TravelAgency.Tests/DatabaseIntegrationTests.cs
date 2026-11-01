@@ -24,7 +24,7 @@ public sealed class DatabaseIntegrationTests
             await database.Database.MigrateAsync(TestContext.Current.CancellationToken);
             await database.Database.MigrateAsync(TestContext.Current.CancellationToken);
             Assert.Empty(await database.Database.GetPendingMigrationsAsync(TestContext.Current.CancellationToken));
-            Assert.Single(await database.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken));
+            Assert.Equal(2, (await database.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken)).Count());
         }
 
         using var client = factory.CreateClient();

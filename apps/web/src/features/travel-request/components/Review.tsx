@@ -5,12 +5,20 @@ import { hasAccommodation, hasFlights, wizardSteps } from '../config';
 import type { StepId, WizardData } from '../model';
 import { buildTravelRequest } from '../payload';
 import styles from '../Wizard.module.scss';
+import { SubmitPanel } from './SubmitPanel';
+import type { FormErrors } from '../validation';
 export function Review({
   data,
   onEdit,
+  busy,
+  onBusy,
+  onValidation,
 }: {
   data: WizardData;
   onEdit: (step: StepId) => void;
+  busy: boolean;
+  onBusy: (busy: boolean) => void;
+  onValidation: (errors: FormErrors) => void;
 }) {
   const t = useWizardCopy();
   const l = t.labels;
@@ -133,6 +141,7 @@ export function Review({
               <div className={styles.reviewHeading}>
                 <h3 id={`review-${step}`}>{t.steps[step]}</h3>
                 <Button
+                  disabled={busy}
                   variant="text"
                   onClick={() => onEdit(step)}
                   aria-label={`${t.edit}: ${t.steps[step]}`}
@@ -151,10 +160,11 @@ export function Review({
             </section>
           ))}
       </div>
-      <Button disabled aria-describedby="submission-notice">
-        {t.submitLater}
-      </Button>
-      <p id="submission-notice">{t.unavailable}</p>
+      <SubmitPanel
+        payload={payload}
+        onValidation={onValidation}
+        onBusy={onBusy}
+      />
     </>
   );
 }
