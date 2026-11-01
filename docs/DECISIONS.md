@@ -197,3 +197,29 @@ Phase 3 references: [React reducer](https://react.dev/reference/react/useReducer
 **Consequences:** Blocked attempt storage prevents submission; error feedback explains recovery. Confirmed success clears matching draft/attempt data, with explicit cleanup warnings if removal fails. General contact remains the separate mailto workflow from decision 012. Administration and subsequent business workflows remain deferred.
 
 Phase 4 references: [ASP.NET rate limiting](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-10.0), [PostgreSQL explicit locks](https://www.postgresql.org/docs/18/explicit-locking.html), [Npgsql JSON mapping](https://www.npgsql.org/efcore/mapping/json.html), [Resend send API](https://resend.com/docs/api-reference/emails/send-email), and [Resend idempotency](https://resend.com/docs/dashboard/emails/idempotency-keys).
+
+## 020 — Standard Identity, cookie sessions and explicit provisioning
+
+**Decision:** Add ASP.NET Core Identity EF 10.0.14 to the existing database with a centralized Administrator policy, framework password hashing, lockout, HttpOnly Strict cookies, absolute configurable sessions, security-stamp validation and framework antiforgery tokens for every admin mutation. Provision one administrator through an explicit transactional command with supplied secrets, never a public registration endpoint or startup seed.
+
+**Reason:** Administrative access protects customer information and requires server enforcement independent of React routing. Framework primitives avoid custom cryptography; cookie sessions avoid browser-managed bearer secrets.
+
+**Consequences:** Development uses exact credentialed loopback origins; production requires approved HTTPS hosting, persistent encrypted key management, MFA and recovery review. Logout invalidates all sessions for the admin. Standard MFA storage/providers are available but enrollment/challenge/recovery UI is deferred; password-only login cannot bypass a required second factor. Production readiness is not claimed.
+
+## 021 — Versioned request workflow with private notes and immutable history
+
+**Decision:** Centralize Submitted/UnderReview/AwaitingCustomer/Closed transitions in Domain. Use a GUID EF concurrency token; atomically update status/timestamp plus activity, or create note/touch request plus activity. Add notes/history with author foreign keys and backfill submitted events for existing enquiries in an additive migration.
+
+**Reason:** Concurrent edits must not silently overwrite decisions, and operational changes need provenance without leaking private notes.
+
+**Consequences:** Conflicts return 409 and require review/refresh. Closed is terminal and does not imply a booking. Activity stores structured status values, never note bodies. No mutation emails or later-phase workflow states are introduced. Existing request-retention deletion cascades linked notes/history; administrator deletion is restricted where provenance exists.
+
+## 022 — Small server-driven bilingual admin frontend
+
+**Decision:** Reuse Axios, the language provider, SCSS tokens and buttons, with focused admin pages and a cancellable in-memory resource hook. Query/filter/page in PostgreSQL, display responsive cards, use generic metadata and exclude persistent private-data caching and search URLs.
+
+**Reason:** The one-agent administration workflow needs readable mobile/desktop views and fresh authorized data without a second design system or state framework.
+
+**Consequences:** Search/filter state resets when the list remounts. Mutations reload affected detail/history; dashboard/list fetch on navigation. The backend remains the authorization boundary. Future scale may justify reviewed indexed substring search or a server-state library, but neither is required for Phase 5.
+
+Phase 5 references: [Identity configuration](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?view=aspnetcore-10.0), [ASP.NET antiforgery](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-10.0), [EF optimistic concurrency](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), and [Identity EF package](https://www.nuget.org/packages/Microsoft.AspNetCore.Identity.EntityFrameworkCore/10.0.14).

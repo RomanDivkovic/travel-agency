@@ -1,6 +1,6 @@
 # Personal Travel Agency & Booking Platform
 
-A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 4 adds real travel enquiry submission, PostgreSQL persistence and durable email notifications.** The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Authentication, bookings and payments remain deferred.
+A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 5 adds administrator authentication and a bilingual dashboard for managing travel enquiries.** Phase 4 submission, PostgreSQL persistence and durable email notifications remain operational. The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Customer accounts, quotations, bookings and payments remain deferred.
 
 ## Stack
 
@@ -77,6 +77,12 @@ curl --fail http://localhost:5080/api/health/ready
 ```
 
 Liveness verifies only the API process. Readiness verifies PostgreSQL connectivity. Both return `{"status":"healthy"}` when successful; readiness returns HTTP 503 and `{"status":"unhealthy"}` when the database is unavailable.
+
+## Administration
+
+Open `/admin/login` after explicitly provisioning the initial administrator. Protected routes are `/admin`, `/admin/requests` and `/admin/requests/:id`. The dashboard shows real PostgreSQL statistics; the list uses server-side search, filters, pagination and sorting. Details show customer travel requirements, controlled status changes, private notes and activity history in Swedish/English.
+
+Authentication uses ASP.NET Core Identity and HttpOnly cookies, independent API authorization, antiforgery tokens, lockout and login rate limiting. There is no public administrator registration or default account/password. See [the provisioning instructions](docs/DEVELOPMENT.md#administrator-provisioning) before attempting login. MFA, secure production key management and an operational credential-recovery process are production prerequisites; this phase does not claim production readiness.
 
 ## Quality commands
 
