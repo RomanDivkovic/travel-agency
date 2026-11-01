@@ -12,7 +12,10 @@ export function usePageMetadata(title: string, description?: string) {
     document.title = `${title} | ${branding.name}`;
     const tags: Record<string, string> = {
       description: text,
-      robots: branding.isPublicLaunch ? 'index, follow' : 'noindex, nofollow',
+      robots:
+        !pathname.startsWith('/admin') && branding.isPublicLaunch
+          ? 'index, follow'
+          : 'noindex, nofollow',
       'og:title': document.title,
       'og:description': text,
       'og:type': 'website',
@@ -40,7 +43,12 @@ export function usePageMetadata(title: string, description?: string) {
     );
     try {
       const origin = new URL(String(import.meta.env.VITE_SITE_URL));
-      if (origin.protocol !== 'https:' || origin.username || origin.password)
+      if (
+        pathname.startsWith('/admin') ||
+        origin.protocol !== 'https:' ||
+        origin.username ||
+        origin.password
+      )
         throw new Error('Invalid public origin');
       if (!canonical) {
         canonical = document.createElement('link');

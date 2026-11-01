@@ -1,4 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router';
+import { AuthProvider, RequireAdmin } from '../features/admin/AuthProvider';
+import { AdminLayout } from '../features/admin/AdminLayout';
+import { LoginPage } from '../features/admin/LoginPage';
+import { DashboardPage } from '../features/admin/DashboardPage';
+import { RequestsPage } from '../features/admin/RequestsPage';
+import { RequestDetailPage } from '../features/admin/RequestDetailPage';
 import { AppLayout } from '../layouts/AppLayout';
 import { FoundationPage } from '../pages/FoundationPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -21,6 +27,28 @@ export function App() {
       <ErrorBoundary>
         <RouteFocus />
         <Routes>
+          <Route
+            path="/admin"
+            element={
+              <AuthProvider>
+                <RequireAdmin />
+              </AuthProvider>
+            }
+          >
+            <Route element={<AdminLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="requests" element={<RequestsPage />} />
+              <Route path="requests/:id" element={<RequestDetailPage />} />
+            </Route>
+          </Route>
+          <Route
+            path="/admin/login"
+            element={
+              <AuthProvider>
+                <LoginPage />
+              </AuthProvider>
+            }
+          />
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path={routes.services} element={<ServicesPage />} />

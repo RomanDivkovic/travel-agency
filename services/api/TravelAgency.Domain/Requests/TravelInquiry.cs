@@ -1,7 +1,7 @@
 namespace TravelAgency.Domain.Requests;
 
 public enum TravelService { Flights, Accommodation, FlightAccommodation, Complete }
-public enum RequestStatus { Submitted }
+public enum RequestStatus { Submitted, UnderReview, AwaitingCustomer, Closed }
 public sealed record CustomerContact(string Name, string Email, string? Phone, string PreferredMethod);
 public sealed record TravelPlan(string? Origin, string? Destination, bool FlexibleDestination, string[] AdditionalStops,
     string DateMode, DateOnly? Departure, DateOnly? Return, DateOnly? Earliest, DateOnly? Latest, int? DurationDays,
@@ -18,6 +18,24 @@ public sealed class TravelInquiry
     public string Language { get; private set; } = "";
     public CustomerContact Contact { get; private set; } = null!;
     public TravelPlan Plan { get; private set; } = null!;
+    public Guid Version { get; private set; } = Guid.NewGuid();
+    public static RequestStatus[] AllowedTransitions(RequestStatus status) => status switch
+    {
+        RequestStatus.Submitted => [RequestStatus.UnderReview, RequestStatus.Closed],
+        RequestStatus.UnderReview => [RequestStatus.AwaitingCustomer, RequestStatus.Closed],
+        RequestStatus.AwaitingCustomer => [RequestStatus.UnderReview, RequestStatus.Closed],
+        _ => []
+    };
+    public void ChangeStatus(RequestStatus next, DateTimeOffset now)
+    {
+        if (!AllowedTransitions(Status).Contains(next)) throw new InvalidOperationException("Invalid status transition.");
+        Status = next; Touch(now);
+    }
+    public void Touch(DateTimeOffset now)
+    {
+        if (now.Offset != TimeSpan.Zero) throw new ArgumentException("UTC required.");
+        UpdatedAt = now.AddTicks(-(now.Ticks % 10)); Version = Guid.NewGuid();
+    }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
 

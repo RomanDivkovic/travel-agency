@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Application.Requests;
+using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Requests;
 using TravelAgency.Infrastructure.Persistence;
 
@@ -49,6 +50,7 @@ public sealed class PostgresTravelRequestStore(TravelAgencyDbContext db, Submiss
             JsonSerializer.Serialize(input.Preferences, SubmissionHandler.JsonOptions), input.Activities!.Value, input.SpecialRequests);
         var request = TravelInquiry.Create(reference, service, input.Language!, new CustomerContact(contact.Name!, contact.Email!, contact.Phone, contact.PreferredMethod!), plan, now);
         db.TravelRequests.Add(request);
+        db.RequestActivities.Add(new RequestActivity { RequestId = request.Id, Type = "Submitted", CreatedAt = request.CreatedAt });
         db.IdempotencyRecords.Add(new IdempotencyRecord { KeyHash = hash, PayloadHash = payloadHash, RequestId = request.Id, ExpiresAt = now.AddDays(settings.IdempotencyRetentionDays) });
         db.NotificationOutbox.AddRange(new NotificationRecord { RequestId = request.Id, Kind = "customer", NextAttemptAt = now }, new NotificationRecord { RequestId = request.Id, Kind = "agent", NextAttemptAt = now });
         await db.SaveChangesAsync(ct);

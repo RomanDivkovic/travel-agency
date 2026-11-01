@@ -2,7 +2,7 @@
 
 ## Scope
 
-Phase 0 creates a modular monolith with a separate React frontend and a single ASP.NET Core API backed by PostgreSQL. Phase 1 builds the public homepage; Phase 2 adds bilingual public information pages, Phase 3 adds a local travel request wizard, and Phase 4 connects it to an independently validated submission API, PostgreSQL and a durable notification outbox. There are no microservices, customer accounts, authentication or payment integrations.
+Phase 0 creates a modular monolith with a separate React frontend and a single ASP.NET Core API backed by PostgreSQL. Phase 1 builds the public homepage; Phase 2 adds bilingual public information pages, Phase 3 adds a local travel request wizard, and Phase 4 connects it to an independently validated submission API, PostgreSQL and a durable notification outbox. Phase 5 adds Identity-backed administrator authentication and request management. There are no microservices, customer accounts or payment integrations.
 
 ## Dependency direction
 
@@ -53,7 +53,7 @@ Swedish is the default language. `localization/LanguageProvider.tsx` initializes
 
 The contact form accepts a public mailbox from build-time `VITE_CONTACT_EMAIL`, validates it, and disables all fields without one. Configured mode uses native constraints plus trimmed-value validation, then exposes an encoded mailto link. It does not automatically open an email client on form submission, send HTTP requests, save personal data or assert delivery. Editing clears the prepared draft. Actual delivery requires the visitor's configured email client and mailbox infrastructure, outside this phase.
 
-Localized page titles, descriptions, Open Graph locale/content and Twitter summary metadata update on navigation and language changes. Canonical links require a configured HTTPS `VITE_SITE_URL` and use its origin plus the current path. The provisional site retains noindex/nofollow and disallowing robots.txt. The same URLs serve both languages, so no misleading hreflang alternate URLs are emitted. Approved domain, locale-specific indexing, prerendering/SSR, sitemap, company schema and legal launch content remain deferred. Authentication, payments and bookings remain deferred; Phase 4 enquiry persistence is described below.
+Localized page titles, descriptions, Open Graph locale/content and Twitter summary metadata update on navigation and language changes. Canonical links require a configured HTTPS `VITE_SITE_URL` and use its origin plus the current path. The provisional site retains noindex/nofollow and disallowing robots.txt. The same URLs serve both languages, so no misleading hreflang alternate URLs are emitted. Approved domain, locale-specific indexing, prerendering/SSR, sitemap, company schema and legal launch content remain deferred. Payments and bookings remain deferred; Phase 4 enquiry persistence is described below.
 
 ## Travel request wizard (Phase 3)
 
@@ -128,8 +128,61 @@ Idempotency records expire after 30 days by default (minimum seven); replay afte
 
 The fixed-window limiter defaults to ten submissions per IP per minute per API instance. CORS and the honeypot do not replace abuse controls. Deployment must configure trusted proxies, shared edge limits if needed, TLS, private database access and least-privilege credentials. The API never trusts arbitrary forwarded headers. Default logging excludes payloads, email addresses, connection strings and provider response bodies; sensitive-data logging must remain disabled.
 
-Tests cover normalized validation, domain invariants, templates, real PostgreSQL concurrency/replay/rollback, worker retries/dead letters, API failures/rate limiting, frontend submission states and browser-to-database flows. Phase 5 administration, authentication, quotations, invoices, payments, bookings and deployment remain outside this phase.
+Tests cover normalized validation, domain invariants, templates, real PostgreSQL concurrency/replay/rollback, worker retries/dead letters, API failures/rate limiting, frontend submission states and browser-to-database flows. Phase 5 administration and authentication are described below. Quotations, invoices, payments, bookings and deployment remain outside the current phase.
 
 ### Personal data and purpose
 
 Enquiries collect name, email, optional phone, preferred contact/language and the requested destinations, travel dates, traveller counts/child ages, budget, preferences and optional free text. These support responding to and preparing the requested travel assistance; they do not create an account or authorize bookings. The UI discourages passport, card and sensitive information. Access is restricted to the backend/database operator and configured email recipients; no public request retrieval exists. Before launch the owner must approve a privacy notice covering controller/contact identity, lawful basis, purposes, processors/transfers, retention, deletion and data-subject rights. Database deletion must be coordinated with backups, capture files and provider copies; the technical defaults alone do not establish GDPR compliance.
+
+## Phase 5 administrator architecture
+
+The existing modular monolith remains in place. Domain centralizes request transitions and holds note/activity records without Identity or EF dependencies. Application defines query/mutation interfaces and DTOs. Infrastructure implements Identity persistence/provisioning, filtered queries and transactional mutations. Api owns cookie/antiforgery composition, centralized role authorization and thin endpoints. The only added package is Identity.EntityFrameworkCore 10.0.14, matching the established framework patch; no frontend dependency was added.
+
+### Authentication and authorization
+
+ASP.NET Core Identity stores salted framework password hashes, role membership, lockout state and security stamps in the existing PostgreSQL database. Only the `Administrator` role satisfies the shared policy. Login is generic for unknown users, wrong passwords, lockouts and unsupported second-factor accounts. Passwords require 12 characters with uppercase/lowercase/digit/symbol. Five failures lock an account for 15 minutes; the endpoint additionally permits ten attempts per IP per minute per process. No registration or password-reset endpoint is exposed.
+
+The application cookie is HttpOnly, SameSite Strict, path `/`, without a broad domain. Production uses a `__Host-` name and Secure Always; local HTTP development uses a separate cookie name and SameAsRequest. Sessions expire absolutely after 30 minutes by default (configurable 1–120), do not slide and are browser-session cookies rather than remember-me cookies. Identity validates security stamps on every authenticated request. Logout rotates the stamp and signs out, invalidating every session for that administrator on its next request. No cookie value, password or bearer token is stored through frontend JavaScript.
+
+`GET /api/admin/auth/csrf` issues the framework antiforgery cookie and request token. Every admin POST/PATCH, including login/logout, validates the request token from `X-CSRF-TOKEN`. The frontend fetches a fresh token before each mutation, including after an authentication identity change. Tokens live only in memory. Anonymous data access returns 401; an authenticated principal without the role returns 403. Both are distinct from 400 antiforgery/input errors. All admin responses carry no-store, and API CSP denies rendering/scripts/framing. Public submission stays anonymous and does not use administrator cookies for authorization.
+
+Development CORS allows credentials only for explicit configured loopback origins. Vite 5173 and API 5080 are different origins but the same localhost site, so Strict cookies work with Axios `withCredentials`. A different hostname (including 127.0.0.1) is not interchangeable. Production currently has no cross-origin CORS policy; deploy behind an approved same-origin HTTPS reverse proxy or separately review an exact credentialed origin policy. Do not loosen to wildcard origins or SameSite None as a shortcut.
+
+### Administrative API
+
+| Endpoint | Behavior |
+| --- | --- |
+| GET `/api/admin/auth/csrf` | Anonymous-safe antiforgery bootstrap |
+| POST `/api/admin/auth/login` | Email/password; antiforgery + IP limit; safe administrator DTO |
+| POST `/api/admin/auth/logout` | Authorized, antiforgery-protected, revoke sessions; 204 |
+| GET `/api/admin/auth/me` | Authorized ID, display name, email and Administrator role only |
+| GET `/api/admin/dashboard/summary` | Database status counts and five latest updated requests |
+| GET `/api/admin/travel-requests` | Validated server-side search, filters, deterministic sorting/pagination |
+| GET `/api/admin/travel-requests/{uuid}` | Complete enquiry DTO, concurrency version and allowed next statuses |
+| PATCH `/api/admin/travel-requests/{uuid}/status` | `{status, version}`; transition + optimistic concurrency; 204 or 409 |
+| GET/POST `/api/admin/travel-requests/{uuid}/notes` | Paged chronological notes / `{content}`; authenticated author; 204 on creation |
+| GET `/api/admin/travel-requests/{uuid}/activity` | Paged chronological immutable history |
+
+All data/mutation endpoints require the administrator policy independently of frontend routing. Missing UUID records return 404, invalid inputs/filters 400, stale versions/concurrent writes 409. Framework Problem Details handles unexpected errors without exposing entities, hashes or exception details.
+
+List parameters are `page` (1–100000), `pageSize` (1–100, default 20), `status` (case-sensitive enum name), `serviceType` (existing four service strings), `search` (up to 150 characters), `sort` (`createdAt_desc`, `createdAt_asc`, `updatedAt_desc`), `from`, and `to` (ISO dates, inclusive UTC submission dates). Search uses escaped, parameterized PostgreSQL ILIKE over reference/name/email. Literal percent/underscore characters are escaped. Pagination uses Count plus ordered Skip/Take in SQL, with UUID tie-breaking. Responses include items, page/pageSize, totalCount/totalPages and exclude notes/contact email from list cards. Small-scale substring search is acceptable initially; production volume may justify reviewed trigram indexes and keyset pagination.
+
+### Workflow and persistence
+
+`Submitted → UnderReview` or `Closed`; `UnderReview → AwaitingCustomer` or `Closed`; `AwaitingCustomer → UnderReview` or `Closed`. Closed is terminal in Phase 5 and does not mean booked. Quotation/payment/booking state remains separate and unimplemented. The domain supplies permitted transitions; APIs validate them again and the frontend displays only allowed values.
+
+The additive `AdminDashboard` migration adds standard Identity tables, a GUID concurrency token and status constraint update, request service/updated indexes, notes and activity tables. Existing Phase 4 enquiries receive generated versions and a submitted event at their original creation timestamp. No enquiry data is deleted. Notes reference the enquiry and authenticated author, limit plain text to 4000 characters and use UTC timestamps. Activity records retain only event type, actor, previous/new status and UTC time, never the note body. Request deletion cascades notes/history; author deletion is restricted to preserve provenance. Existing retention maintenance therefore covers request-linked admin data too. Administrator-account retention requires separate operational review.
+
+A status change updates the domain version/timestamp and adds activity in one SaveChanges transaction. Notes also touch the enquiry and record their activity atomically. EF compares the original version in UPDATE; concurrent changes roll back the entire write and return 409. No status-change emails are sent. New public submissions create their submitted activity in the existing request/outbox transaction. Public receipts and customer emails do not expose notes, admin activity or internal IDs.
+
+### Frontend and session state
+
+`features/admin` separates authentication context, API adapter, cancellable query hook, login/layout, dashboard/list/detail pages, fields/actions/timeline, copy and SCSS. Protected routes gate rendering after `/me`; safe return paths are restricted to known admin route shapes. Expired 401 responses clear the auth context and unmount protected data. A generation guard prevents older session checks restoring authentication after logout/invalidation. Initial page load, window focus and a 60-second check refresh the session. In-flight reads are aborted on key/route changes; stale responses cannot replace a newer query. Mutations reload detail/version and timelines; list/dashboard are freshly loaded when visited. There is no persistent private-data cache and no Redux/query dependency.
+
+Search/filter state stays in memory (not URL, localStorage or analytics). Names, contact, notes and activity are escaped React text; there is no trusted HTML or rich-text editor. Preference labels reuse the wizard localization resources, while admin strings use the existing Swedish-default language provider. Request cards reflow instead of imposing a wide table on phones; sidebar navigation wraps into a compact navigation block on smaller screens. Admin metadata stays noindex and omits canonicals and customer names.
+
+### Production security boundary
+
+This phase does not claim production readiness. Implement/review standard TOTP MFA enrollment, verification, recovery codes and recovery procedures before exposing customer information. Identity token-provider/storage capabilities are retained, and a two-factor-enabled account cannot bypass its second factor through this password-only endpoint. Password recovery/rotation is a controlled operator task until a reviewed workflow exists. Do not disable MFA to work around missing UI.
+
+Provision data-protection keys on persistent restricted storage, with encryption at rest and sharing only across intended API instances; default local key handling is insufficient for a deployment guarantee. Review HTTPS/proxy trust, secure hosts/origins, frontend admin no-store/CSP headers, session policy, centralized throttling for multiple instances, least-privilege database access, backups and account recovery. No customer analytics are introduced. Operator access is limited to authenticated administrators and database/backup operators; privacy notices/retention and legal policies still require owner approval. These technical controls alone do not establish GDPR compliance.
