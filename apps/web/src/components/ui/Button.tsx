@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { Link, type LinkProps } from 'react-router';
 import styles from './Button.module.scss';
 
@@ -16,7 +16,8 @@ export function Button({
   className = '',
   type = 'button',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & SharedProps) {
+}: ButtonHTMLAttributes<HTMLButtonElement> &
+  SharedProps & { ref?: Ref<HTMLButtonElement> }) {
   return (
     <button
       type={type}

@@ -3,7 +3,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { FoundationPage } from '../pages/FoundationPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { HomePage } from '../features/home/HomePage';
-import { ComingSoonPage } from '../pages/ComingSoonPage';
+import { WizardPage } from '../features/travel-request/WizardPage';
 import { routes } from './config/routes';
 import { RouteFocus } from './RouteFocus';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -27,7 +27,7 @@ export function App() {
             <Route path={routes.about} element={<AboutPage />} />
             <Route path={routes.contact} element={<ContactPage />} />
             <Route path={routes.faq} element={<FaqPage />} />
-            <Route path={routes.planTrip} element={<ComingSoonPage />} />
+            <Route path={routes.planTrip} element={<WizardPage />} />
             <Route
               path={routes.aboutPreview}
               element={<Navigate to={routes.about} replace />}

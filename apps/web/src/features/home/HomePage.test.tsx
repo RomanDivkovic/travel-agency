@@ -3,8 +3,9 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { expect, it } from 'vitest';
 import { App } from '../../app/App';
-import { branding } from '../../app/config/branding';
 import { routes } from '../../app/config/routes';
+import { branding } from '../../app/config/branding';
+import { serviceWizardLink } from '../travel-request/config';
 import { sv } from '../../content/sv';
 import { publicCopy } from '../../content/public';
 
@@ -47,25 +48,26 @@ it('renders exactly four service cards with useful links and no invented prices'
       within(services).getByRole('link', {
         name: service.action,
       }),
-    ).toHaveAttribute('href', `${routes.services}#${service.id}`);
+    ).toHaveAttribute('href', serviceWizardLink(service.id));
   }
   expect(services).not.toHaveTextContent(/\d+\s*(SEK|kr)/);
 });
 
-it('sends the primary CTA to an honest non-submitting future request page', async () => {
+it('opens the travel wizard from the primary CTA without claiming submission', async () => {
   const user = userEvent.setup();
   renderHome();
   const hero = screen.getByRole('region', { name: sv.hero.title.join(' ') });
   await user.click(within(hero).getByRole('link', { name: sv.actions.plan }));
-  expect(
-    screen.getByRole('heading', { level: 1, name: sv.comingSoon.title }),
-  ).toBeInTheDocument();
-  expect(screen.getByText(sv.comingSoon.note)).toBeInTheDocument();
-  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-  await user.click(screen.getByRole('link', { name: sv.actions.home }));
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-    sv.hero.title.join(' '),
+    'Berätta om din nästa resa',
   );
+  expect(screen.getAllByRole('radio')).toHaveLength(4);
+  expect(
+    screen.getByText(/Webbplatsen kan ännu inte ta emot/),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /Skicka förfrågan/ }),
+  ).not.toBeInTheDocument();
 });
 
 it('provides a clearly labeled about preview without inventing an identity', async () => {

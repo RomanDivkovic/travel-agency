@@ -193,14 +193,14 @@ it('rejects invalid mailbox configuration and encodes header-like input as conte
   expect(draft).toContain('subject=Trip%20%26%20test%0ABcc%3A%20x');
   expect(draft.match(/&/g)).toHaveLength(1);
 });
-it('keeps the legacy about route working and the request wizard unimplemented', () => {
+it('keeps the legacy about route working and opens the request wizard', () => {
   const app = show('/about-preview');
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
     publicCopy.sv.about.title,
   );
   app.unmount();
   show('/plan-your-trip');
-  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  expect(screen.getAllByRole('radio')).toHaveLength(4);
 });
 it('emits canonical links only for configured HTTPS origins', () => {
   vi.stubEnv('VITE_SITE_URL', 'https://travel.example/base');

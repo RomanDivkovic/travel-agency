@@ -3,11 +3,18 @@ import { useLocation } from 'react-router';
 
 export function RouteFocus() {
   const location = useLocation();
-  const previousLocation = useRef(location.key);
+  const previousLocation = useRef(location);
 
   useEffect(() => {
-    const routeChanged = previousLocation.current !== location.key;
-    previousLocation.current = location.key;
+    const previous = previousLocation.current;
+    const routeChanged = previous.key !== location.key;
+    const searchOnlyChanged =
+      previous.pathname === location.pathname &&
+      previous.hash === location.hash &&
+      previous.search !== location.search;
+    previousLocation.current = location;
+    // Keeping wizard/filter query state in the URL must not move focus away from controls.
+    if (searchOnlyChanged) return;
     const frame = window.requestAnimationFrame(() => {
       if (location.hash) {
         const target = document.getElementById(location.hash.slice(1));

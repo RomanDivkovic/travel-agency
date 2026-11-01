@@ -1,3 +1,4 @@
+import { serviceWizardLink } from '../travel-request/config';
 import { routes } from '../../app/config/routes';
 import { ButtonLink } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
@@ -36,6 +37,9 @@ export function ServicesPage() {
                 <p>
                   <strong>{copy.services.suitable}</strong> {detail.suitable}
                 </p>
+                <ButtonLink to={serviceWizardLink(service.id)}>
+                  {service.action}
+                </ButtonLink>
                 <ButtonLink to={routes.pricing} variant="text">
                   {copy.pricingAction}
                 </ButtonLink>

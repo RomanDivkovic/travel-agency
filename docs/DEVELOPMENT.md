@@ -2,7 +2,7 @@
 
 ## Phase branch workflow
 
-Never implement changes directly on `main`. Before each phase, inspect Git status and preserve any existing work. When the previous phase is merged and the working tree is clean, switch to `main`, pull with `git pull --ff-only origin main`, then create the assigned phase branch before editing files. Phase 2 uses `codex/phase-2-public-pages-localization`.
+Never implement changes directly on `main`. Before each phase, inspect Git status and preserve any existing work. When the previous phase is merged and the working tree is clean, switch to `main`, pull with `git pull --ff-only origin main`, then create the assigned phase branch before editing files. Phase 3 uses `codex/phase-3-travel-request-wizard`.
 
 Do not discard changes, force-push, delete unmerged branches, or merge a phase automatically. Staging and committing require explicit user authorization. Keep each phase reviewable so it can be tested independently or rolled back through Git history.
 
@@ -56,7 +56,7 @@ npm --prefix apps/web run dev
 
 Open <http://localhost:5173>. The API listens on <http://localhost:5000>. Vite refuses a busy port instead of silently switching to an origin that CORS does not allow. Use `npm --prefix apps/web run preview` after a frontend build for a local build preview; configure its origin explicitly if testing API calls on another port.
 
-The public homepage makes no health requests. Use `/_dev/health` on the development server for API diagnostics; that route is absent from the production build. Public pages are `/services`, `/pricing`, `/about`, `/contact` and `/faq`, in addition to `/`. `/about-preview` redirects to `/about`. `/plan-your-trip` remains an informational notice with no travel request form. Existing homepage anchors (including `/#sa-fungerar-det`) are preserved.
+The public homepage makes no health requests. Use `/_dev/health` on the development server for API diagnostics; that route is absent from the production build. Public pages are `/services`, `/pricing`, `/about`, `/contact` and `/faq`, in addition to `/`. `/about-preview` redirects to `/about`. `/plan-your-trip` opens the travel wizard; submission is disabled. Existing homepage anchors (including `/#sa-fungerar-det`) are preserved.
 
 ### Language and contact verification
 
@@ -72,6 +72,18 @@ curl -i http://localhost:5000/api/health/ready
 docker compose ps
 docker compose logs --tail=50 postgres
 ```
+
+## Travel wizard development and verification
+
+Use the repository root for `npm --prefix apps/web ...` commands, or change into `apps/web` and run `npm ...` directly. The wizard requires no new environment variables, credentials, backend process or database.
+
+Open `/plan-your-trip` for generic service selection, or use `?service=flights`, `accommodation`, `flight-accommodation` or `complete` to preselect a service. Unknown values are ignored. Homepage and Services-page cards use the shared mapping in `features/travel-request/config.ts`. The flow is configured by service, not by translated labels or hardcoded numeric step indexes.
+
+For a manual journey, select a service; enter a departure location when flights apply; enter a destination or opt into suggestions; set fixed/flexible dates; enter travellers/child ages and rooms when applicable; set a positive budget; choose relevant preferences; add optional requests; enter contact details; and review. Try blank/invalid fields to confirm progression is blocked. Use Back to retain answers, or an Edit button in review and Back to review to validate all answers again. Changing service resets service-specific choices. Switch languages mid-step and confirm values and translated errors are preserved. The final send control must remain disabled, with no request traffic, success confirmation or reference number.
+
+Draft saving is optional. Tick the save checkbox and inspect `travel-agency.request-draft.v1` in browser storage: it must contain only service, dates, traveller counts/ages, budget, structured preferences and an activity-help boolean. It must not contain contact, destination/origin/stops or special-request text. Reload to restore permitted answers, then re-enter omitted details. A stored draft restores at service selection rather than jumping over validation. Invalid/expired drafts are discarded on mount. Confirm that Start over clears this key and unchecks saving without changing the separate language preference. Blocked storage must produce feedback and still allow the journey in memory.
+
+`model.ts` holds input and payload types; `reducer.ts` handles answer updates and service/child-count transitions; `validation.ts` is shared by step gating and payload construction; `payload.ts` is the Phase 4 integration boundary. UI components never post the payload or persist it as a draft. Extend the existing unit/interaction tests whenever a conditional rule changes. Future server validation must repeat all applicable rules independently.
 
 ## Migrations
 
@@ -144,6 +156,16 @@ NuGet audit checks transitive dependencies during restore; warnings fail under `
 - Production preview at `http://localhost:4173` passed 8 direct-route smoke checks, language persistence, noindex metadata and absence of public health API calls. Development diagnostics correctly rendered the not-found page in production.
 - Backend working directory: repository root. `dotnet format`, Release build (zero warnings/errors) and tests passed: 9 succeeded, 1 explicitly skipped because no dedicated `TEST_DATABASE_CONNECTION` was configured. The skipped PostgreSQL integration test is not claimed as executed.
 - Browser plugin was not available; the existing Playwright and axe runtimes were used without adding project dependencies. Temporary browser scripts, screenshots and machine-readable evidence were kept outside the repository under `/private/tmp/travel-phase2-*`.
+
+## Phase 3 verification — 2026-11-01
+
+- From the repository root, `npm --prefix apps/web run format:check`, `lint`, `typecheck`, `test` and `build` passed. All 83 frontend tests across 11 files passed, covering the existing application plus four complete wizard journeys, payload filtering/normalization, validation boundaries, service/child-count transitions, edits/back navigation, language changes, draft allowlisting, corruption/expiry, storage errors and reset. The focus-race regression and changed-service URL/restoration regression are covered. `npm audit --audit-level=low` reported zero vulnerabilities; dependency files are unchanged.
+- The Browser plugin was unavailable. The existing Playwright Chromium/axe runtimes inspected the actual app at `http://localhost:5173`, without adding dependencies. All four services completed to review in both languages (8 journeys). Fixed/one-way and flexible dates, flexible destinations, child ages, rooms, budget, dynamic preferences, activities, contact validation, review edits, Back navigation, draft privacy/restoration/reset, cancellation focus and language switching were exercised. All eight service-specific links across the homepage and Services page preselected correctly; the generic hero CTA opened the wizard.
+- Wizard reflow was checked at 320, 375, 768, 1024 and 1440px, with full accommodation/complete journeys on mobile and flight/combined journeys on desktop. Eight existing public/redirect/not-found routes were checked at 320, 375 and 1440px (24 route/viewport combinations), including meaningful content, overflow, image loading and framework-overlay checks. No console/page/resource errors or broken routes/images were observed. No API traffic occurred during the public/wizard journeys.
+- Twelve axe scans covered all step families plus review and reset confirmation. Zero violations or incomplete checks were reported. Keyboard/native control behavior, error links, heading/error focus, mobile/desktop screenshots and start-over cancellation focus were checked. This is Chromium and automated/manual keyboard QA, not a formal screen-reader or cross-browser conformance certification.
+- Production preview at `http://localhost:4173` verified all four service query values, a complete one-way flight journey, editable contact review, disabled submission, noindex metadata, language persistence, permitted draft restoration, changed-service URL/refresh behavior, start-over and exclusion of development diagnostics. No console errors or API traffic occurred. Temporary preview processes were stopped afterward; browser evidence/scripts were kept outside the repository under `/private/tmp/travel-phase3-*`.
+- From the repository root, backend formatting and Release build passed with zero warnings/errors. Backend tests: 9 passed, 1 explicitly skipped because no isolated `TEST_DATABASE_CONNECTION` was configured. The PostgreSQL integration test is not claimed as executed. Backend code, migrations and CI configuration are unchanged.
+- Phase 3 implements request preparation only. No actual submission/delivery or server persistence was implemented or tested. Phase 4 remains unstarted.
 
 ## Database lifecycle and safe reset
 

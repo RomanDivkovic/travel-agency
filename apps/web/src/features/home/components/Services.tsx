@@ -1,4 +1,4 @@
-import { routes } from '../../../app/config/routes';
+import { serviceWizardLink } from '../../travel-request/config';
 import { useTranslations } from '../../../localization/useLanguage';
 import { ButtonLink } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
@@ -30,7 +30,7 @@ export function Services() {
             <h3>{service.title}</h3>
             <p>{service.description}</p>
             <ButtonLink
-              to={`${routes.services}#${service.id}`}
+              to={serviceWizardLink(service.id)}
               variant="text"
               icon={<Icon name="arrow" size={18} />}
             >
