@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Domain.Admin;
+using TravelAgency.Domain.Payments;
 using TravelAgency.Domain.Quotations;
 using TravelAgency.Domain.Requests;
 using TravelAgency.Infrastructure.Admin;
+using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
 
@@ -11,6 +13,13 @@ namespace TravelAgency.Infrastructure.Persistence;
 
 public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext> options) : IdentityDbContext<Administrator>(options)
 {
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<PaymentTransaction> Payments => Set<PaymentTransaction>();
+    public DbSet<PaymentEventRecord> PaymentEvents => Set<PaymentEventRecord>();
+    public DbSet<InvoiceAccessToken> InvoiceTokens => Set<InvoiceAccessToken>();
+    public DbSet<ResearchEligibility> ResearchEligibility => Set<ResearchEligibility>();
+    public DbSet<InvoiceCounter> InvoiceCounters => Set<InvoiceCounter>();
+    public DbSet<SandboxPayment> SandboxPayments => Set<SandboxPayment>();
     public DbSet<TravelInquiry> TravelRequests => Set<TravelInquiry>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
     public DbSet<NotificationRecord> NotificationOutbox => Set<NotificationRecord>();
@@ -23,6 +32,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
     {
         base.OnModelCreating(model);
         model.ConfigureQuotations();
+        model.ConfigurePayments();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);
@@ -86,8 +96,10 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         key.HasOne<TravelInquiry>().WithMany().HasForeignKey(k => k.RequestId).OnDelete(DeleteBehavior.Cascade);
         var notification = model.Entity<NotificationRecord>();
         notification.HasKey(n => n.Id);
+        notification.HasIndex(n => new { n.InvoiceId, n.Kind }).IsUnique().HasFilter("\"InvoiceId\" IS NOT NULL");
+        notification.HasOne<Invoice>().WithMany().HasForeignKey(n => n.InvoiceId).OnDelete(DeleteBehavior.Cascade);
         notification.Property(n => n.Kind).HasMaxLength(32).IsRequired();
-        notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NULL");
+        notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL");
         notification.HasIndex(n => new { n.QuotationId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NOT NULL");
         notification.HasOne<Quotation>().WithMany().HasForeignKey(n => n.QuotationId).OnDelete(DeleteBehavior.Cascade);
         notification.HasIndex(n => n.NextAttemptAt).HasFilter("\"SentAt\" IS NULL AND \"DeadLetterAt\" IS NULL");

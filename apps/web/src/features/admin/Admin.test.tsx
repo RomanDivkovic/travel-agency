@@ -1,3 +1,4 @@
+import { invoiceApi } from '../payments/api';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
@@ -22,6 +23,11 @@ vi.mock('./api', () => ({
     activity: vi.fn(),
     status: vi.fn(),
     addNote: vi.fn(),
+  },
+}));
+vi.mock('../payments/api', () => ({
+  invoiceApi: {
+    summary: vi.fn().mockResolvedValue({ currencies: [], recentPayments: [] }),
   },
 }));
 vi.mock('../quotations/api', () => ({ quotationApi: { forRequest: vi.fn() } }));
@@ -92,6 +98,10 @@ function mount(path = '/admin') {
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(invoiceApi.summary).mockResolvedValue({
+    currencies: [],
+    recentPayments: [],
+  });
   vi.mocked(quotationApi.forRequest).mockResolvedValue({
     items: [],
     page: 1,

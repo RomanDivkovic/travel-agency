@@ -20,7 +20,7 @@ using TravelAgency.Infrastructure.Quotations;
 namespace TravelAgency.Tests;
 
 [Collection("Request persistence")]
-public sealed class QuotationApiTests : IAsyncLifetime
+public sealed partial class QuotationApiTests : IAsyncLifetime
 {
     private WebApplicationFactory<Program> factory = null!;
     private ApiFactory original = null!;
@@ -37,6 +37,10 @@ public sealed class QuotationApiTests : IAsyncLifetime
         original = new ApiFactory(connectionString: Connection);
         factory = original.WithWebHostBuilder(b =>
         {
+            b.UseSetting("Payments:Provider", "Sandbox"); b.UseSetting("Payments:IssuanceEnabled", "true"); b.UseSetting("Payments:AccountingApproved", "true");
+            b.UseSetting("Payments:PublicOrigin", "http://localhost:5174"); b.UseSetting("Payments:SandboxSigningSecret", "TEST-ONLY-signing-secret-at-least-32-characters");
+            b.UseSetting("Payments:SellerName", "TEST business"); b.UseSetting("Payments:SellerAddress", "TEST address"); b.UseSetting("Payments:RegistrationNumber", "TEST not a registration");
+            b.UseSetting("Payments:TaxInformation", "TEST tax only"); b.UseSetting("Payments:TermsSv", "TEST invoice terms sv — NOT LEGAL"); b.UseSetting("Payments:TermsEn", "TEST invoice terms en — NOT LEGAL"); b.UseSetting("Payments:TermsVersion", "TEST-v1");
             b.UseSetting("Quotations:IssuanceEnabled", "true"); b.UseSetting("Quotations:PublicOrigin", "http://localhost:5174");
             b.UseSetting("Quotations:ApprovedTaxTreatments:0", "VatExclusive"); b.UseSetting("Quotations:ApprovedTaxTreatments:1", "NoVat");
             b.UseSetting("Quotations:ApprovedTaxRatesBasisPoints:0", "2500"); b.UseSetting("Quotations:TermsVersion", "test-only-v1");
@@ -52,6 +56,7 @@ public sealed class QuotationApiTests : IAsyncLifetime
     {
         if (factory is null) return;
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>();
+        await db.Invoices.Where(i => requests.Contains(i.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.TravelRequests.Where(r => requests.Contains(r.Id)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         var users = scope.ServiceProvider.GetRequiredService<UserManager<Administrator>>(); var user = await users.FindByIdAsync(userId); if (user is not null) Assert.True((await users.DeleteAsync(user)).Succeeded);
         await factory.DisposeAsync(); await original.DisposeAsync();

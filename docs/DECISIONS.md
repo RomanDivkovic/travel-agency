@@ -257,3 +257,37 @@ Phase 5 references: [Identity configuration](https://learn.microsoft.com/en-us/a
 **Consequences:** Quotation Sent means issued/queued, never inbox proof. Stale issued messages can be suppressed; external delivery remains at least once. History keeps structured events/actors/versions without private notes or token values. Phase 7 receives an immutable accepted-version boundary, with no invoice/payment/activation code in Phase 6.
 
 Phase 6 references: [ASP.NET Data Protection purpose isolation](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings?view=aspnetcore-10.0), [PostgreSQL row/advisory locks](https://www.postgresql.org/docs/18/explicit-locking.html), [partial unique indexes](https://www.postgresql.org/docs/18/indexes-partial.html), and [URL fragment behavior](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment).
+
+## 027 — Immutable invoices and transactional numbering
+
+**Decision:** Create one invoice from one accepted quotation version, copy exact calculated line/tax/amount snapshots, permit billing-details editing only while Draft, and freeze approved seller/terms data at explicit issuance. Use a transactionally locked database counter for final numbering and unique constraints on number/quotation. Cancel only Draft; do not offer paid overrides, issued corrections or fabricated refunds.
+
+**Reason:** Financial records must preserve the accepted agreement, avoid duplicate collection and not silently change issued amounts. An accountant must approve numbering, advance service billing, mandatory fields, VAT and correction/retention policy before commercial issuance.
+
+**Consequences:** Issuance defaults disabled. Missing seller/tax/terms/accounting/provider approval returns 412. Draft cancellation does not enable another primary invoice. Authorized escaped HTML snapshots are downloadable; PDF generation is browser print/save until reliable server PDF tooling is justified.
+
+## 028 — Disabled live payments and isolated development simulation
+
+**Decision:** Define a focused provider interface, but implement only Disabled and a Development-only Sandbox adapter because no provider was approved. Sandbox evidence is persisted separately; every test invoice, checkout, result, email and metric is labelled simulated. Production rejects Sandbox at startup. No payment SDK/dependency or merchant credentials are invented.
+
+**Reason:** A complete, testable financial architecture is possible without pretending that local simulation is a live/official provider sandbox or a real charge.
+
+**Consequences:** Live provider acceptance criteria remain blocked. Future approval must establish supported currencies/methods, merchant-of-record arrangement, official hosted checkout/signatures, refund/correction obligations and real reconciliation. Simulated eligibility is separate from real travel-research eligibility and cannot activate actual service work.
+
+## 029 — One verified, idempotent settlement path
+
+**Decision:** Lock invoice and provider event processing, durably deduplicate event IDs, compare amount/currency/session/provider context and settle invoice/payment/eligibility/activity/outbox atomically. Reconciliation queries provider evidence and uses the same path with bounded persisted claims/retries. Success is monotonic and duplicate successful attempts become review discrepancies.
+
+**Reason:** Redirect parameters, unsigned requests, duplicate/concurrent/out-of-order events and provider outages cannot be trusted to authorize work or revenue.
+
+**Consequences:** Customer results fetch backend state and poll finitely. No administrative mark-paid action, raw webhook retention, late fees, debt demands or automatic reminders are introduced. Existing outbox delivers localized invoice/confirmation/failure/agent messages independently of the financial transaction.
+
+## 030 — Invoice-scoped fragment credentials and reusable UI
+
+**Decision:** Reuse secure-link primitives with a new invoice scope and Data Protection purpose; tokens remain in fragments and headers. Add explicit admin revocation without pretending to cancel existing payments. Reuse the admin client, CSRF/auth, language provider, SCSS tokens, in-memory resource hook and existing background worker. Lazy-load payment pages.
+
+**Reason:** Invoice access must not be inherited from a quotation or leaked through HTTP URLs, analytics, caches or persistent browser storage. A second auth, email or state framework is unnecessary.
+
+**Consequences:** Hosting must enforce private-page no-store/no-referrer/CSP/HTTPS and protected key persistence. Customer emails/browser history still carry private links. No new frontend/NuGet dependencies were added.
+
+Phase 7 references: [Skatteverket invoice rules](https://www.skatteverket.se/foretag/moms/saljavarorochtjanster/fakturering.4.58d555751259e4d66168000403.html), [Verksamt invoice content](https://verksamt.se/en/agreement-invoicing/invoice/invoice-content), [PostgreSQL locking](https://www.postgresql.org/docs/18/explicit-locking.html), [.NET HMAC-SHA256](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.hmacsha256.hashdata?view=net-10.0), [fixed-time comparison](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.fixedtimeequals?view=net-10.0), [Data Protection purpose isolation](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings?view=aspnetcore-10.0), and [EF transactional update considerations](https://learn.microsoft.com/en-us/ef/core/saving/execute-insert-update-delete). These references inform implementation, not a declaration of legal compliance.
