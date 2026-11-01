@@ -58,8 +58,12 @@
 .list li {
   padding-block: 0.4rem;
 }
-.serviceCard a {
-  margin-top: 1rem;
+.serviceActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2.5rem;
+  margin-top: 1.5rem;
 }
 .quote {
   margin-top: 3rem;

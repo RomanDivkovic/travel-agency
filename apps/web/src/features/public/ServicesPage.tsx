@@ -37,12 +37,14 @@ export function ServicesPage() {
                 <p>
                   <strong>{copy.services.suitable}</strong> {detail.suitable}
                 </p>
-                <ButtonLink to={serviceWizardLink(service.id)}>
-                  {service.action}
-                </ButtonLink>
-                <ButtonLink to={routes.pricing} variant="text">
-                  {copy.pricingAction}
-                </ButtonLink>
+                <div className={styles.serviceActions}>
+                  <ButtonLink to={routes.pricing} variant="text">
+                    {copy.pricingAction}
+                  </ButtonLink>
+                  <ButtonLink to={serviceWizardLink(service.id)}>
+                    {service.action}
+                  </ButtonLink>
+                </div>
               </article>
             );
           })}
