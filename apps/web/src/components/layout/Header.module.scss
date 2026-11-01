@@ -1,4 +1,3 @@
-@use '../../styles/breakpoints' as bp;
 .header {
   position: sticky;
   top: 0;
@@ -52,7 +51,7 @@
     text-decoration: none;
   }
 }
-@media (min-width: bp.$desktop) {
+@media (min-width: 80rem) {
   .desktop {
     display: flex;
     align-items: center;
@@ -75,5 +74,44 @@
   .toggle,
   .mobile {
     display: none;
+  }
+}
+
+.language {
+  margin-left: auto;
+}
+.languageLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.language select {
+  min-height: 2.75rem;
+  max-width: 7.5rem;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  padding: 0.5rem;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+@media (max-width: 25rem) {
+  .row {
+    gap: 0.5rem;
+  }
+  .row > a:first-child {
+    font-size: 1rem;
+    min-width: 0;
+    white-space: normal;
+  }
+  .row > a:first-child svg {
+    width: 28px;
+  }
+  .language select {
+    max-width: 6rem;
   }
 }

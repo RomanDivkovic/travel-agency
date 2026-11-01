@@ -6,4 +6,8 @@ import { afterEach, vi } from 'vitest';
 window.scrollTo = vi.fn();
 Element.prototype.scrollIntoView = vi.fn();
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+  document.documentElement.lang = 'sv';
+});

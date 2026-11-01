@@ -1,6 +1,6 @@
 # Personal Travel Agency & Booking Platform
 
-A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 0 provides the foundation; Phase 1 adds the provisional brand, design system, and responsive Swedish homepage.** Customer requests, authentication, bookings, and payments remain deferred.
+A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 2 completes the bilingual informational website on the Phase 0 foundation and Phase 1 design system.** Customer requests, authentication, bookings, and payments remain deferred.
 
 ## Stack
 
@@ -57,7 +57,13 @@ npm --prefix apps/web run dev
 
 Visit <http://localhost:5173> for the homepage. The original API diagnostics remain at <http://localhost:5173/_dev/health> in development and display **API anslutet** when a valid health response is received. Diagnostics are excluded from production routing.
 
-The provisional name is configured in `apps/web/src/app/config/branding.ts`; Swedish text is centralized in `apps/web/src/content/sv.ts`. Request and about CTAs lead to clearly labeled informational fallbacks. The request form is not implemented yet. Contact details, legal pages, and the agent portrait are explicit placeholders.
+The provisional name is configured in `apps/web/src/app/config/branding.ts`. Public routes are `/`, `/services`, `/pricing`, `/about`, `/contact`, and `/faq`. `/about-preview` redirects to `/about`. `/plan-your-trip` remains an informational notice: **the travel request wizard is not implemented**.
+
+The header switches the whole public site between Swedish (default) and English without changing the route. Typed homepage resources are in `apps/web/src/content/sv.ts` and `en.ts`; page resources are in `content/public.ts`. The language choice is stored under `travel-agency.language.v1` in localStorage. Blocked storage falls back to in-memory switching.
+
+The contact form is disabled until `VITE_CONTACT_EMAIL` contains an approved public mailbox. When configured, it validates fields and prepares an encoded `mailto:` draft for the visitor to review and send in their email application. **The website does not deliver or store messages**, and opening a draft is never reported as delivery. No API endpoint or email provider is added. Configure only public values in `apps/web/.env`, then restart/rebuild; see the development guide.
+
+Each route has localized title, description and social metadata. Prelaunch indexing remains disabled. Optional `VITE_SITE_URL` supplies an approved HTTPS origin for canonical links; there is no invented domain. Locale-specific URLs, hreflang, sitemap publication and prerendering remain launch work. Contact details, legal pages and the agent portrait remain explicit placeholders.
 
 API checks:
 

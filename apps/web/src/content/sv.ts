@@ -2,7 +2,7 @@ export const sv = {
   meta: {
     homeTitle: 'Personlig reseplanering & bokningshjälp',
     description:
-      'Få personlig hjälp att hitta, planera och boka flyg, boende och semesterresor. Skicka en kostnadsfri förfrågan och få ett erbjudande anpassat efter dina behov.',
+      'Få personlig hjälp att hitta, planera och boka flyg, boende och semesterresor. Läs om personlig resehjälp, våra tjänster och hur prissättningen fungerar.',
   },
   navigation: {
     label: 'Huvudnavigation',
@@ -13,9 +13,10 @@ export const sv = {
     items: [
       { label: 'Hem', destination: 'home' },
       { label: 'Tjänster', destination: 'services' },
-      { label: 'Så fungerar det', destination: 'process' },
+      { label: 'Priser', destination: 'pricing' },
       { label: 'Om mig', destination: 'about' },
       { label: 'Kontakt', destination: 'contact' },
+      { label: 'Vanliga frågor', destination: 'faq' },
     ],
   },
   actions: {

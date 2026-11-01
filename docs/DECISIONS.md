@@ -102,6 +102,30 @@ The .NET 10 SDK uses Microsoft Testing Platform through `global.json`, and the x
 
 **Consequences:** This is a deliberate transitive major-version override, supported by the project's Node 24 runtime and verified with a clean install, the full frontend quality checks, and npm audit. Remove the override once all upstream consumers require a patched version. The version selector leaves newer, already-patched dependencies alone.
 
+## 011 — Small, typed bilingual public site
+
+**Decision:** Use stable English route paths for the five informational pages and a React language context backed by validated localStorage. Swedish is the default. Reuse the Phase 1 design system and preserve homepage anchors, the future-request notice and development diagnostics.
+
+**Reason:** Two static languages do not require an i18n framework. Centralized resources and a typed shared-copy shape keep components free of duplicated language branches. Language switching preserves the current page; unavailable storage must not break the UI.
+
+**Consequences:** The same public URLs serve both languages, so language-specific search indexing and hreflang are deferred. Document language, page metadata and all public copy change together. FAQ uses native details/summary rather than custom ARIA state. Route focus remains managed by the existing shared helper. No request wizard or new backend functionality is included.
+
+## 012 — Explicit email drafts instead of simulated contact delivery
+
+**Decision:** An optional public `VITE_CONTACT_EMAIL` enables a validated form that prepares an encoded mailto link. Without an approved address, fields are disabled and the page explains why. No contact-delivery API or message persistence is introduced.
+
+**Reason:** No real mailbox or delivery provider has been supplied. An email draft is useful without claiming a message was delivered. Visitors explicitly open and send the draft in their own client.
+
+**Consequences:** Real end-to-end delivery is unverified and depends on external email infrastructure. The form never reports success as delivery. It does not store personal data, includes data-minimization guidance and clears a prepared draft on edits. Provider-backed delivery can be added in an authorized later phase.
+
+## 013 — Prelaunch localized SEO with an explicit public origin
+
+**Decision:** Add route-specific localized title, description, Open Graph and Twitter metadata. Emit a canonical only from a configured HTTPS `VITE_SITE_URL`. Preserve prelaunch noindex and robots restrictions.
+
+**Reason:** Neither an approved public domain nor launch authorization is available. Invented canonical hosts, alternate language URLs, business schema or live price claims would be misleading.
+
+**Consequences:** This is client-rendered metadata. Search engine rendering, locale-specific URLs, prerendering/SSR, sitemap and approved indexing remain launch decisions. Owner identity, portrait, contact details, fixed fees and legal pages remain explicitly provisional.
+
 ## Research references
 
 Official references consulted during implementation:
@@ -119,3 +143,5 @@ Official references consulted during implementation:
 - [Lucide React](https://lucide.dev/guide/react/getting-started)
 - [WAI disclosure navigation](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/)
 - [LCP optimization](https://web.dev/articles/optimize-lcp) and [Lighthouse](https://developer.chrome.com/docs/lighthouse/overview)
+
+Phase 2 references: [React context](https://react.dev/reference/react/createContext), [React Router navigation](https://reactrouter.com/start/declarative/navigating), [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [native disclosures](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details), and [Vite public environment configuration](https://vite.dev/guide/env-and-mode).

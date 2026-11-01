@@ -1,8 +1,9 @@
 import { Component, type ReactNode } from 'react';
-import { sv } from '../content/sv';
+import { useTranslations } from '../localization/useLanguage';
+import type { Translations } from '../content/types';
 
-export class ErrorBoundary extends Component<
-  { children: ReactNode },
+class Boundary extends Component<
+  { children: ReactNode; messages: Translations['errors'] },
   { hasError: boolean }
 > {
   state = { hasError: false };
@@ -12,6 +13,7 @@ export class ErrorBoundary extends Component<
   }
 
   render() {
+    const sv = { errors: this.props.messages };
     if (this.state.hasError) {
       return (
         <main>
@@ -25,4 +27,9 @@ export class ErrorBoundary extends Component<
     }
     return this.props.children;
   }
+}
+
+export function ErrorBoundary({ children }: { children: ReactNode }) {
+  const t = useTranslations();
+  return <Boundary messages={t.errors}>{children}</Boundary>;
 }

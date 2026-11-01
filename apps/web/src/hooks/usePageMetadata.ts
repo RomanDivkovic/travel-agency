@@ -1,21 +1,26 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router';
 import { branding } from '../app/config/branding';
-import { sv } from '../content/sv';
+import { useLanguage, useTranslations } from '../localization/useLanguage';
 
-export function usePageMetadata(
-  title: string,
-  description: string = sv.meta.description,
-) {
+export function usePageMetadata(title: string, description?: string) {
+  const { language } = useLanguage();
+  const t = useTranslations();
+  const text = description ?? t.meta.description;
+  const { pathname } = useLocation();
   useEffect(() => {
     document.title = `${title} | ${branding.name}`;
     const tags: Record<string, string> = {
-      description,
+      description: text,
       robots: branding.isPublicLaunch ? 'index, follow' : 'noindex, nofollow',
       'og:title': document.title,
-      'og:description': description,
+      'og:description': text,
       'og:type': 'website',
-      'og:locale': branding.locale.replace('-', '_'),
+      'og:locale': language === 'sv' ? 'sv_SE' : 'en_GB',
       'og:site_name': branding.name,
+      'twitter:card': 'summary',
+      'twitter:title': document.title,
+      'twitter:description': text,
     };
     for (const [name, content] of Object.entries(tags)) {
       const attribute = name.startsWith('og:') ? 'property' : 'name';
@@ -29,5 +34,22 @@ export function usePageMetadata(
       }
       element.content = content;
     }
-  }, [title, description]);
+    // A canonical is only emitted when an actual public HTTPS origin is configured.
+    let canonical = document.head.querySelector<HTMLLinkElement>(
+      'link[rel="canonical"]',
+    );
+    try {
+      const origin = new URL(String(import.meta.env.VITE_SITE_URL));
+      if (origin.protocol !== 'https:' || origin.username || origin.password)
+        throw new Error('Invalid public origin');
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.append(canonical);
+      }
+      canonical.href = new URL(pathname, origin.origin).href;
+    } catch {
+      canonical?.remove();
+    }
+  }, [title, text, language, pathname]);
 }
