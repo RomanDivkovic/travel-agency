@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TravelAgency.Application.Requests;
+using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
 
 namespace TravelAgency.Infrastructure.Email;
 
-public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null) : INotificationProcessor
+public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null) : INotificationProcessor
 {
     public static TimeSpan RetryDelay(int attempts) => TimeSpan.FromSeconds(Math.Min(3600, 30 * Math.Pow(2, Math.Clamp(attempts - 1, 0, 20))));
     public async Task<bool> ProcessOneAsync(CancellationToken ct)
@@ -23,7 +24,12 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         try
         {
             EmailMessage? message;
-            if (notification.QuotationId is { } quoteId)
+            if (notification.InvoiceId is { } invoiceId)
+            {
+                var invoice = await db.Invoices.AsNoTracking().SingleAsync(i => i.Id == invoiceId, ct);
+                message = InvoiceNotificationTemplates.Create(notification, invoice, settings, invoiceCodec!);
+            }
+            else if (notification.QuotationId is { } quoteId)
             {
                 var quote = await db.Quotations.AsNoTracking().Include(q => q.Lines).SingleAsync(q => q.Id == quoteId, ct);
                 var number = await db.QuotationSeries.Where(s => s.Id == quote.SeriesId).Select(s => s.Number).SingleAsync(ct);

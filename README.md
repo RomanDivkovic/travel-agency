@@ -1,6 +1,6 @@
 # Personal Travel Agency & Booking Platform
 
-A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 6 adds versioned service quotations and secure, account-free customer approval.** The Phase 5 administrator dashboard remains available. Phase 4 submission, PostgreSQL persistence and durable email notifications remain operational. The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Customer accounts, invoicing, bookings and payments remain deferred.
+A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 7 adds invoicing and a clearly labelled development payment simulator, building on secure Phase 6 quotation approval.** The Phase 5 administrator dashboard remains available. Phase 4 submission, PostgreSQL persistence and durable email notifications remain operational. The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Customer accounts, supplier bookings and live payment-provider integration remain deferred.
 
 ## Stack
 
@@ -121,3 +121,11 @@ The database integration tests explicitly skip unless `TEST_DATABASE_CONNECTION`
 - [Earlier requirements review](docs/REQUIREMENTS_REVIEW.md)
 
 CI runs on pull requests and pushes to `main`. Work always happens on a separate phase branch; merge only after explicit approval. Deployment is outside the current scope. The site retains prelaunch `noindex` and a disallowing `robots.txt`; revisit both before an approved public launch.
+
+## Phase 7 — invoicing and service payments
+
+Accepted quotations now support immutable invoice drafts/issuance, authorized downloadable HTML documents, secure invoice links, payment attempts, verified-event settlement, bounded reconciliation, overdue detection, bilingual customer/result pages, admin invoice management and currency-separated dashboard metrics. Existing auth/CSRF, outbox, localization and design components are reused.
+
+**No live payment provider is approved or integrated.** Payments default to Disabled and commercial invoice issuance remains off. The Development-only Sandbox adapter explicitly simulates outcomes without charging money; simulated eligibility is separate from real travel-work eligibility. Real hosted checkout/provider sandbox acceptance remains blocked pending provider approval and implementation, alongside required business/tax/accounting/legal configuration. Nothing in this phase confirms supplier bookings.
+
+Admin: `/admin/invoices`, `/admin/invoices/:id`; customers: `/invoice#credential`, `/payment/result#credential`; Development simulator: `/payment/sandbox#credential`. Accepted quotation details link to invoice creation. See the Phase 7 sections in [Development](docs/DEVELOPMENT.md), [Architecture](docs/ARCHITECTURE.md) and [Decisions](docs/DECISIONS.md) for configuration, security, testing and production blockers. No Phase 8 work is implemented.

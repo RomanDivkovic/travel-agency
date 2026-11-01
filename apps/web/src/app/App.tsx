@@ -1,3 +1,24 @@
+import { lazy, Suspense } from 'react';
+const AdminInvoiceListPage = lazy(() =>
+  import('../features/payments/AdminInvoiceListPage').then((m) => ({
+    default: m.AdminInvoiceListPage,
+  })),
+);
+const AdminInvoiceDetailPage = lazy(() =>
+  import('../features/payments/AdminInvoiceDetailPage').then((m) => ({
+    default: m.AdminInvoiceDetailPage,
+  })),
+);
+const CustomerInvoicePage = lazy(() =>
+  import('../features/payments/CustomerInvoicePage').then((m) => ({
+    default: m.CustomerInvoicePage,
+  })),
+);
+const SandboxPaymentPage = lazy(() =>
+  import('../features/payments/SandboxPaymentPage').then((m) => ({
+    default: m.SandboxPaymentPage,
+  })),
+);
 import { Navigate, Route, Routes } from 'react-router';
 import { AdminQuotationListPage } from '../features/quotations/AdminQuotationListPage';
 import { AdminQuotationDetailPage } from '../features/quotations/AdminQuotationDetailPage';
@@ -29,54 +50,69 @@ export function App() {
     <LanguageProvider>
       <ErrorBoundary>
         <RouteFocus />
-        <Routes>
-          <Route
-            path="/admin"
-            element={
-              <AuthProvider>
-                <RequireAdmin />
-              </AuthProvider>
-            }
-          >
-            <Route element={<AdminLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="requests" element={<RequestsPage />} />
-              <Route path="quotations" element={<AdminQuotationListPage />} />
-              <Route
-                path="quotations/:id"
-                element={<AdminQuotationDetailPage />}
-              />
-              <Route path="requests/:id" element={<RequestDetailPage />} />
-            </Route>
-          </Route>
-          <Route
-            path="/admin/login"
-            element={
-              <AuthProvider>
-                <LoginPage />
-              </AuthProvider>
-            }
-          />
-          <Route path="/quote" element={<CustomerQuotationPage />} />
-          <Route element={<AppLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path={routes.services} element={<ServicesPage />} />
-            <Route path={routes.pricing} element={<PricingPage />} />
-            <Route path={routes.about} element={<AboutPage />} />
-            <Route path={routes.contact} element={<ContactPage />} />
-            <Route path={routes.faq} element={<FaqPage />} />
-            <Route path="/plan-your-trip/success" element={<SuccessPage />} />
-            <Route path={routes.planTrip} element={<WizardPage />} />
+        <Suspense fallback={<p role="status">Hämtar… / Loading…</p>}>
+          <Routes>
             <Route
-              path={routes.aboutPreview}
-              element={<Navigate to={routes.about} replace />}
+              path="/admin"
+              element={
+                <AuthProvider>
+                  <RequireAdmin />
+                </AuthProvider>
+              }
+            >
+              <Route element={<AdminLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="requests" element={<RequestsPage />} />
+                <Route path="invoices" element={<AdminInvoiceListPage />} />
+                <Route
+                  path="invoices/:id"
+                  element={<AdminInvoiceDetailPage />}
+                />
+                <Route path="quotations" element={<AdminQuotationListPage />} />
+                <Route
+                  path="quotations/:id"
+                  element={<AdminQuotationDetailPage />}
+                />
+                <Route path="requests/:id" element={<RequestDetailPage />} />
+              </Route>
+            </Route>
+            <Route
+              path="/admin/login"
+              element={
+                <AuthProvider>
+                  <LoginPage />
+                </AuthProvider>
+              }
             />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-          {import.meta.env.DEV ? (
-            <Route path={routes.diagnostics} element={<FoundationPage />} />
-          ) : null}
-        </Routes>
+            <Route path="/invoice" element={<CustomerInvoicePage />} />
+            <Route
+              path="/payment/result"
+              element={<CustomerInvoicePage result />}
+            />
+            {import.meta.env.DEV && (
+              <Route path="/payment/sandbox" element={<SandboxPaymentPage />} />
+            )}
+            <Route path="/quote" element={<CustomerQuotationPage />} />
+            <Route element={<AppLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path={routes.services} element={<ServicesPage />} />
+              <Route path={routes.pricing} element={<PricingPage />} />
+              <Route path={routes.about} element={<AboutPage />} />
+              <Route path={routes.contact} element={<ContactPage />} />
+              <Route path={routes.faq} element={<FaqPage />} />
+              <Route path="/plan-your-trip/success" element={<SuccessPage />} />
+              <Route path={routes.planTrip} element={<WizardPage />} />
+              <Route
+                path={routes.aboutPreview}
+                element={<Navigate to={routes.about} replace />}
+              />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+            {import.meta.env.DEV ? (
+              <Route path={routes.diagnostics} element={<FoundationPage />} />
+            ) : null}
+          </Routes>
+        </Suspense>
       </ErrorBoundary>
     </LanguageProvider>
   );

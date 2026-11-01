@@ -15,6 +15,8 @@ export function usePageMetadata(title: string, description?: string) {
       robots:
         !pathname.startsWith('/admin') &&
         pathname !== '/quote' &&
+        pathname !== '/invoice' &&
+        !pathname.startsWith('/payment/') &&
         branding.isPublicLaunch
           ? 'index, follow'
           : 'noindex, nofollow',
@@ -48,6 +50,8 @@ export function usePageMetadata(title: string, description?: string) {
       if (
         pathname.startsWith('/admin') ||
         pathname === '/quote' ||
+        pathname === '/invoice' ||
+        pathname.startsWith('/payment/') ||
         origin.protocol !== 'https:' ||
         origin.username ||
         origin.password

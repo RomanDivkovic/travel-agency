@@ -1,6 +1,7 @@
 using System.Text.Json;
 using TravelAgency.Api.Admin;
 using TravelAgency.Api.Health;
+using TravelAgency.Api.Payments;
 using TravelAgency.Api.Quotations;
 using TravelAgency.Api.Requests;
 using TravelAgency.Infrastructure;
@@ -15,6 +16,7 @@ builder.Services.AddInfrastructure(connectionString);
 builder.AddRequestFeature();
 builder.AddAdminFeature();
 builder.AddQuotations();
+builder.AddPayments();
 builder.Services.AddProblemDetails();
 // Malformed minimal-API inputs are client errors, including in Development.
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = false);
@@ -60,7 +62,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.XFrameOptions = "DENY";
     context.Response.Headers["Referrer-Policy"] = "no-referrer";
     context.Response.Headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'";
-    if (context.Request.Path.StartsWithSegments("/api/admin") || context.Request.Path.StartsWithSegments("/api/public/quotations")) context.Response.Headers.CacheControl = "no-store";
+    if (context.Request.Path.StartsWithSegments("/api/admin") || context.Request.Path.StartsWithSegments("/api/public") || context.Request.Path.StartsWithSegments("/api/payments")) context.Response.Headers.CacheControl = "no-store";
     await next(context);
 });
 app.UseExceptionHandler(error => error.Run(async context =>
@@ -84,6 +86,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.MapQuotations();
+app.MapInvoices();
 app.MapAdminAuth();
 app.MapAdminRequests();
 app.MapHealthEndpoints();

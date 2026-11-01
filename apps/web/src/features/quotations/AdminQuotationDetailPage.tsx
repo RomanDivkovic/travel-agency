@@ -1,3 +1,4 @@
+import { QuotationInvoice } from '../payments/QuotationInvoice';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { Button } from '../../components/ui/Button';
@@ -86,6 +87,9 @@ export function AdminQuotationDetailPage() {
           {preview ? (
             <QuotationSummary quotation={state.data.detail.quotation} />
           ) : null}
+          {state.data.detail.quotation.status === 'Accepted' && (
+            <QuotationInvoice quotationId={id} />
+          )}
           <QuotationHistory id={id} revision={revision} />
         </>
       )}

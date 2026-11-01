@@ -1,3 +1,4 @@
+import { PaymentOverview } from '../payments/PaymentOverview';
 import { useCallback, useState } from 'react';
 import { usePageMetadata } from '../../hooks/usePageMetadata';
 import { adminApi } from './api';
@@ -41,6 +42,7 @@ export function DashboardPage() {
               </div>
             ))}
           </div>
+          <PaymentOverview />
           <h2>{t.recent}</h2>
           <RequestCards nested items={state.data.recentlyUpdated} />
         </>

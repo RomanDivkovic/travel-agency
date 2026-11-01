@@ -1,0 +1,131 @@
+.panel {
+  padding: 24px;
+  margin: 24px 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.panel h2 {
+  font-size: 1.8rem;
+  margin-top: 0;
+}
+.customer {
+  max-width: 980px;
+  margin: auto;
+  padding: 32px 24px 64px;
+  overflow-wrap: anywhere;
+}
+.customer h1 {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  margin: 24px 0;
+}
+.header,
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+.actions {
+  justify-content: flex-start;
+  margin: 20px 0;
+}
+.notice {
+  padding: 16px 20px;
+  border-left: 4px solid var(--color-primary);
+  background: var(--color-sand);
+  white-space: pre-wrap;
+}
+.prose {
+  white-space: pre-wrap;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 20px;
+}
+.grid > * {
+  min-width: 0;
+}
+.line {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.line h3 {
+  font-size: 1.4rem;
+  margin-top: 0;
+}
+.totals {
+  margin-left: auto;
+  max-width: 480px;
+}
+.totals > div,
+.details > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.totals dd,
+.details dd {
+  margin: 0;
+}
+.grand {
+  font-weight: 700;
+  border-top: 1px solid var(--color-primary);
+  font-size: 1.2rem;
+}
+.form {
+  display: grid;
+  gap: 20px;
+}
+.form label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid #89969f;
+  border-radius: 6px;
+  background: white;
+  color: var(--color-text);
+}
+.form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: var(--color-primary);
+  background: var(--color-sand);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .customer {
+    padding: 24px 16px 48px;
+  }
+  .panel {
+    padding: 20px;
+  }
+}

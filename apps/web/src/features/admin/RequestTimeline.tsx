@@ -1,3 +1,4 @@
+import { usePaymentCopy } from '../payments/copy';
 import { useDateFormat } from './useDateFormat';
 import { useCallback, useState } from 'react';
 import { quotationEventLabel, useQuotationCopy } from '../quotations/copy';
@@ -16,6 +17,7 @@ export function RequestTimeline({
   kind: 'notes' | 'activity';
 }) {
   const t = useAdminCopy();
+  const payments = usePaymentCopy();
   const quotations = useQuotationCopy();
   const statusLabel = (value: string | null) =>
     value && Object.hasOwn(t.statuses, value)
@@ -71,7 +73,11 @@ export function RequestTimeline({
                         : item.type === 'StatusChanged'
                           ? `${t.statusChanged}: ${item.previousValue ? statusLabel(item.previousValue) : ''} → ${item.newValue ? statusLabel(item.newValue) : ''}`
                           : item.type
-                            ? quotationEventLabel(item.type, quotations)
+                            ? Object.hasOwn(payments.events, item.type)
+                              ? payments.events[
+                                  item.type as keyof typeof payments.events
+                                ]
+                              : quotationEventLabel(item.type, quotations)
                             : null}
                   </p>
                   {item.content ? (
@@ -79,7 +85,13 @@ export function RequestTimeline({
                   ) : null}
                   <small>
                     {item.author ??
-                      (item.type === 'QuotationExpired'
+                      (item.type === 'QuotationExpired' ||
+                      [
+                        'InvoiceOverdue',
+                        'ServiceFeeVerified',
+                        'PaymentFailed',
+                        'PaymentCancelled',
+                      ].includes(item.type)
                         ? quotations.system
                         : t.customer)}{' '}
                     ·{' '}
