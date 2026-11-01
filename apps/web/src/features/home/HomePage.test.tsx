@@ -62,9 +62,7 @@ it('opens the travel wizard from the primary CTA without claiming submission', a
     'Berätta om din nästa resa',
   );
   expect(screen.getAllByRole('radio')).toHaveLength(4);
-  expect(
-    screen.getByText(/Webbplatsen kan ännu inte ta emot/),
-  ).toBeInTheDocument();
+  expect(screen.getByText(/Din förfrågan är kostnadsfri/)).toBeInTheDocument();
   expect(
     screen.queryByRole('button', { name: /Skicka förfrågan/ }),
   ).not.toBeInTheDocument();

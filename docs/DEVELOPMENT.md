@@ -2,7 +2,7 @@
 
 ## Phase branch workflow
 
-Never implement changes directly on `main`. Before each phase, inspect Git status and preserve any existing work. When the previous phase is merged and the working tree is clean, switch to `main`, pull with `git pull --ff-only origin main`, then create the assigned phase branch before editing files. Phase 3 uses `codex/phase-3-travel-request-wizard`.
+Never implement changes directly on `main`. Before each phase, inspect Git status and preserve any existing work. When the previous phase is merged and the working tree is clean, switch to `main`, pull with `git pull --ff-only origin main`, then create the assigned phase branch before editing files. Phase 4 uses `phase-4-request-persistence-notifications`.
 
 Do not discard changes, force-push, delete unmerged branches, or merge a phase automatically. Staging and committing require explicit user authorization. Keep each phase reviewable so it can be tested independently or rolled back through Git history.
 
@@ -31,9 +31,9 @@ The setup script preserves existing `.env` files. On first use it copies the exa
 | `POSTGRES_PORT` | Compose | Loopback host port (default 5432) |
 | `ConnectionStrings__TravelAgency` | API and EF | Npgsql connection string; required, no credential fallback |
 | `ASPNETCORE_ENVIRONMENT` | API | `Development` locally; `Production` on deployed infrastructure |
-| `ASPNETCORE_URLS` | API | Local listener, `http://localhost:5000` |
+| `ASPNETCORE_URLS` | API | Local listener, `http://localhost:5080` |
 | `Cors__AllowedOrigins__0` | API | Explicit development browser origin, `http://localhost:5173` |
-| `VITE_API_BASE_URL` | Vite | Public API URL, `http://localhost:5000` locally |
+| `VITE_API_BASE_URL` | Vite | Public API URL, `http://localhost:5080` locally |
 | `VITE_CONTACT_EMAIL` | Vite | Optional approved public mailbox; blank or invalid disables the contact form |
 | `VITE_SITE_URL` | Vite | Optional public HTTPS origin for canonical links; never a secret |
 | `TEST_DATABASE_CONNECTION` | xUnit | Optional dedicated database connection; database name must end in `_tests` |
@@ -54,9 +54,9 @@ Only examples belong in Git. Production must use managed environment/secret conf
 npm --prefix apps/web run dev
 ```
 
-Open <http://localhost:5173>. The API listens on <http://localhost:5000>. Vite refuses a busy port instead of silently switching to an origin that CORS does not allow. Use `npm --prefix apps/web run preview` after a frontend build for a local build preview; configure its origin explicitly if testing API calls on another port.
+Open <http://localhost:5173>. The API listens on <http://localhost:5080>. Vite refuses a busy port instead of silently switching to an origin that CORS does not allow. Use `npm --prefix apps/web run preview` after a frontend build for a local build preview; configure its origin explicitly if testing API calls on another port.
 
-The public homepage makes no health requests. Use `/_dev/health` on the development server for API diagnostics; that route is absent from the production build. Public pages are `/services`, `/pricing`, `/about`, `/contact` and `/faq`, in addition to `/`. `/about-preview` redirects to `/about`. `/plan-your-trip` opens the travel wizard; submission is disabled. Existing homepage anchors (including `/#sa-fungerar-det`) are preserved.
+The public homepage makes no health requests. Use `/_dev/health` on the development server for API diagnostics; that route is absent from the production build. Public pages are `/services`, `/pricing`, `/about`, `/contact` and `/faq`, in addition to `/`. `/about-preview` redirects to `/about`. `/plan-your-trip` opens the travel wizard; explicit submission is available when the API and database are running. Existing homepage anchors (including `/#sa-fungerar-det`) are preserved.
 
 ### Language and contact verification
 
@@ -67,27 +67,27 @@ Leave `VITE_CONTACT_EMAIL` blank until a real mailbox is approved. To verify the
 `VITE_SITE_URL` is optional until the public domain is approved. Use an HTTPS origin to emit path-specific canonical links. Localized client metadata is implemented, but noindex/robots restrictions remain deliberate. Launch requires reviewing indexing, legal content, multilingual URL strategy and static-host SPA fallback routing (all public paths must serve index.html). No SSR, sitemap or hreflang claim is made in Phase 2.
 
 ```bash
-curl -i http://localhost:5000/api/health
-curl -i http://localhost:5000/api/health/ready
+curl -i http://localhost:5080/api/health
+curl -i http://localhost:5080/api/health/ready
 docker compose ps
 docker compose logs --tail=50 postgres
 ```
 
 ## Travel wizard development and verification
 
-Use the repository root for `npm --prefix apps/web ...` commands, or change into `apps/web` and run `npm ...` directly. The wizard requires no new environment variables, credentials, backend process or database.
+Use the repository root for `npm --prefix apps/web ...` commands, or change into `apps/web` and run `npm ...` directly. Editing remains local; submitting requires the API, migrated PostgreSQL database and the Phase 4 configuration below.
 
 Open `/plan-your-trip` for generic service selection, or use `?service=flights`, `accommodation`, `flight-accommodation` or `complete` to preselect a service. Unknown values are ignored. Homepage and Services-page cards use the shared mapping in `features/travel-request/config.ts`. The flow is configured by service, not by translated labels or hardcoded numeric step indexes.
 
-For a manual journey, select a service; enter a departure location when flights apply; enter a destination or opt into suggestions; set fixed/flexible dates; enter travellers/child ages and rooms when applicable; set a positive budget; choose relevant preferences; add optional requests; enter contact details; and review. Try blank/invalid fields to confirm progression is blocked. Use Back to retain answers, or an Edit button in review and Back to review to validate all answers again. Changing service resets service-specific choices. Switch languages mid-step and confirm values and translated errors are preserved. The final send control must remain disabled, with no request traffic, success confirmation or reference number.
+For a manual journey, select a service; enter a departure location when flights apply; enter a destination or opt into suggestions; set fixed/flexible dates; enter travellers/child ages and rooms when applicable; set a positive budget; choose relevant preferences; add optional requests; enter contact details; and review. Try blank/invalid fields to confirm progression is blocked. Use Back to retain answers, or an Edit button in review and Back to review to validate all answers again. Changing service resets service-specific choices. Switch languages mid-step and confirm values and translated errors are preserved. Use Send only with synthetic data during verification. Confirm that HTTP 201 precedes the receipt screen; a pending or failed request must retain answers and permitted drafts.
 
 Draft saving is optional. Tick the save checkbox and inspect `travel-agency.request-draft.v1` in browser storage: it must contain only service, dates, traveller counts/ages, budget, structured preferences and an activity-help boolean. It must not contain contact, destination/origin/stops or special-request text. Reload to restore permitted answers, then re-enter omitted details. A stored draft restores at service selection rather than jumping over validation. Invalid/expired drafts are discarded on mount. Confirm that Start over clears this key and unchecks saving without changing the separate language preference. Blocked storage must produce feedback and still allow the journey in memory.
 
-`model.ts` holds input and payload types; `reducer.ts` handles answer updates and service/child-count transitions; `validation.ts` is shared by step gating and payload construction; `payload.ts` is the Phase 4 integration boundary. UI components never post the payload or persist it as a draft. Extend the existing unit/interaction tests whenever a conditional rule changes. Future server validation must repeat all applicable rules independently.
+`model.ts` holds input and payload types; `reducer.ts` handles answer updates and service/child-count transitions; `validation.ts` is shared by step gating and payload construction; `payload.ts` is the Phase 4 integration boundary. The dedicated submission service posts the payload only after explicit Send; browser drafts never contain it. Extend client and independent server validation tests together when conditional rules change.
 
 ## Migrations
 
-The initial `Baseline` migration intentionally contains no business schema. EF creates only its own history table. Run migrations explicitly; API startup does not mutate the database.
+The initial `Baseline` remains empty. The additive `TravelRequestSubmission` migration creates enquiry, idempotency and outbox tables plus the reference sequence. Run migrations explicitly; API startup does not mutate the database.
 
 ```bash
 ./scripts/with-env.sh dotnet ef migrations list --project services/api/TravelAgency.Infrastructure
@@ -118,7 +118,7 @@ dotnet test --solution TravelAgency.sln --configuration Release --no-build --no-
 
 Use `npm --prefix apps/web run test:watch` for frontend watch mode. Fix formatting with `npm --prefix apps/web run format` and `dotnet format TravelAgency.sln --no-restore`.
 
-Backend tests use in-process test hosting; no running API is required. They simulate readiness success/failure and also exercise an unreachable real PostgreSQL connection. Without `TEST_DATABASE_CONNECTION`, the database migration integration test is explicitly skipped.
+Backend tests use in-process test hosting; no running API is required. They simulate readiness success/failure and also exercise an unreachable real PostgreSQL connection. Without `TEST_DATABASE_CONNECTION`, the PostgreSQL integration tests are explicitly skipped.
 
 `global.json` selects Microsoft Testing Platform, as required by the current xUnit package on .NET 10. Use `dotnet test --solution TravelAgency.sln` rather than the legacy positional solution argument. No VSTest compatibility packages are needed for this SDK baseline.
 
@@ -134,7 +134,7 @@ Then run:
 ./scripts/with-env.sh bash -c 'export TEST_DATABASE_CONNECTION="Host=127.0.0.1;Port=$POSTGRES_PORT;Database=travel_agency_tests;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD;Timeout=3;Command Timeout=5"; dotnet test --solution TravelAgency.sln'
 ```
 
-This test applies migrations twice to that isolated database; it does not drop a database or touch the application database. A database name without the `_tests` suffix fails before accessing it. The local example uses the development cluster; CI uses its own ephemeral container.
+These tests apply migrations and exercise real transactions/concurrency against that isolated database; it does not drop a database or touch the application database. A database name without the `_tests` suffix fails before accessing it. The local example uses the development cluster; CI uses its own ephemeral container.
 
 Dependency checks:
 
@@ -195,3 +195,42 @@ Recreate `travel_agency_tests` afterward if needed. Never use these reset comman
 - **EF package conflict:** keep EF runtime, design package, and dotnet-ef on matching 10.0 patch versions. Npgsql's lower minimum dependency is not a reason to downgrade the explicitly pinned runtime.
 - **Integration test skipped:** create the isolated test database and set `TEST_DATABASE_CONNECTION` as shown above.
 - **No GitHub CI run:** configure a remote, push the review branch, and open a PR. This phase does not create a remote, stage files, commit, push, or merge automatically.
+
+## Phase 4 configuration and operation
+
+API examples now use port **5080**; macOS can reserve port 5000 for Control Center. Keep root `ASPNETCORE_URLS` and `apps/web/.env` `VITE_API_BASE_URL` aligned. Do not terminate unrelated processes to obtain a port. Existing environment files are preserved by setup, so copy new safe settings from `.env.example` manually when upgrading.
+
+| Configuration | Default / behavior |
+| --- | --- |
+| `Requests__ReferencePrefix` | `TRV`; uppercase 2–8 characters |
+| `Requests__IdempotencyRetentionDays` | 30; minimum 7 |
+| `Requests__RequestRetentionDays` | 365; explicit production value required |
+| `Requests__PurgeExpiredRequests` | false; approve retention before enabling deletion |
+| `Requests__PermitLimit`, `Requests__WindowSeconds` | 10 requests per IP / 60 seconds per instance |
+| `Email__Provider` | `Capture` in development; `Resend` for external transport |
+| `Email__BusinessName` | Provisional `Your Travel Planner` |
+| `Email__FromAddress`, `Email__AgentRecipient` | Local `.invalid` fixtures; approved real mailboxes required for Resend |
+| `Email__ApiKey` | Server secret required for Resend; never a Vite variable |
+| `Email__CaptureDirectory` | `.local-mail`, relative to API content root |
+| `Email__MaxAttempts`, `Email__PollSeconds` | 8 attempts, 5-second polling |
+| `Email__WorkerEnabled` | true; false also disables periodic retention maintenance |
+
+Capture performs no network delivery. The default files are in `services/api/TravelAgency.Api/.local-mail`, excluded from Git and owner-readable on Unix. Inspect only your synthetic fixtures; the files contain personal data. Successful jobs have `SentAt`, which means captured/accepted by transport. Customer and agent jobs are distinct. To verify capture: submit a synthetic enquiry, confirm its server receipt, then check two matching outbox rows and their GUID-named JSON files. Verify reference, recipient, Swedish/English customer text, HTML escaping and plain-text alternatives. Do not report capture as inbox delivery.
+
+For external delivery, obtain an owner-approved Resend account, verified sender/domain, agent mailbox and secret API key. Set `Email__Provider=Resend`, the approved addresses and `Email__ApiKey` in server secret configuration. Restart the API. Test with an approved recipient and inspect provider status and the actual inbox. This has not been performed locally; no external credentials were supplied. Production rejects Capture and placeholder mailboxes. Do not log provider response bodies or secrets.
+
+Request persistence commits before email processing. Temporary failures retry with bounded backoff; permanent failures and exhausted jobs have `DeadLetterAt`. There is no administrator UI yet. An authorized operator can inspect job IDs/kinds/attempts/timestamps and correct transport configuration; any manual requeue must target reviewed job IDs and consider duplicate delivery. Do not delete/recreate the enquiry to resend mail. Provider deduplication lasts 24 hours; outbox retries do not promise exactly-once delivery.
+
+Hourly maintenance removes expired idempotency records. Optional request purging deletes old enquiries and cascades their keys/jobs; it is disabled by default. Approve privacy notices, legal basis and retention before launch, including separate capture-file, backup and provider deletion policies. Configure a private database, TLS, approved hosts/origins and trusted proxy handling before deployment. The per-process limiter requires infrastructure-level coordination for multiple API instances.
+
+Submission recovery uses the same UUID after a lost response; the server returns the original receipt. A changed payload with that key returns 409. Restore the original answers or explicitly Start over after considering whether the first enquiry already exists. The browser permits attempts for seven days; server keys last 30 days by default. Clearing site data, resetting an attempt, or retrying after server expiry can create another enquiry. Blocked attempt storage prevents sending safely; opt-in draft storage alone is not required. The success page confirms persistence only and holds a receipt without contact information in tab-scoped storage for up to 24 hours.
+
+### Phase 4 verification — 2026-11-01
+
+- Frontend: 93 tests across 12 files; backend: 26 tests with real isolated PostgreSQL, none skipped. Tests cover existing routes and wizard behavior plus validation, concurrency, replay conflicts, transaction rollback, retry/dead letters, rate limiting, uncertain responses, receipt guards, storage failures and translation states.
+- Playwright Chromium exercised all four services in Swedish and English against the real API on 5080 and the development database: eight unique saved enquiries. One deliberately lost response retried with the same key and returned the identical original receipt. No unexpected page/console errors occurred.
+- Four axe scans (review mobile, uncertain-response error, Swedish mobile confirmation and English desktop confirmation) found zero violations or incomplete checks. Confirmation layouts were checked at 320, 375, 768, 1024 and 1440px; direct confirmation access without receipt and reload restoration were verified. Desktop/mobile screenshots were inspected. This does not establish screen-reader or cross-browser certification.
+- Both migrations were applied to the existing development database without resets and to the isolated `travel_agency_phase4_tests` database. Temporary evidence is under `/private/tmp/travel-phase4-*`. Local capture is the email verification boundary; real external delivery remains unverified.
+
+- Final quality checks passed: frontend Prettier, ESLint, TypeScript, 93 tests and production build; backend formatting, Release build with zero warnings/errors and 26 tests with none skipped. npm audit reported zero vulnerabilities; NuGet reported no vulnerable direct/transitive packages. Both default and Release EF model-drift checks passed. An initial default EF check stopped with a build failure; its isolated rerun passed without source changes.
+- Additional rendered regression checks passed for eight public/wizard/not-found paths × two languages × two widths (32 combinations), including language persistence, FAQ disclosure, main headings, image loading and overflow. No unexpected console/page errors occurred. PostgreSQL confirmed two processed jobs per browser enquiry; all sixteen capture files had matching references, HTML/plain text, localized customer subjects and owner-only Unix permissions. No external email was sent.

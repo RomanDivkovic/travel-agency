@@ -5,9 +5,9 @@ import { useLanguage } from '../../localization/useLanguage';
 const sv = {
   title: 'Berätta om din nästa resa',
   description:
-    'Steg för steg samlar vi dina önskemål till ett reseunderlag. Du kan granska och ändra allt innan förfrågningar öppnar.',
+    'Steg för steg samlar vi dina önskemål till ett reseunderlag. Granska dina svar och skicka sedan din kostnadsfria förfrågan.',
   unavailable:
-    'Inget skickas i den här versionen. Webbplatsen kan ännu inte ta emot reseförfrågningar eller bokningar.',
+    'Din förfrågan är kostnadsfri och innebär ingen bokning. Du godkänner ett separat erbjudande innan betalt researbete börjar.',
   next: 'Fortsätt',
   back: 'Tillbaka',
   edit: 'Ändra',
@@ -34,10 +34,10 @@ const sv = {
   noAnswer: 'Inte angivet',
   yes: 'Ja',
   no: 'Nej',
-  checked: 'Underlaget är kontrollerat. Inget har skickats.',
+  checked: 'Underlaget är kontrollerat. Granska svaren innan du skickar.',
   submitLater: 'Skicka förfrågan – öppnar senare',
   reviewNote:
-    'Detta är en granskning, inte en inskickad förfrågan. Inget referensnummer skapas och ingen kontakt tas. Dina kontaktuppgifter finns bara i den öppna sidan.',
+    'Granska alla uppgifter nedan. Ingenting skickas förrän du väljer att skicka din förfrågan.',
   steps: {
     service: 'Välj tjänst',
     destination: 'Resmål',
@@ -138,7 +138,7 @@ const sv = {
     additional:
       'Skriv inte passnummer, betaluppgifter, hälsouppgifter eller andra känsliga uppgifter. Högst 2 000 tecken.',
     contact:
-      'Kontaktuppgifter behövs för ett komplett underlag, men sparas inte i lokala utkast. Ingen kontakt tas i den här versionen.',
+      'Kontaktuppgifter behövs för ett komplett underlag, men sparas inte i lokala utkast. Uppgifterna skickas bara när du väljer att skicka förfrågan.',
   },
   errors: {
     required: 'Fyll i detta fält.',
@@ -162,9 +162,9 @@ const sv = {
 const en = {
   title: 'Tell us about your next journey',
   description:
-    'Build your travel brief one step at a time. Review and change every answer before enquiries open.',
+    'Build your travel brief one step at a time. Review every answer before sending your free enquiry.',
   unavailable:
-    'Nothing is sent in this version. The website cannot receive travel enquiries or bookings yet.',
+    'Your enquiry is free and does not make a booking. You approve a separate quotation before paid travel research begins.',
   next: 'Continue',
   back: 'Back',
   edit: 'Edit',
@@ -191,10 +191,10 @@ const en = {
   noAnswer: 'Not provided',
   yes: 'Yes',
   no: 'No',
-  checked: 'Your brief has been checked. Nothing has been sent.',
+  checked: 'Your brief has been checked. Review your answers before sending.',
   submitLater: 'Send enquiry – available later',
   reviewNote:
-    'This is a review, not a submitted enquiry. No reference number is created and no contact is made. Your contact details exist only in this open page.',
+    'Review every answer below. Nothing is sent until you choose to send your enquiry.',
   steps: {
     service: 'Choose a service',
     destination: 'Destination',
@@ -295,7 +295,7 @@ const en = {
     additional:
       'Do not enter passport numbers, payment details, health information or other sensitive data. Maximum 2,000 characters.',
     contact:
-      'Contact details are required for a complete brief but are not saved in local drafts. No contact is made in this version.',
+      'Contact details are required for a complete brief but are not saved in local drafts. Details are sent only when you choose to send the enquiry.',
   },
   errors: {
     required: 'Complete this field.',

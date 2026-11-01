@@ -19,6 +19,15 @@ internal sealed class ApiFactory(
             ?? "Host=127.0.0.1;Port=1;Database=unavailable_tests;Username=unused;Timeout=1;Command Timeout=1");
         builder.UseSetting("Cors:AllowedOrigins:0", "http://localhost:5173");
 
+        builder.UseSetting("Email:WorkerEnabled", "false");
+        if (environment == "Production")
+        {
+            builder.UseSetting("Email:Provider", "Resend");
+            builder.UseSetting("Email:ApiKey", "test-only-no-delivery");
+            builder.UseSetting("Email:FromAddress", "sender@example.test");
+            builder.UseSetting("Email:AgentRecipient", "agent@example.test");
+            builder.UseSetting("Requests:RequestRetentionDays", "365");
+        }
         if (databaseAvailable.HasValue)
         {
             builder.ConfigureTestServices(services =>

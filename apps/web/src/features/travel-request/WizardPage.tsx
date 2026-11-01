@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router';
 import { Section } from '../../components/ui/Section';
 import { Button } from '../../components/ui/Button';
 import { usePageMetadata } from '../../hooks/usePageMetadata';
-import { isService, wizardSteps } from './config';
+import { isService, wizardSteps, stepForField } from './config';
 import { useWizardCopy } from './copy';
 import { emptyWizard, type Service, type StepId } from './model';
 import { wizardReducer } from './reducer';
@@ -29,6 +29,11 @@ import { PreferencesStep } from './steps/PreferencesStep';
 import { PersonalDetails } from './steps/PersonalDetails';
 import { Review } from './components/Review';
 import styles from './Wizard.module.scss';
+import {
+  hasSubmissionAttempt,
+  resetSubmissionAttempt,
+} from './submissionStorage';
+import { useSubmissionCopy } from './submissionCopy';
 export function WizardPage() {
   const [params, setParams] = useSearchParams();
   // Entry links seed a new mount; local service changes must not remount and lose answers.
@@ -55,6 +60,8 @@ function TravelWizard({
   onServiceChange: (service: Service | '') => void;
 }) {
   const t = useWizardCopy();
+  const submitCopy = useSubmissionCopy();
+  const [busy, setBusy] = useState(false);
   const [initial] = useState(() => {
     const draft = loadDraft();
     let data = draft.data ?? emptyWizard();
@@ -133,6 +140,7 @@ function TravelWizard({
     if (next) go(next);
   }
   function reset() {
+    resetSubmissionAttempt();
     dispatch({ type: 'reset' });
     onServiceChange('');
     setSaving(false);
@@ -171,6 +179,7 @@ function TravelWizard({
                   {i < index ? (
                     <button
                       type="button"
+                      disabled={busy}
                       onClick={() => {
                         setEditing(false);
                         go(id);
@@ -197,6 +206,7 @@ function TravelWizard({
               {t.steps[step]}
             </h2>
             <Button
+              disabled={busy}
               ref={resetButton}
               variant="text"
               onClick={() => setResetPrompt(true)}
@@ -210,7 +220,11 @@ function TravelWizard({
               aria-label={t.startOver}
               className={styles.notice}
             >
-              <p>{t.resetQuestion}</p>
+              <p>
+                {hasSubmissionAttempt()
+                  ? submitCopy.pendingReset
+                  : t.resetQuestion}
+              </p>
               <div className={styles.actions}>
                 <Button onClick={reset}>{t.resetConfirm}</Button>
                 <Button
@@ -262,6 +276,25 @@ function TravelWizard({
           {step === 'review' ? (
             <Review
               data={data}
+              busy={busy}
+              onBusy={setBusy}
+              onValidation={(serverErrors) => {
+                const field = Object.keys(serverErrors).find((key) =>
+                  stepForField(key),
+                );
+                const target = field ? stepForField(field) : undefined;
+                if (target) {
+                  setEditing(true);
+                  setStep(target);
+                  showErrors(
+                    Object.fromEntries(
+                      Object.entries(serverErrors).filter(
+                        ([key]) => stepForField(key) === target,
+                      ),
+                    ),
+                  );
+                }
+              }}
               onEdit={(id) => {
                 setEditing(true);
                 go(id);
@@ -319,7 +352,11 @@ function TravelWizard({
           )}
           {step === 'review' ? (
             <div className={styles.actions}>
-              <Button variant="outline" onClick={() => go('contact')}>
+              <Button
+                disabled={busy}
+                variant="outline"
+                onClick={() => go('contact')}
+              >
                 {t.back}
               </Button>
             </div>

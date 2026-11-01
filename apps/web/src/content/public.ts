@@ -126,7 +126,7 @@ const svPublic = {
     availability:
       'Svarstider och öppettider publiceras inför lansering. Inga akuta reseärenden hanteras här.',
     wizard:
-      'I reseplaneraren kan du förbereda och granska ett underlag. Det går ännu inte att skicka in det.',
+      'I reseplaneraren kan du förbereda, granska och skicka en kostnadsfri reseförfrågan.',
   },
   faq: {
     title: 'Bra att veta innan du reser.',
@@ -141,7 +141,7 @@ const svPublic = {
       {
         question: 'Kostar den första förfrågan något?',
         answer:
-          'Den första förfrågan blir kostnadsfri. Du får en personlig offert och bestämmer om du vill gå vidare. Du kan förbereda ett underlag i reseplaneraren, men det går ännu inte att skicka in det.',
+          'Den första förfrågan blir kostnadsfri. Du får en personlig offert och bestämmer om du vill gå vidare. Du kan skicka en kostnadsfri förfrågan i reseplaneraren.',
       },
       {
         question: 'Vad är skillnaden mellan serviceavgift och resekostnad?',
@@ -171,7 +171,7 @@ const svPublic = {
       {
         question: 'Kan jag boka eller betala på webbplatsen nu?',
         answer:
-          'Nej. Webbplatsen är under uppbyggnad. Förfrågningar, betalningar, kundkonton och bokningar är inte aktiverade. Kontaktformuläret skickar inte meddelanden automatiskt.',
+          'Du kan skicka en reseförfrågan, men du kan inte boka eller betala här. En förfrågan innebär ingen bokning. Betalningar och kundkonton är inte aktiverade. Det allmänna kontaktformuläret förbereder bara ett e-postutkast.',
       },
       {
         question: 'Kan jag få hjälp på engelska?',
@@ -309,7 +309,7 @@ const enPublic = {
     availability:
       'Response times and opening hours will be published before launch. Urgent travel issues are not handled here.',
     wizard:
-      'The travel wizard lets you prepare and review a brief. You cannot submit it yet.',
+      'The travel wizard lets you prepare, review and send a free travel enquiry.',
   },
   faq: {
     title: 'Good to know before you go.',
@@ -324,7 +324,7 @@ const enPublic = {
       {
         question: 'Does the initial enquiry cost anything?',
         answer:
-          'The initial enquiry will be free. You receive a personal quote and decide whether to proceed. You can prepare a brief in the travel wizard, but cannot submit it yet.',
+          'The initial enquiry will be free. You receive a personal quote and decide whether to proceed. You can send a free enquiry in the travel wizard.',
       },
       {
         question: 'How is the service fee different from travel costs?',
@@ -354,7 +354,7 @@ const enPublic = {
       {
         question: 'Can I book or pay on the website now?',
         answer:
-          'No. The website is under development. Enquiries, payments, customer accounts and bookings are not activated. The contact form does not send messages automatically.',
+          'You can send a travel enquiry, but cannot book or pay here. An enquiry does not make a booking. Payments and customer accounts are not activated. The general contact form only prepares an email draft.',
       },
       {
         question: 'Can I use the website in English?',

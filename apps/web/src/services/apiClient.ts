@@ -4,6 +4,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly status?: number,
+    public readonly details?: unknown,
+    public readonly retryAfter?: string,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -24,7 +26,14 @@ apiClient.interceptors.response.use(
       ? error.response?.status
       : undefined;
     return Promise.reject(
-      new ApiError('API-anropet misslyckades. Försök igen senare.', status),
+      new ApiError(
+        'API-anropet misslyckades. Försök igen senare.',
+        status,
+        axios.isAxiosError(error) ? error.response?.data : undefined,
+        axios.isAxiosError(error)
+          ? error.response?.headers['retry-after']
+          : undefined,
+      ),
     );
   },
 );

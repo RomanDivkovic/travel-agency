@@ -57,7 +57,7 @@ public sealed class HealthEndpointTests
         Assert.IsType<DatabaseReadiness>(scope.ServiceProvider.GetRequiredService<IDatabaseReadiness>());
         var database = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>();
         Assert.Equal("Npgsql.EntityFrameworkCore.PostgreSQL", database.Database.ProviderName);
-        Assert.Empty(database.Model.GetEntityTypes());
+        Assert.NotNull(database.Model.FindEntityType(typeof(TravelAgency.Domain.Requests.TravelInquiry)));
     }
 
     [Theory]

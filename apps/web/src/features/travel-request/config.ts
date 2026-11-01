@@ -36,3 +36,29 @@ export function serviceWizardLink(cardId: string) {
   const service = cardServices[cardId];
   return service ? `${routes.planTrip}?service=${service}` : routes.planTrip;
 }
+
+export function stepForField(field: string): StepId | undefined {
+  if (field.startsWith('age-')) return 'travelers';
+  const groups: Partial<Record<StepId, string[]>> = {
+    service: ['service'],
+    destination: ['origin', 'place', 'stops'],
+    dates: [
+      'departure',
+      'return',
+      'earliest',
+      'latest',
+      'duration',
+      'dateMode',
+    ],
+    travelers: ['adults', 'children', 'rooms'],
+    budget: ['amount', 'currency', 'scope'],
+    flightPreferences: ['priority', 'baggage'],
+    accommodationPreferences: ['accommodationType'],
+    tripPreferences: ['pace'],
+    additional: ['activities', 'special'],
+    contact: ['name', 'email', 'phone', 'contactMethod'],
+  };
+  return (Object.entries(groups) as [StepId, string[]][]).find(([, fields]) =>
+    fields.includes(field),
+  )?.[0];
+}

@@ -171,3 +171,29 @@ Official references consulted during implementation:
 Phase 2 references: [React context](https://react.dev/reference/react/createContext), [React Router navigation](https://reactrouter.com/start/declarative/navigating), [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [native disclosures](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details), and [Vite public environment configuration](https://vite.dev/guide/env-and-mode).
 
 Phase 3 references: [React reducer](https://react.dev/reference/react/useReducer), [external store subscriptions](https://react.dev/reference/react/useSyncExternalStore), [WAI multi-page forms](https://www.w3.org/WAI/tutorials/forms/multi-page/), [WAI input validation](https://www.w3.org/WAI/tutorials/forms/validation/), and [Web Storage handling](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API).
+
+## 017 — Atomic enquiry submission and durable replay detection
+
+**Decision:** Adapt the existing typed payload to independently validated Application DTOs. Persist the Submitted enquiry, hashed idempotency identity and two notification jobs in one PostgreSQL transaction. Serialize identical keys with a transaction advisory lock and use a unique global sequence-backed reference. Keep the baseline; add a migration.
+
+**Reason:** Network uncertainty and concurrent clicks must not create multiple enquiries or lose notification intent. A client validation result is not a server trust boundary.
+
+**Consequences:** Same-key/same-normalized-payload replays return the original receipt; changed content conflicts. Sequence gaps are valid. Idempotency is retained 30 days by default; a later expired identity can create another enquiry. Public references provide no lookup authorization. This supersedes decision 016's Phase 3 disabled-submission boundary without adding customer accounts.
+
+## 018 — Durable outbox with safe local capture and explicit external transport
+
+**Decision:** Use PostgreSQL `FOR UPDATE SKIP LOCKED`, bounded retries/dead letters and a transport abstraction. Development captures owner-readable files; production requires a configured Resend sender/key. Templates provide encoded HTML and plain text, localized customer acknowledgement and an agent summary.
+
+**Reason:** Email outages must not undo saved enquiries, and development must not accidentally contact customers. An accepted email is not proof of inbox delivery.
+
+**Consequences:** At-least-once delivery can duplicate after a crash outside the provider's 24-hour deduplication window. Capture and mock HTTP tests do not establish external delivery. No email-provider SDK/package or separate queue service is needed. Retention defaults are explicit, and request purging stays off pending owner approval; capture files and backups require separate policies.
+
+## 019 — Confirmed receipts and privacy-preserving browser retry state
+
+**Decision:** Show success only after a validated 201 receipt. Keep a UUID/timestamp attempt across uncertain retries, seven-day browser recovery, no payload persistence, and a receipt-only 24-hour session record. Lock pending edits, map server errors to steps, honor Retry-After and require explicit reset for a new attempt.
+
+**Reason:** A timeout can follow a successful database commit. Silent key rotation or simulated success would mislead visitors and duplicate work.
+
+**Consequences:** Blocked attempt storage prevents submission; error feedback explains recovery. Confirmed success clears matching draft/attempt data, with explicit cleanup warnings if removal fails. General contact remains the separate mailto workflow from decision 012. Administration and subsequent business workflows remain deferred.
+
+Phase 4 references: [ASP.NET rate limiting](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-10.0), [PostgreSQL explicit locks](https://www.postgresql.org/docs/18/explicit-locking.html), [Npgsql JSON mapping](https://www.npgsql.org/efcore/mapping/json.html), [Resend send API](https://resend.com/docs/api-reference/emails/send-email), and [Resend idempotency](https://resend.com/docs/dashboard/emails/idempotency-keys).

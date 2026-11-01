@@ -3,6 +3,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { FoundationPage } from '../pages/FoundationPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { HomePage } from '../features/home/HomePage';
+import { SuccessPage } from '../features/travel-request/SuccessPage';
 import { WizardPage } from '../features/travel-request/WizardPage';
 import { routes } from './config/routes';
 import { RouteFocus } from './RouteFocus';
@@ -27,6 +28,7 @@ export function App() {
             <Route path={routes.about} element={<AboutPage />} />
             <Route path={routes.contact} element={<ContactPage />} />
             <Route path={routes.faq} element={<FaqPage />} />
+            <Route path="/plan-your-trip/success" element={<SuccessPage />} />
             <Route path={routes.planTrip} element={<WizardPage />} />
             <Route
               path={routes.aboutPreview}

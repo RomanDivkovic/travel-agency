@@ -1,6 +1,6 @@
 # Personal Travel Agency & Booking Platform
 
-A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 3 adds a bilingual travel request wizard to the informational website.** It prepares and validates a travel brief locally. Actual submission, server persistence, authentication, bookings and payments remain deferred.
+A Swedish-first platform for one independent travel agent. Development follows [the master plan](docs/MASTER_PLAN.md), one phase at a time. **Phase 4 adds real travel enquiry submission, PostgreSQL persistence and durable email notifications.** The bilingual wizard receives a server-generated receipt only after saving. Local development captures emails without external delivery. Authentication, bookings and payments remain deferred.
 
 ## Stack
 
@@ -17,9 +17,9 @@ Exact frontend versions are in `apps/web/package.json` and its lockfile; backend
 apps/web/                         React frontend and tests
 services/api/
   TravelAgency.Api/               HTTP, middleware, composition root
-  TravelAgency.Application/       Application interfaces and future use cases
-  TravelAgency.Domain/            Dependency-free domain project (no entities yet)
-  TravelAgency.Infrastructure/    EF, PostgreSQL, migrations
+  TravelAgency.Application/       Request validation, submission use case, interfaces
+  TravelAgency.Domain/            Dependency-free travel enquiry model
+  TravelAgency.Infrastructure/    EF, PostgreSQL, migrations, outbox and email adapters
   TravelAgency.Tests/             API and database integration tests
 scripts/                         Local environment helpers
 docs/                            Specification, architecture, development, decisions
@@ -61,19 +61,19 @@ The provisional name is configured in `apps/web/src/app/config/branding.ts`. Pub
 
 The header switches the whole public site between Swedish (default) and English without changing the route. Typed homepage resources are in `apps/web/src/content/sv.ts` and `en.ts`; page resources are in `content/public.ts`. The language choice is stored under `travel-agency.language.v1` in localStorage. Blocked storage falls back to in-memory switching.
 
-The contact form is disabled until `VITE_CONTACT_EMAIL` contains an approved public mailbox. When configured, it validates fields and prepares an encoded `mailto:` draft for the visitor to review and send in their email application. **The website does not deliver or store messages**, and opening a draft is never reported as delivery. No API endpoint or email provider is added. Configure only public values in `apps/web/.env`, then restart/rebuild; see the development guide.
+The contact form is disabled until `VITE_CONTACT_EMAIL` contains an approved public mailbox. When configured, it validates fields and prepares an encoded `mailto:` draft for the visitor to review and send in their email application. **This general contact form does not deliver or store messages**, and opening a draft is never reported as delivery. Travel enquiries use the separate Phase 4 API and notification flow below. Configure only public values in `apps/web/.env`, then restart/rebuild; see the development guide.
 
 Each route has localized title, description and social metadata. Prelaunch indexing remains disabled. Optional `VITE_SITE_URL` supplies an approved HTTPS origin for canonical links; there is no invented domain. Locale-specific URLs, hreflang, sitemap publication and prerendering remain launch work. Contact details, legal pages and the agent portrait remain explicit placeholders.
 
-The wizard covers service selection, destination, fixed/flexible dates, travellers, budget, relevant preferences, additional requests, contact details and an editable review. It uses a typed reducer, pure step/whole-request validation and a discriminated TypeScript `TravelRequest` payload in `apps/web/src/features/travel-request`. All four service journeys work in Swedish and English. The final send control remains disabled; no API call, confirmation, email or request reference is generated.
+The wizard covers service selection, destination, fixed/flexible dates, travellers, budget, relevant preferences, additional requests, contact details and an editable review. It uses a typed reducer, pure step/whole-request validation and a discriminated TypeScript `TravelRequest` payload in `apps/web/src/features/travel-request`. All four service journeys work in Swedish and English. Explicit submission calls `POST /api/travel-requests`. Server validation, an atomic database transaction and an idempotency key protect retries. A confirmed HTTP 201 opens `/plan-your-trip/success` with the actual reference; email processing is separate and does not establish a booking.
 
-Local drafts are **opt-in**. Only service, dates, traveller counts/ages, budget, structured preferences and activity-help choice are stored under `travel-agency.request-draft.v1`. Destinations, departure locations, contact details and free text are never persisted. Versioned drafts can be restored for seven days and are validated on read; expired/corrupt drafts are discarded on the next wizard visit. Restored sessions start at service selection and require re-entry of excluded details. Start over clears the draft and disables saving. See the development guide for verification and the architecture guide for the future Phase 4 boundary.
+Local drafts are **opt-in**. Only service, dates, traveller counts/ages, budget, structured preferences and activity-help choice are stored under `travel-agency.request-draft.v1`. Destinations, departure locations, contact details and free text are never persisted. Versioned drafts can be restored for seven days and are validated on read; expired/corrupt drafts are discarded on the next wizard visit. Restored sessions start at service selection and require re-entry of excluded details. Start over clears the draft and disables saving. A separate localStorage record stores only the submission UUID and creation time, never the payload. Retrying an uncertain response keeps that key. Confirmed success clears the draft and attempt; the receipt alone stays in sessionStorage for up to 24 hours. See the architecture and development guides for recovery and retention limits.
 
 API checks:
 
 ```bash
-curl --fail http://localhost:5000/api/health
-curl --fail http://localhost:5000/api/health/ready
+curl --fail http://localhost:5080/api/health
+curl --fail http://localhost:5080/api/health/ready
 ```
 
 Liveness verifies only the API process. Readiness verifies PostgreSQL connectivity. Both return `{"status":"healthy"}` when successful; readiness returns HTTP 503 and `{"status":"unhealthy"}` when the database is unavailable.
@@ -93,7 +93,7 @@ dotnet test --solution TravelAgency.sln --configuration Release --no-build --no-
 dotnet list TravelAgency.sln package --vulnerable --include-transitive
 ```
 
-The database integration test explicitly skips unless `TEST_DATABASE_CONNECTION` points to a dedicated database whose name ends in `_tests`. [Development instructions](docs/DEVELOPMENT.md) explain how to run it; CI enables it against an isolated database.
+The database integration tests explicitly skip unless `TEST_DATABASE_CONNECTION` points to a dedicated database whose name ends in `_tests`. [Development instructions](docs/DEVELOPMENT.md) explain how to run it; CI enables it against an isolated database.
 
 ## Documentation and status
 
