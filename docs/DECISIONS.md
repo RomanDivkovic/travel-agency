@@ -126,6 +126,30 @@ The .NET 10 SDK uses Microsoft Testing Platform through `global.json`, and the x
 
 **Consequences:** This is client-rendered metadata. Search engine rendering, locale-specific URLs, prerendering/SSR, sitemap and approved indexing remain launch decisions. Owner identity, portrait, contact details, fixed fees and legal pages remain explicitly provisional.
 
+## 014 — Reducer-driven dynamic travel wizard
+
+**Decision:** Implement the request-preparation UI at `/plan-your-trip` with typed local reducer state, a service-dependent step list, focused step components and pure shared validation. Reuse the bilingual context and Phase 1 components. Query-based preselection accepts only four known service identifiers. Local selection changes replace the query without remounting the form; search-only updates preserve focus. This prevents an old entry link overriding a changed service on refresh, and start over removes the query.
+
+**Reason:** Conditional steps and review edits need a single consistent answer model, without introducing a form library or future backend dependencies. Input strings preserve intermediate edits; normalized numeric values belong in the final payload.
+
+**Consequences:** Step and whole-request validation must both pass before a complete `TravelRequest` can be produced. Service changes retain shared answers but reset service-specific preferences. Review edits revalidate all applicable steps. Progress/focus/error summaries are derived from the configured flow. No future workflow is implemented.
+
+## 015 — Opt-in drafts with an explicit persistence allowlist
+
+**Decision:** Save a versioned, bounded, seven-day local draft only after opt-in. Store structured travel selections and the activity-help boolean; exclude every destination/origin/stops field, contact detail and free-text request. Restore at service selection, rebuild only known keys and require omitted details again. Start over removes the draft and disables saving.
+
+**Reason:** A full form snapshot would retain unnecessary personal data and free text on shared devices. Local storage is untrusted, unavailable in some environments and not a substitute for Phase 4 persistence.
+
+**Consequences:** Restoration is deliberately partial, not a guarantee of full-session recovery. Expiry is enforced on the next wizard visit, not by background deletion. Storage errors are surfaced and editing continues in memory; denied deletion requires browser site-data cleanup. `useSyncExternalStore` observes write availability without setting UI state directly inside the synchronization effect. Language preference stays separate.
+
+## 016 — Validated local payload without simulated submission
+
+**Decision:** Define a service-discriminated TypeScript `TravelRequest` with normalized dates, travellers, budget, preferences and contact fields. A pure builder returns it only after full validation. Keep the send control disabled and explicitly disclose that nothing is sent.
+
+**Reason:** Phase 3 prepares the information model; Phase 4 owns server contracts, persistence, real acknowledgements and email. A local valid form must not imply agency receipt or a booking.
+
+**Consequences:** No request endpoint/client, database entity, reference number, notification, authentication, quotation or payment is added. The future API integration must independently validate and adapt this payload rather than trusting client validation. Contact details remain only in the open page.
+
 ## Research references
 
 Official references consulted during implementation:
@@ -145,3 +169,5 @@ Official references consulted during implementation:
 - [LCP optimization](https://web.dev/articles/optimize-lcp) and [Lighthouse](https://developer.chrome.com/docs/lighthouse/overview)
 
 Phase 2 references: [React context](https://react.dev/reference/react/createContext), [React Router navigation](https://reactrouter.com/start/declarative/navigating), [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [native disclosures](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details), and [Vite public environment configuration](https://vite.dev/guide/env-and-mode).
+
+Phase 3 references: [React reducer](https://react.dev/reference/react/useReducer), [external store subscriptions](https://react.dev/reference/react/useSyncExternalStore), [WAI multi-page forms](https://www.w3.org/WAI/tutorials/forms/multi-page/), [WAI input validation](https://www.w3.org/WAI/tutorials/forms/validation/), and [Web Storage handling](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API).

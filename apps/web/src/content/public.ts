@@ -126,7 +126,7 @@ const svPublic = {
     availability:
       'Svarstider och öppettider publiceras inför lansering. Inga akuta reseärenden hanteras här.',
     wizard:
-      'Det separata formuläret för reseförfrågningar kommer i nästa fas och är inte öppet ännu.',
+      'I reseplaneraren kan du förbereda och granska ett underlag. Det går ännu inte att skicka in det.',
   },
   faq: {
     title: 'Bra att veta innan du reser.',
@@ -141,7 +141,7 @@ const svPublic = {
       {
         question: 'Kostar den första förfrågan något?',
         answer:
-          'Den första förfrågan blir kostnadsfri. Du får en personlig offert och bestämmer om du vill gå vidare. Förfrågningsformuläret är inte öppet ännu.',
+          'Den första förfrågan blir kostnadsfri. Du får en personlig offert och bestämmer om du vill gå vidare. Du kan förbereda ett underlag i reseplaneraren, men det går ännu inte att skicka in det.',
       },
       {
         question: 'Vad är skillnaden mellan serviceavgift och resekostnad?',
@@ -309,7 +309,7 @@ const enPublic = {
     availability:
       'Response times and opening hours will be published before launch. Urgent travel issues are not handled here.',
     wizard:
-      'The separate travel enquiry form is planned for the next phase and is not open yet.',
+      'The travel wizard lets you prepare and review a brief. You cannot submit it yet.',
   },
   faq: {
     title: 'Good to know before you go.',
@@ -324,7 +324,7 @@ const enPublic = {
       {
         question: 'Does the initial enquiry cost anything?',
         answer:
-          'The initial enquiry will be free. You receive a personal quote and decide whether to proceed. The enquiry form is not open yet.',
+          'The initial enquiry will be free. You receive a personal quote and decide whether to proceed. You can prepare a brief in the travel wizard, but cannot submit it yet.',
       },
       {
         question: 'How is the service fee different from travel costs?',
