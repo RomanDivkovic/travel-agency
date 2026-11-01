@@ -1,5 +1,6 @@
 import { useDateFormat } from './useDateFormat';
 import { useCallback, useState } from 'react';
+import { quotationEventLabel, useQuotationCopy } from '../quotations/copy';
 import { adminApi } from './api';
 import { useAdminResource } from './useAdminResource';
 import { useAdminCopy } from './copy';
@@ -15,6 +16,11 @@ export function RequestTimeline({
   kind: 'notes' | 'activity';
 }) {
   const t = useAdminCopy();
+  const quotations = useQuotationCopy();
+  const statusLabel = (value: string | null) =>
+    value && Object.hasOwn(t.statuses, value)
+      ? t.statuses[value as keyof typeof t.statuses]
+      : value;
   const date = useDateFormat();
   const [page, setPage] = useState(1);
   const [retry, setRetry] = useState(0);
@@ -63,14 +69,20 @@ export function RequestTimeline({
                       : item.type === 'NoteAdded'
                         ? t.noteAdded
                         : item.type === 'StatusChanged'
-                          ? `${t.statusChanged}: ${item.previousValue ? t.statuses[item.previousValue] : ''} → ${item.newValue ? t.statuses[item.newValue] : ''}`
-                          : null}
+                          ? `${t.statusChanged}: ${item.previousValue ? statusLabel(item.previousValue) : ''} → ${item.newValue ? statusLabel(item.newValue) : ''}`
+                          : item.type
+                            ? quotationEventLabel(item.type, quotations)
+                            : null}
                   </p>
                   {item.content ? (
                     <p className={styles.prose}>{item.content}</p>
                   ) : null}
                   <small>
-                    {item.author ?? t.customer} ·{' '}
+                    {item.author ??
+                      (item.type === 'QuotationExpired'
+                        ? quotations.system
+                        : t.customer)}{' '}
+                    ·{' '}
                     <time dateTime={item.createdAt}>
                       {date(item.createdAt)}
                     </time>

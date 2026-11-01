@@ -57,7 +57,7 @@ public sealed class AdminQueries(TravelAgencyDbContext db) : IAdminQueries
     {
         var source = db.RequestActivities.AsNoTracking().Where(a => a.RequestId == id);
         var count = await source.CountAsync(ct);
-        var rows = await (from a in source join u in db.Users on a.ActorId equals u.Id into authors from u in authors.DefaultIfEmpty() orderby a.CreatedAt, a.Id select new ActivityDto(a.Id, a.Type, u == null ? null : u.DisplayName, a.PreviousValue, a.NewValue, a.CreatedAt)).Skip((page - 1) * 50).Take(50).ToArrayAsync(ct);
+        var rows = await (from a in source join u in db.Users on a.ActorId equals u.Id into authors from u in authors.DefaultIfEmpty() orderby a.CreatedAt, a.Id select new ActivityDto(a.Id, a.Type, u == null ? null : u.DisplayName, a.PreviousValue, a.NewValue, a.CreatedAt, db.Quotations.Where(q => q.Id == a.QuotationId).Select(q => (int?)q.Version).FirstOrDefault())).Skip((page - 1) * 50).Take(50).ToArrayAsync(ct);
         return new(rows, page, 50, count, (int)Math.Ceiling(count / 50d));
     }
 }

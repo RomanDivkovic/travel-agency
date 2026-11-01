@@ -49,7 +49,7 @@ public static partial class RequestFeatureSetup
             {
                 var seconds = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retry) ? Math.Ceiling(retry.TotalSeconds) : requests.WindowSeconds;
                 context.HttpContext.Response.Headers.RetryAfter = Math.Max(1, seconds).ToString(System.Globalization.CultureInfo.InvariantCulture);
-                context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("TravelRequests").LogWarning("Travel request rate limit reached. Trace {TraceId}", context.HttpContext.TraceIdentifier);
+                context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("TravelRequests").LogWarning("API rate limit reached. Trace {TraceId}", context.HttpContext.TraceIdentifier);
                 await Results.Problem(statusCode: 429, title: "Please wait before retrying.").ExecuteAsync(context.HttpContext);
             };
         });

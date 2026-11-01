@@ -10,7 +10,7 @@ public sealed record PageResult<T>(T[] Items, int Page, int PageSize, int TotalC
 public sealed record AdminRequestDetail(Guid Id, string ReferenceNumber, string ServiceType, string Status, string Language,
     CustomerContact Contact, TravelPlan Plan, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, Guid Version, string[] AllowedStatuses);
 public sealed record NoteDto(Guid Id, string Author, string Content, DateTimeOffset CreatedAt);
-public sealed record ActivityDto(Guid Id, string Type, string? Author, string? PreviousValue, string? NewValue, DateTimeOffset CreatedAt);
+public sealed record ActivityDto(Guid Id, string Type, string? Author, string? PreviousValue, string? NewValue, DateTimeOffset CreatedAt, int? QuotationVersion = null);
 public sealed record DashboardDto(int Total, int Submitted, int UnderReview, int AwaitingCustomer, int Closed, RequestListItem[] RecentlyUpdated);
 public sealed record RequestQuery(int Page = 1, int PageSize = 20, string? Status = null, string? ServiceType = null,
     string? Search = null, string Sort = "createdAt_desc", DateOnly? From = null, DateOnly? To = null)

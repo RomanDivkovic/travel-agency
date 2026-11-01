@@ -2,10 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TravelAgency.Application.Requests;
 using TravelAgency.Infrastructure.Persistence;
+using TravelAgency.Infrastructure.Quotations;
 
 namespace TravelAgency.Infrastructure.Email;
 
-public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null) : INotificationProcessor
+public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null) : INotificationProcessor
 {
     public static TimeSpan RetryDelay(int attempts) => TimeSpan.FromSeconds(Math.Min(3600, 30 * Math.Pow(2, Math.Clamp(attempts - 1, 0, 20))));
     public async Task<bool> ProcessOneAsync(CancellationToken ct)
@@ -21,8 +22,16 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         var retryable = true;
         try
         {
-            await sender.SendAsync(NotificationTemplates.Create(notification.Id, notification.Kind, request, settings), ct);
-            notification.SentAt = clock.GetUtcNow();
+            EmailMessage? message;
+            if (notification.QuotationId is { } quoteId)
+            {
+                var quote = await db.Quotations.AsNoTracking().Include(q => q.Lines).SingleAsync(q => q.Id == quoteId, ct);
+                var number = await db.QuotationSeries.Where(s => s.Id == quote.SeriesId).Select(s => s.Number).SingleAsync(ct);
+                message = QuotationNotificationTemplates.Create(notification, quote, number, settings, quotationCodec!, clock.GetUtcNow());
+            }
+            else message = NotificationTemplates.Create(notification.Id, notification.Kind, request, settings);
+            if (message is null) { notification.DeadLetterAt = clock.GetUtcNow(); notification.ProtectedLink = null; }
+            else { await sender.SendAsync(message, ct); notification.SentAt = clock.GetUtcNow(); notification.ProtectedLink = null; }
         }
         catch (EmailDeliveryException failure) { retryable = failure.Retryable; }
         catch (IOException) { }

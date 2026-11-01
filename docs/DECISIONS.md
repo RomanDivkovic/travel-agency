@@ -223,3 +223,37 @@ Phase 4 references: [ASP.NET rate limiting](https://learn.microsoft.com/en-us/as
 **Consequences:** Search/filter state resets when the list remounts. Mutations reload affected detail/history; dashboard/list fetch on navigation. The backend remains the authorization boundary. Future scale may justify reviewed indexed substring search or a server-state library, but neither is required for Phase 5.
 
 Phase 5 references: [Identity configuration](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?view=aspnetcore-10.0), [ASP.NET antiforgery](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-10.0), [EF optimistic concurrency](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), and [Identity EF package](https://www.nuget.org/packages/Microsoft.AspNetCore.Identity.EntityFrameworkCore/10.0.14).
+
+## 023 — Immutable quotation versions and serial commercial decisions
+
+**Decision:** One numbered series per non-Closed request, separate version/line records, a database sequence, optimistic version tokens and a shared PostgreSQL row lock for all mutations/decisions. A partial unique index reserves one Draft/Sent/Accepted slot. Revise immediately supersedes/revokes a current Sent offer, preserving its prices/terms. Accepted cannot be revised.
+
+**Reason:** Admin revisions, expiry and customer decisions must not create conflicting contracts or overwrite an issued snapshot. Sequential MAX+1 and browser-only guards are insufficient.
+
+**Consequences:** A new revision is a draft and the previous link stops working immediately. Opposite decisions conflict; same-decision replay is idempotent. Terms/acceptance wording and monetary values stay frozen. Enquiry status and future invoice/payment/booking states remain separate.
+
+## 024 — Exact money with explicit tax and legal approval gates
+
+**Decision:** Integer two-decimal minor units for SEK/EUR/USD, integer quantities and tax basis points, backend decimal calculation and per-line midpoint-away-from-zero rounding. Support explicit exclusive/inclusive/no-tax treatment, with Unconfirmed drafts. Require approved configuration and exact configured legal-text matching before issuing.
+
+**Reason:** No confirmed VAT treatment or reviewed consumer terms were supplied. Financial integrity and truthful offers require server authority and explicit owner/adviser input.
+
+**Consequences:** Drafts work locally while issuance defaults off. No rate, exemption or legal waiver is assumed. A positive issued total is required. Configured terms/version and acknowledgement are frozen per version, and future changes affect only new issuance. Test fixtures are labeled nonlegal and isolated from actual business configuration.
+
+## 025 — Fragment bearer links with hashed lookup and protected delivery envelopes
+
+**Decision:** Generate 256-bit random version-scoped credentials; store hashes with expiry/revocation. Email `/quote#credential` links and send credentials to fixed API routes through a header. Encrypt the pending outbox delivery envelope with an isolated ASP.NET Data Protection purpose; never store a plaintext credential in the database/browser storage or expose it in admin DTOs.
+
+**Reason:** A fragment keeps bearer secrets out of HTTP/proxy URLs while permitting account-free review. Durable delivery needs a recoverable envelope, separate from the hashed authentication lookup.
+
+**Consequences:** Email/browser history still hold the private link and must be treated accordingly. Key persistence/encryption and capture retention are production prerequisites. Link access continues for a bounded read window after validity, while decisions independently enforce the exact deadline. Cancel/revise revoke access. Public API no-store/no-referrer, generic errors, explicit confirmation and per-IP limiting remain mandatory; no customer account or qualified-signature claim is introduced.
+
+## 026 — Reuse outbox/activity and protect commercial retention
+
+**Decision:** Extend existing activity/outbox records with optional quotation associations, filtered uniqueness and quotation notifications. Reuse the worker for bounded expiry batches. Exclude quotation-linked requests from the older automatic request purger until commercial retention is approved.
+
+**Reason:** A second email/job stack is unnecessary; issued/accepted records need reliable notification intent and careful retention. An email provider outage must not change business state.
+
+**Consequences:** Quotation Sent means issued/queued, never inbox proof. Stale issued messages can be suppressed; external delivery remains at least once. History keeps structured events/actors/versions without private notes or token values. Phase 7 receives an immutable accepted-version boundary, with no invoice/payment/activation code in Phase 6.
+
+Phase 6 references: [ASP.NET Data Protection purpose isolation](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings?view=aspnetcore-10.0), [PostgreSQL row/advisory locks](https://www.postgresql.org/docs/18/explicit-locking.html), [partial unique indexes](https://www.postgresql.org/docs/18/indexes-partial.html), and [URL fragment behavior](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment).

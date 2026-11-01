@@ -5,10 +5,12 @@ import { BrandLogo } from '../../components/layout/BrandLogo';
 import { Button } from '../../components/ui/Button';
 import { useAdminAuth } from './authContext';
 import { useAdminCopy } from './copy';
+import { useQuotationCopy } from '../quotations/copy';
 import { adminApi } from './api';
 import styles from './Admin.module.scss';
 export function AdminLayout() {
   const t = useAdminCopy();
+  const quotations = useQuotationCopy();
   const auth = useAdminAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -37,6 +39,7 @@ export function AdminLayout() {
             {t.dashboard}
           </NavLink>
           <NavLink to="/admin/requests">{t.requests}</NavLink>
+          <NavLink to="/admin/quotations">{quotations.title}</NavLink>
         </nav>
         <Link to="/">{t.home}</Link>
         <Button variant="outline" disabled={busy} onClick={() => void logout()}>

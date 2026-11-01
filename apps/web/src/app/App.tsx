@@ -1,4 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
+import { AdminQuotationListPage } from '../features/quotations/AdminQuotationListPage';
+import { AdminQuotationDetailPage } from '../features/quotations/AdminQuotationDetailPage';
+import { CustomerQuotationPage } from '../features/quotations/CustomerQuotationPage';
 import { AuthProvider, RequireAdmin } from '../features/admin/AuthProvider';
 import { AdminLayout } from '../features/admin/AdminLayout';
 import { LoginPage } from '../features/admin/LoginPage';
@@ -38,6 +41,11 @@ export function App() {
             <Route element={<AdminLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="requests" element={<RequestsPage />} />
+              <Route path="quotations" element={<AdminQuotationListPage />} />
+              <Route
+                path="quotations/:id"
+                element={<AdminQuotationDetailPage />}
+              />
               <Route path="requests/:id" element={<RequestDetailPage />} />
             </Route>
           </Route>
@@ -49,6 +57,7 @@ export function App() {
               </AuthProvider>
             }
           />
+          <Route path="/quote" element={<CustomerQuotationPage />} />
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path={routes.services} element={<ServicesPage />} />

@@ -9,6 +9,8 @@ public sealed class IdempotencyRecord
 }
 public sealed class NotificationRecord
 {
+    public Guid? QuotationId { get; set; }
+    public string? ProtectedLink { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid RequestId { get; set; }
     public string Kind { get; set; } = "";
