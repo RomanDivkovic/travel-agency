@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TravelAgency.Api.Admin;
+using TravelAgency.Api.Bookings;
 using TravelAgency.Api.Health;
 using TravelAgency.Api.Payments;
 using TravelAgency.Api.Quotations;
@@ -19,6 +20,7 @@ builder.AddAdminFeature();
 builder.AddQuotations();
 builder.AddPayments();
 builder.AddResearch();
+builder.AddBookings();
 builder.Services.AddProblemDetails();
 // Malformed minimal-API inputs are client errors, including in Development.
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = false);
@@ -90,6 +92,7 @@ app.UseRateLimiter();
 app.MapQuotations();
 app.MapInvoices();
 app.MapResearch();
+app.MapBookings();
 app.MapAdminAuth();
 app.MapAdminRequests();
 app.MapHealthEndpoints();

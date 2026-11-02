@@ -1,0 +1,98 @@
+.panel {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 20px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+}
+.form {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.form label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.form input,
+.form textarea,
+.form select {
+  min-width: 0;
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  border: 1px solid #89969f;
+  border-radius: 6px;
+  background: white;
+  color: var(--color-text);
+}
+.form fieldset {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  padding: 16px;
+}
+.form .check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.check input {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+.notice {
+  border-left: 4px solid var(--color-primary);
+  background: var(--color-sand);
+  padding: 16px;
+}
+.status {
+  display: inline-block;
+  border: 1px solid var(--color-border);
+  background: var(--color-sand);
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-weight: 600;
+}
+.history {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 400px;
+  overflow: auto;
+  font-size: 14px;
+}
+.checklist {
+  list-style: none;
+  padding: 0;
+}
+.checklist li {
+  padding: 8px 0;
+}
+@media (max-width: 600px) {
+  .panel {
+    padding: 16px;
+  }
+  .actions > * {
+    max-width: 100%;
+  }
+}
+
+.notice button {
+  // Keep secondary confirmation controls readable against the warm notice surface.
+  --color-secondary: #193e54;
+}

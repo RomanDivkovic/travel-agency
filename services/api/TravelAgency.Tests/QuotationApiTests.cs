@@ -59,6 +59,8 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
     {
         if (factory is null) return;
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>();
+        await db.BookingEvents.Where(e => db.Bookings.Any(b => b.Id == e.BookingId && requests.Contains(b.RequestId))).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.Bookings.Where(b => requests.Contains(b.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.ProposalDecisions.Where(d => db.TravelProposals.Any(p => p.Id == d.ProposalId && db.ProposalSeries.Any(s => s.Id == p.SeriesId && requests.Contains(s.RequestId)))).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.TravelProposals.Where(p => db.ProposalSeries.Any(s => s.Id == p.SeriesId && requests.Contains(s.RequestId))).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.ResearchWorkspaces.Where(w => requests.Contains(w.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);

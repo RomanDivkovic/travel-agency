@@ -1,3 +1,4 @@
+import { useBookingCopy } from '../bookings/copy';
 import { usePaymentCopy } from '../payments/copy';
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
@@ -11,6 +12,7 @@ import { adminApi } from './api';
 import styles from './Admin.module.scss';
 export function AdminLayout() {
   const t = useAdminCopy();
+  const bookings = useBookingCopy();
   const payments = usePaymentCopy();
   const quotations = useQuotationCopy();
   const auth = useAdminAuth();
@@ -43,6 +45,7 @@ export function AdminLayout() {
           <NavLink to="/admin/requests">{t.requests}</NavLink>
           <NavLink to="/admin/quotations">{quotations.title}</NavLink>
           <NavLink to="/admin/invoices">{payments.title}</NavLink>
+          <NavLink to="/admin/bookings">{bookings.title}</NavLink>
           <NavLink to="/admin/proposals">{t.proposals}</NavLink>
         </nav>
         <Link to="/">{t.home}</Link>

@@ -69,6 +69,16 @@ import { AboutPage } from '../features/public/AboutPage';
 import { ContactPage } from '../features/public/ContactPage';
 import { FaqPage } from '../features/public/FaqPage';
 
+const AdminBookingListPage = lazy(() =>
+  import('../features/bookings/BookingList').then((m) => ({
+    default: m.AdminBookingListPage,
+  })),
+);
+const AdminBookingDetailPage = lazy(() =>
+  import('../features/bookings/BookingWorkspace').then((m) => ({
+    default: m.AdminBookingDetailPage,
+  })),
+);
 export function App() {
   return (
     <LanguageProvider>
@@ -89,6 +99,11 @@ export function App() {
                 <Route
                   path="requests/:id/research"
                   element={<AdminResearchPage />}
+                />
+                <Route path="bookings" element={<AdminBookingListPage />} />
+                <Route
+                  path="bookings/:id"
+                  element={<AdminBookingDetailPage />}
                 />
                 <Route path="proposals" element={<AdminProposalListPage />} />
                 <Route path="proposals/:id" element={<AdminProposalPage />} />

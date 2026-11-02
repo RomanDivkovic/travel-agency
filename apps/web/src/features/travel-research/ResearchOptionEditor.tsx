@@ -59,12 +59,16 @@ export function ResearchOptionEditor({
   option,
   onSaved,
   onClose,
+  saveInput,
+  additionalFields,
 }: {
   requestId: string;
   kind: ResearchKind;
   option?: ResearchOption;
   onSaved: () => void;
   onClose: () => void;
+  saveInput?: (input: ResearchInput) => Promise<void>;
+  additionalFields?: import('react').ReactNode;
 }) {
   const t = useResearchCopy();
   const [form, setForm] = useState(() => initial(kind, option));
@@ -90,12 +94,14 @@ export function ResearchOptionEditor({
     setBusy(true);
     setError(undefined);
     try {
-      await researchApi.saveOption(
-        requestId,
-        { ...form, priceMinorUnits: minor },
-        option?.id,
-        option?.versionToken,
-      );
+      if (saveInput) await saveInput({ ...form, priceMinorUnits: minor });
+      else
+        await researchApi.saveOption(
+          requestId,
+          { ...form, priceMinorUnits: minor },
+          option?.id,
+          option?.versionToken,
+        );
       onSaved();
     } catch (e) {
       setError(e instanceof ApiError ? (e.status ?? 0) : 0);
@@ -217,13 +223,18 @@ export function ResearchOptionEditor({
               maxLength={3000}
               onChange={(v) => update('conditions', v)}
             />
-            <TextArea
-              label={t.optionNotes}
-              value={form.notes}
-              maxLength={4000}
-              onChange={(v) => update('notes', v)}
-            />
-            <p>{t.private}</p>
+            {!saveInput && (
+              <>
+                <TextArea
+                  label={t.optionNotes}
+                  value={form.notes}
+                  maxLength={4000}
+                  onChange={(v) => update('notes', v)}
+                />
+                <p>{t.private}</p>
+              </>
+            )}
+            {additionalFields}
             <Button type="submit" disabled={busy}>
               {busy ? t.saving : t.save}
             </Button>

@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TravelAgency.Application.Requests;
+using TravelAgency.Domain.Admin;
+using TravelAgency.Domain.Bookings;
+using TravelAgency.Infrastructure.Bookings;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
@@ -25,7 +28,15 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         try
         {
             EmailMessage? message;
-            if (notification.ProposalId is { } proposalId)
+            if (notification.BookingId is { } bookingId)
+            {
+                // Lock this aggregate through delivery. Mutations never lock outbox rows, avoiding reverse lock ordering.
+                await db.Database.SqlQuery<Guid>($"SELECT \"Id\" AS \"Value\" FROM \"Bookings\" WHERE \"Id\" = {bookingId} FOR NO KEY UPDATE").ToArrayAsync(ct);
+                var booking = await db.Bookings.AsNoTracking().SingleAsync(b => b.Id == bookingId, ct);
+                message = notification.Kind.StartsWith("booking-confirmed-", StringComparison.Ordinal) && (booking.Status != BookingStatus.Confirmed || booking.Revision != notification.BookingRevision)
+                    ? null : BookingNotificationTemplates.Create(notification, settings);
+            }
+            else if (notification.ProposalId is { } proposalId)
             {
                 var proposal = await db.TravelProposals.AsNoTracking().Include(p => p.Alternatives).SingleAsync(p => p.Id == proposalId, ct);
                 var number = await db.ProposalSeries.Where(s => s.Id == proposal.SeriesId).Select(s => s.Number).SingleAsync(ct);
@@ -44,7 +55,11 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
             }
             else message = NotificationTemplates.Create(notification.Id, notification.Kind, request, settings);
             if (message is null) { notification.DeadLetterAt = clock.GetUtcNow(); notification.ProtectedLink = null; }
-            else { await sender.SendAsync(message, ct); notification.SentAt = clock.GetUtcNow(); notification.ProtectedLink = null; }
+            else
+            {
+                await sender.SendAsync(message, ct); notification.SentAt = clock.GetUtcNow(); notification.ProtectedLink = null;
+                if (notification.BookingId is { } booking) db.RequestActivities.Add(new RequestActivity { RequestId = notification.RequestId, BookingId = booking, Type = "BookingMailSent", CreatedAt = clock.GetUtcNow() });
+            }
         }
         catch (EmailDeliveryException failure) { retryable = failure.Retryable; }
         catch (IOException) { }

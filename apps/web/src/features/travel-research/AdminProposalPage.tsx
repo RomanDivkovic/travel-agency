@@ -1,3 +1,4 @@
+import { CreateBooking } from '../bookings/BookingIntegration';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { BrandLogo } from '../../components/layout/BrandLogo';
@@ -79,6 +80,12 @@ export function AdminProposalPage() {
             configuration={state.data.configuration}
             onSaved={refresh}
           />
+          {state.data.detail.proposal.status === 'Approved' && (
+            <CreateBooking
+              proposalId={id}
+              requestId={state.data.detail.requestId}
+            />
+          )}
           <p>{t.previewHint}</p>
           <Button
             variant="outline"

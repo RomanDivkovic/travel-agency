@@ -1,3 +1,4 @@
+import { bookingApi } from '../bookings/api';
 import { researchApi } from '../travel-research/api';
 import { invoiceApi } from '../payments/api';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -24,6 +25,24 @@ vi.mock('./api', () => ({
     activity: vi.fn(),
     status: vi.fn(),
     addNote: vi.fn(),
+  },
+}));
+vi.mock('../bookings/api', () => ({
+  bookingApi: {
+    metrics: vi.fn().mockResolvedValue({
+      inProgress: 0,
+      partiallyConfirmed: 0,
+      confirmed: 0,
+      failedReservations: 0,
+      upcomingDepartures: 0,
+    }),
+    list: vi.fn().mockResolvedValue({
+      items: [],
+      page: 1,
+      totalPages: 0,
+      totalCount: 0,
+      pageSize: 20,
+    }),
   },
 }));
 vi.mock('../travel-research/api', () => ({
@@ -102,6 +121,20 @@ function mount(path = '/admin') {
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(bookingApi.metrics).mockResolvedValue({
+    inProgress: 0,
+    partiallyConfirmed: 0,
+    confirmed: 0,
+    failedReservations: 0,
+    upcomingDepartures: 0,
+  });
+  vi.mocked(bookingApi.list).mockResolvedValue({
+    items: [],
+    page: 1,
+    pageSize: 20,
+    totalCount: 0,
+    totalPages: 0,
+  });
   vi.mocked(researchApi.workspace).mockResolvedValue({
     eligible: false,
     status: 'NotStarted',
