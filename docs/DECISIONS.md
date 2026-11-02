@@ -291,3 +291,37 @@ Phase 6 references: [ASP.NET Data Protection purpose isolation](https://learn.mi
 **Consequences:** Hosting must enforce private-page no-store/no-referrer/CSP/HTTPS and protected key persistence. Customer emails/browser history still carry private links. No new frontend/NuGet dependencies were added.
 
 Phase 7 references: [Skatteverket invoice rules](https://www.skatteverket.se/foretag/moms/saljavarorochtjanster/fakturering.4.58d555751259e4d66168000403.html), [Verksamt invoice content](https://verksamt.se/en/agreement-invoicing/invoice/invoice-content), [PostgreSQL locking](https://www.postgresql.org/docs/18/explicit-locking.html), [.NET HMAC-SHA256](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.hmacsha256.hashdata?view=net-10.0), [fixed-time comparison](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.fixedtimeequals?view=net-10.0), [Data Protection purpose isolation](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings?view=aspnetcore-10.0), and [EF transactional update considerations](https://learn.microsoft.com/en-us/ef/core/saving/execute-insert-update-delete). These references inform implementation, not a declaration of legal compliance.
+
+## 031 — Real payment evidence gates manual research
+
+**Decision:** Reuse Phase 7 eligibility, but verify the joined real Paid invoice, accepted quotation, matched Succeeded payment and non-Closed request at every research mutation. Reject Sandbox/Disabled and simulated eligibility; provide no admin bypass. Keep research metadata/notes separate from administrative request and payment statuses.
+
+**Reason:** Button visibility and manually edited status are not proof that paid research is authorized. Phase 7 still lacks an approved live adapter.
+
+**Consequences:** Production research cannot be activated through the development simulator. Guarded, isolated test fixtures seed synthetic evidence without adding a production exception. The workspace reuses existing customer requirements and persists only its own metadata/options.
+
+## 032 — Typed manual supplier options and explicit price units
+
+**Decision:** Use one discriminated option model with typed flight/stay/extra detail snapshots, integer minor units, explicit quantity/basis and original SEK/EUR/USD currency. Keep private notes separate. Require source name, safe HTTPS link, price timestamp and conditions; availability timestamp is optional. Group flight legs by journey with explicit zone/offset consistency.
+
+**Reason:** Manual research needs useful comparison without a supplier API, scraping, invented live inventory, accidental traveler/night multiplication, cross-currency totals or misleading return-flight duration.
+
+**Consequences:** No supplier URL is fetched/verified by the backend. Comparison is side-by-side and responsive. New currencies need reviewed minor-unit support; no conversion source is assumed. Source credentials and automated purchases remain out of scope.
+
+## 033 — Immutable versioned alternatives and scoped customer decisions
+
+**Decision:** One proposal series per request, separate versions/alternatives/item associations, saved customer-safe snapshots and SQL-pagination. Require save/review after source changes before send. Freeze sent terms and prices; revise into new IDs while immediately revoking old access. Approved is terminal. Use the request row NO KEY UPDATE lock plus optimistic tokens for shared state transitions.
+
+**Reason:** Research edits and approval/revision races cannot overwrite a customer-approved itinerary or permit approval of a replaced version. Supplier estimates and already-paid service fees must stay distinct.
+
+**Consequences:** Explicit primary selection, unchecked acknowledgement and second confirmation precede approval. Decisions are idempotent only for the same choice. No booking/refund follows automatically; revised supplier costs require future explicit authorization. Historical source associations block destructive removal.
+
+## 034 — Reuse secure links, outbox, preview and the existing worker
+
+**Decision:** Proposal-only fragment/header credentials with hash lookup, isolated Data Protection envelopes, expiry/revocation, no persistent browser token storage and bounded public rate limiting. Reuse admin authentication/CSRF, activity, localized outbox, resource hooks and background expiry. Render the same saved proposal components in preview and customer views.
+
+**Reason:** Separate scopes avoid treating invoice/quotation links as blanket customer access; reuse avoids new auth/email/job/state systems. Manual supplier links must not introduce SSRF or private-page analytics leaks.
+
+**Consequences:** Reviewed bilingual terms and acknowledgement are required before enabling sending. Production private SPA headers/key management/privacy prerequisites still apply. Delivery/capture is not inbox proof. No Phase 9 supplier execution or portal is introduced.
+
+Phase 8 references: [PostgreSQL lock compatibility](https://www.postgresql.org/docs/18/explicit-locking.html), [TimeZoneInfo offset validation](https://learn.microsoft.com/en-us/dotnet/api/system.timezoneinfo.getutcoffset?view=net-10.0), [EF transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions), [Data Protection purpose isolation](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings?view=aspnetcore-10.0), and [noopener](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/noopener). No supplier site was scraped or represented as automatically verified.

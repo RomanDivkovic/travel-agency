@@ -1,3 +1,4 @@
+import { researchApi } from '../travel-research/api';
 import { invoiceApi } from '../payments/api';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,6 +25,9 @@ vi.mock('./api', () => ({
     status: vi.fn(),
     addNote: vi.fn(),
   },
+}));
+vi.mock('../travel-research/api', () => ({
+  researchApi: { workspace: vi.fn() },
 }));
 vi.mock('../payments/api', () => ({
   invoiceApi: {
@@ -98,6 +102,20 @@ function mount(path = '/admin') {
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(researchApi.workspace).mockResolvedValue({
+    eligible: false,
+    status: 'NotStarted',
+    versionToken: null,
+    notes: '',
+    options: [],
+    proposals: {
+      items: [],
+      page: 1,
+      pageSize: 20,
+      totalCount: 0,
+      totalPages: 0,
+    },
+  });
   vi.mocked(invoiceApi.summary).mockResolvedValue({
     currencies: [],
     recentPayments: [],

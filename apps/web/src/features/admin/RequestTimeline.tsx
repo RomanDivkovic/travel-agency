@@ -1,3 +1,4 @@
+import { useResearchCopy } from '../travel-research/copy';
 import { usePaymentCopy } from '../payments/copy';
 import { useDateFormat } from './useDateFormat';
 import { useCallback, useState } from 'react';
@@ -18,6 +19,7 @@ export function RequestTimeline({
 }) {
   const t = useAdminCopy();
   const payments = usePaymentCopy();
+  const research = useResearchCopy();
   const quotations = useQuotationCopy();
   const statusLabel = (value: string | null) =>
     value && Object.hasOwn(t.statuses, value)
@@ -73,11 +75,15 @@ export function RequestTimeline({
                         : item.type === 'StatusChanged'
                           ? `${t.statusChanged}: ${item.previousValue ? statusLabel(item.previousValue) : ''} → ${item.newValue ? statusLabel(item.newValue) : ''}`
                           : item.type
-                            ? Object.hasOwn(payments.events, item.type)
-                              ? payments.events[
-                                  item.type as keyof typeof payments.events
+                            ? Object.hasOwn(research.events, item.type)
+                              ? research.events[
+                                  item.type as keyof typeof research.events
                                 ]
-                              : quotationEventLabel(item.type, quotations)
+                              : Object.hasOwn(payments.events, item.type)
+                                ? payments.events[
+                                    item.type as keyof typeof payments.events
+                                  ]
+                                : quotationEventLabel(item.type, quotations)
                             : null}
                   </p>
                   {item.content ? (
@@ -86,6 +92,7 @@ export function RequestTimeline({
                   <small>
                     {item.author ??
                       (item.type === 'QuotationExpired' ||
+                      item.type === 'ProposalExpired' ||
                       [
                         'InvoiceOverdue',
                         'ServiceFeeVerified',

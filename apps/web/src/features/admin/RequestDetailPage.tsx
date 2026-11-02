@@ -1,3 +1,4 @@
+import { RequestResearch } from '../travel-research/RequestResearch';
 import { useDateFormat } from './useDateFormat';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
@@ -57,6 +58,7 @@ export function RequestDetailPage() {
           </section>
           <RequestFields request={r} />
           <RequestQuotations requestId={id} closed={r.status === 'Closed'} />
+          <RequestResearch requestId={id} />
           <RequestActions
             key={r.version}
             request={r}

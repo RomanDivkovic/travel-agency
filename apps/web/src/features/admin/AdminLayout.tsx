@@ -43,6 +43,7 @@ export function AdminLayout() {
           <NavLink to="/admin/requests">{t.requests}</NavLink>
           <NavLink to="/admin/quotations">{quotations.title}</NavLink>
           <NavLink to="/admin/invoices">{payments.title}</NavLink>
+          <NavLink to="/admin/proposals">{t.proposals}</NavLink>
         </nav>
         <Link to="/">{t.home}</Link>
         <Button variant="outline" disabled={busy} onClick={() => void logout()}>
