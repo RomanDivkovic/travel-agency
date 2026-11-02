@@ -1,3 +1,4 @@
+import { RequestBookings } from '../bookings/BookingIntegration';
 import { RequestResearch } from '../travel-research/RequestResearch';
 import { useDateFormat } from './useDateFormat';
 import { useCallback, useState } from 'react';
@@ -59,6 +60,7 @@ export function RequestDetailPage() {
           <RequestFields request={r} />
           <RequestQuotations requestId={id} closed={r.status === 'Closed'} />
           <RequestResearch requestId={id} />
+          <RequestBookings requestId={id} />
           <RequestActions
             key={r.version}
             request={r}

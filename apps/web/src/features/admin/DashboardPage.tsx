@@ -1,3 +1,4 @@
+import { BookingOverview } from '../bookings/BookingIntegration';
 import { PaymentOverview } from '../payments/PaymentOverview';
 import { useCallback, useState } from 'react';
 import { usePageMetadata } from '../../hooks/usePageMetadata';
@@ -43,6 +44,7 @@ export function DashboardPage() {
             ))}
           </div>
           <PaymentOverview />
+          <BookingOverview />
           <h2>{t.recent}</h2>
           <RequestCards nested items={state.data.recentlyUpdated} />
         </>

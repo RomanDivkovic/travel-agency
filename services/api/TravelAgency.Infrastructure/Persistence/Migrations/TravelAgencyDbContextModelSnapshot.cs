@@ -22,6 +22,8 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("booking_reference");
+
             modelBuilder.HasSequence("proposal_reference");
 
             modelBuilder.HasSequence("quotation_reference");
@@ -169,6 +171,9 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.Property<string>("ActorId")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -197,6 +202,8 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ActorId");
+
+                    b.HasIndex("BookingId");
 
                     b.HasIndex("ProposalId");
 
@@ -235,6 +242,250 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasIndex("RequestId", "CreatedAt", "Id");
 
                     b.ToTable("RequestNotes");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.BookingEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReservationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.HasIndex("BookingId", "CreatedAt", "Id");
+
+                    b.ToTable("BookingEvents");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.SupplierReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApprovedSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("ArrangementVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long?>("CancellationChargeMinorUnits")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CancellationReason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("CancellationReference")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ConfirmationDocumentReference")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ConfirmationEvidence")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CurrentSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("FailureReason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("PaymentArrangement")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("PaymentResponsibility")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<Guid>("ProposalItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("ReapprovedVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("RequiresReview")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ReservationType")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<string>("SupplierReference")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TicketingStatus")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProposalItemId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("BookingId", "ProposalItemId")
+                        .IsUnique();
+
+                    b.ToTable("SupplierReservations", t =>
+                        {
+                            t.HasCheckConstraint("CK_Reservation_Charge", "\"CancellationChargeMinorUnits\" IS NULL OR \"CancellationChargeMinorUnits\" BETWEEN 0 AND 10000000000");
+
+                            t.HasCheckConstraint("CK_Reservation_Status", "\"Status\" IN ('NotStarted','InProgress','AwaitingConfirmation','Confirmed','Failed','Cancelled')");
+                        });
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.TravelBooking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApprovedAlternativeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AuthorizationJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByAdministratorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly?>("DepartureDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ProposalVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedAlternativeId");
+
+                    b.HasIndex("CreatedByAdministratorId");
+
+                    b.HasIndex("ProposalId")
+                        .IsUnique();
+
+                    b.HasIndex("Reference")
+                        .IsUnique();
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.HasIndex("Status", "DepartureDate");
+
+                    b.ToTable("Bookings", t =>
+                        {
+                            t.HasCheckConstraint("CK_Booking_Status", "\"Status\" IN ('Pending','InProgress','PartiallyConfirmed','Confirmed','Failed','Cancelled')");
+                        });
                 });
 
             modelBuilder.Entity("TravelAgency.Domain.Payments.Invoice", b =>
@@ -1397,6 +1648,12 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.Property<int>("Attempts")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("BookingRevision")
+                        .HasColumnType("integer");
+
                     b.Property<DateTimeOffset?>("DeadLetterAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1410,6 +1667,9 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("NextAttemptAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
 
                     b.Property<Guid?>("ProposalId")
                         .HasColumnType("uuid");
@@ -1431,6 +1691,10 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasIndex("NextAttemptAt")
                         .HasFilter("\"SentAt\" IS NULL AND \"DeadLetterAt\" IS NULL");
 
+                    b.HasIndex("BookingId", "Kind")
+                        .IsUnique()
+                        .HasFilter("\"BookingId\" IS NOT NULL");
+
                     b.HasIndex("InvoiceId", "Kind")
                         .IsUnique()
                         .HasFilter("\"InvoiceId\" IS NOT NULL");
@@ -1445,7 +1709,7 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RequestId", "Kind")
                         .IsUnique()
-                        .HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL AND \"ProposalId\" IS NULL");
+                        .HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL AND \"ProposalId\" IS NULL AND \"BookingId\" IS NULL");
 
                     b.ToTable("NotificationOutbox");
                 });
@@ -1508,6 +1772,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ActorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("TravelAgency.Domain.Bookings.TravelBooking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
                         .WithMany()
                         .HasForeignKey("ProposalId")
@@ -1537,6 +1806,68 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RequestId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.BookingEvent", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Bookings.TravelBooking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Bookings.SupplierReservation", null)
+                        .WithMany()
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.SupplierReservation", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Bookings.TravelBooking", null)
+                        .WithMany("Reservations")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Research.ProposalItem", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.TravelBooking", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.ProposalAlternative", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedAlternativeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByAdministratorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -1872,6 +2203,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TravelAgency.Infrastructure.Requests.NotificationRecord", b =>
                 {
+                    b.HasOne("TravelAgency.Domain.Bookings.TravelBooking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("TravelAgency.Domain.Payments.Invoice", null)
                         .WithMany()
                         .HasForeignKey("InvoiceId")
@@ -1892,6 +2228,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("RequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Bookings.TravelBooking", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("TravelAgency.Domain.Quotations.Quotation", b =>

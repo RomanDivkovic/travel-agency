@@ -325,3 +325,27 @@ Phase 7 references: [Skatteverket invoice rules](https://www.skatteverket.se/for
 **Consequences:** Reviewed bilingual terms and acknowledgement are required before enabling sending. Production private SPA headers/key management/privacy prerequisites still apply. Delivery/capture is not inbox proof. No Phase 9 supplier execution or portal is introduced.
 
 Phase 8 references: [PostgreSQL lock compatibility](https://www.postgresql.org/docs/18/explicit-locking.html), [TimeZoneInfo offset validation](https://learn.microsoft.com/en-us/dotnet/api/system.timezoneinfo.getutcoffset?view=net-10.0), [EF transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions), [Data Protection purpose isolation](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings?view=aspnetcore-10.0), and [noopener](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/noopener). No supplier site was scraped or represented as automatically verified.
+
+## 035 — Manual supplier facts, separate from customer approval
+
+**Decision:** Generate one required supplier reservation for each selected approved proposal item and derive overall booking status. Require initial explicit external booking authority and genuine supplier confirmation/cancellation evidence. Keep internal sequence references separate from supplier references, record payment responsibility explicitly, and never execute supplier operations or alter service-fee revenue.
+
+**Reason:** Proposal acceptance is not a supplier reservation, a successful payment attempt is not supplier confirmation, and a partially booked trip must remain visibly partial.
+
+**Consequences:** One booking workflow per request; cancellations remain historical and terminal for that reservation. Same-category replacements/amendments use versioned recorded arrangements and renewed approval where needed. No unapproved add-on endpoint or automatic cancellation/refund exists. Flight ticketing is tracked separately from reservation confirmation.
+
+## 036 — Conservative exact-arrangement reapproval and audit history
+
+**Decision:** Preserve original proposal estimates and typed snapshots. Require fresh checks before start/confirm and external customer reapproval for higher price, currency/material changes or changed payment authority. Once review is triggered it cannot be cleared by unrelated edits. Reapproval records are bound to the current arrangement version, with evidence/channel/customer timestamp and administrator actor; future changes invalidate it.
+
+**Reason:** A lower price can accompany worse conditions, and prior approval must not authorize an unrelated replacement or unlimited costs. This phase does not add a public portal or pretend that an administrator's statement is an electronic customer signature.
+
+**Consequences:** The agent must collect genuine external approval and keep its reference. UTC approval timestamps support subsecond precision. Parent-request/booking locks, version tokens, restricted FKs and transactional before/after events protect races and preserve historical facts. [EF concurrency](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), [EF transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions) and [PostgreSQL row locks](https://www.postgresql.org/docs/current/explicit-locking.html) informed the implementation.
+
+## 037 — Snapshot-based booking confirmation through the existing outbox
+
+**Decision:** Only a fully confirmed booking may queue a full-trip customer confirmation. Snapshot confirmed reservation facts and costs per booking revision. The worker locks that aggregate through delivery and discards stale confirmation jobs. Failure notifications use separate agent wording. Existing sender/backoff/capture and activity infrastructure are reused.
+
+**Reason:** Partial trips and later amendments must not produce misleading complete-trip confirmation. Queued is not delivered; supplier details must come from recorded evidence.
+
+**Consequences:** Local capture verifies application delivery, not an external inbox. At-least-once delivery remains possible on transport/commit uncertainty. No new job platform, upload system, payment integration or supplier fetcher is introduced.

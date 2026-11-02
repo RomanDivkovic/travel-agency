@@ -9,6 +9,9 @@ public sealed class IdempotencyRecord
 }
 public sealed class NotificationRecord
 {
+    public Guid? BookingId { get; set; }
+    public int? BookingRevision { get; set; }
+    public string? PayloadJson { get; set; }
     public Guid? InvoiceId { get; set; }
     public Guid? ProposalId { get; set; }
     public Guid? QuotationId { get; set; }
