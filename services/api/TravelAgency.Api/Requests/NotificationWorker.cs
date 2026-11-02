@@ -3,6 +3,7 @@ using TravelAgency.Application.Requests;
 using TravelAgency.Infrastructure.Email;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Requests;
+using TravelAgency.Infrastructure.Research;
 
 namespace TravelAgency.Api.Requests;
 
@@ -26,6 +27,8 @@ public sealed class NotificationWorker(IServiceScopeFactory scopes, EmailSetting
                     await expiryScope.ServiceProvider.GetRequiredService<IQuotationExpiration>().ExpireBatchAsync(stoppingToken);
                 await using (var paymentScope = scopes.CreateAsyncScope())
                     await paymentScope.ServiceProvider.GetRequiredService<PaymentMaintenance>().RunAsync(stoppingToken);
+                await using (var proposalScope = scopes.CreateAsyncScope())
+                    await proposalScope.ServiceProvider.GetRequiredService<ProposalMaintenance>().RunAsync(stoppingToken);
                 for (var i = 0; i < 10; i++)
                 {
                     await using var scope = scopes.CreateAsyncScope();

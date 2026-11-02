@@ -22,6 +22,8 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("proposal_reference");
+
             modelBuilder.HasSequence("quotation_reference");
 
             modelBuilder.HasSequence("travel_request_reference");
@@ -178,6 +180,9 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasMaxLength(24)
                         .HasColumnType("character varying(24)");
 
+                    b.Property<Guid?>("ProposalId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("QuotationId")
                         .HasColumnType("uuid");
 
@@ -192,6 +197,8 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ActorId");
+
+                    b.HasIndex("ProposalId");
 
                     b.HasIndex("QuotationId");
 
@@ -844,6 +851,363 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalAccessToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("Hash")
+                        .IsUnique();
+
+                    b.HasIndex("ProposalId")
+                        .IsUnique();
+
+                    b.ToTable("ProposalTokens");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalAlternative", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Recommended")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProposalId", "SortOrder")
+                        .IsUnique();
+
+                    b.ToTable("ProposalAlternative");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalDecision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Acknowledgement")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid?>("AlternativeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("DecidedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TermsVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AlternativeId");
+
+                    b.HasIndex("ProposalId")
+                        .IsUnique();
+
+                    b.ToTable("ProposalDecisions");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AlternativeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ResearchOptionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SourceVersion")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResearchOptionId");
+
+                    b.HasIndex("AlternativeId", "ResearchOptionId")
+                        .IsUnique();
+
+                    b.ToTable("ProposalItems");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalSeries", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Number")
+                        .IsUnique();
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("ProposalSeries");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ResearchOption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId", "Kind");
+
+                    b.ToTable("ResearchOptions");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ResearchWorkspace", b =>
+                {
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RequestId");
+
+                    b.ToTable("ResearchWorkspaces");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.TravelProposal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcceptanceText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByAdministratorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Introduction")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<string>("PaidServiceJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset?>("RejectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("SelectedAlternativeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
+                    b.Property<string>("TermsSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(6000)
+                        .HasColumnType("character varying(6000)");
+
+                    b.Property<string>("TermsVersion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TripJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ValidUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByAdministratorId");
+
+                    b.HasIndex("SeriesId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Proposal_Current")
+                        .HasFilter("\"Status\" IN ('Draft','Sent','Approved')");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.HasIndex("SeriesId", "Version")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "ValidUntil");
+
+                    b.ToTable("TravelProposals", t =>
+                        {
+                            t.HasCheckConstraint("CK_Proposal_Status", "\"Status\" IN ('Draft','Sent','Approved','Rejected','Expired','Superseded','Cancelled')");
+
+                            t.HasCheckConstraint("CK_Proposal_Version", "\"Version\" >= 1");
+                        });
+                });
+
             modelBuilder.Entity("TravelAgency.Infrastructure.Admin.Administrator", b =>
                 {
                     b.Property<string>("Id")
@@ -1047,6 +1411,9 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("NextAttemptAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("ProposalId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ProtectedLink")
                         .HasColumnType("text");
 
@@ -1068,13 +1435,17 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasFilter("\"InvoiceId\" IS NOT NULL");
 
+                    b.HasIndex("ProposalId", "Kind")
+                        .IsUnique()
+                        .HasFilter("\"ProposalId\" IS NOT NULL");
+
                     b.HasIndex("QuotationId", "Kind")
                         .IsUnique()
                         .HasFilter("\"QuotationId\" IS NOT NULL");
 
                     b.HasIndex("RequestId", "Kind")
                         .IsUnique()
-                        .HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL");
+                        .HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL AND \"ProposalId\" IS NULL");
 
                     b.ToTable("NotificationOutbox");
                 });
@@ -1136,6 +1507,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ActorId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("TravelAgency.Domain.Quotations.Quotation", null)
                         .WithMany()
@@ -1378,6 +1754,95 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalAccessToken", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalAlternative", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
+                        .WithMany("Alternatives")
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalDecision", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.ProposalAlternative", null)
+                        .WithMany()
+                        .HasForeignKey("AlternativeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalItem", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.ProposalAlternative", null)
+                        .WithMany("Items")
+                        .HasForeignKey("AlternativeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Research.ResearchOption", null)
+                        .WithMany()
+                        .HasForeignKey("ResearchOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalSeries", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.ResearchWorkspace", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ResearchOption", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Research.ResearchWorkspace", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ResearchWorkspace", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.TravelProposal", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByAdministratorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Research.ProposalSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TravelAgency.Infrastructure.Payments.SandboxPayment", b =>
                 {
                     b.HasOne("TravelAgency.Domain.Payments.Invoice", null)
@@ -1412,6 +1877,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("InvoiceId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("TravelAgency.Domain.Research.TravelProposal", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("TravelAgency.Domain.Quotations.Quotation", null)
                         .WithMany()
                         .HasForeignKey("QuotationId")
@@ -1427,6 +1897,16 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TravelAgency.Domain.Quotations.Quotation", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.ProposalAlternative", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Research.TravelProposal", b =>
+                {
+                    b.Navigation("Alternatives");
                 });
 #pragma warning restore 612, 618
         }

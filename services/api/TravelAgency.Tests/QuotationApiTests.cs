@@ -37,6 +37,9 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
         original = new ApiFactory(connectionString: Connection);
         factory = original.WithWebHostBuilder(b =>
         {
+            b.UseSetting("Proposals:SendingEnabled", "true"); b.UseSetting("Proposals:PublicOrigin", "http://localhost:5174");
+            b.UseSetting("Proposals:TermsVersion", "TEST-proposal-v1"); b.UseSetting("Proposals:TermsSv", "TEST proposal terms — NOT LEGAL."); b.UseSetting("Proposals:TermsEn", "TEST proposal terms — NOT LEGAL.");
+            b.UseSetting("Proposals:AcceptanceTextSv", "TEST explicit choice, no unlimited spending."); b.UseSetting("Proposals:AcceptanceTextEn", "TEST explicit choice, no unlimited spending.");
             b.UseSetting("Payments:Provider", "Sandbox"); b.UseSetting("Payments:IssuanceEnabled", "true"); b.UseSetting("Payments:AccountingApproved", "true");
             b.UseSetting("Payments:PublicOrigin", "http://localhost:5174"); b.UseSetting("Payments:SandboxSigningSecret", "TEST-ONLY-signing-secret-at-least-32-characters");
             b.UseSetting("Payments:SellerName", "TEST business"); b.UseSetting("Payments:SellerAddress", "TEST address"); b.UseSetting("Payments:RegistrationNumber", "TEST not a registration");
@@ -56,6 +59,9 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
     {
         if (factory is null) return;
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>();
+        await db.ProposalDecisions.Where(d => db.TravelProposals.Any(p => p.Id == d.ProposalId && db.ProposalSeries.Any(s => s.Id == p.SeriesId && requests.Contains(s.RequestId)))).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.TravelProposals.Where(p => db.ProposalSeries.Any(s => s.Id == p.SeriesId && requests.Contains(s.RequestId))).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.ResearchWorkspaces.Where(w => requests.Contains(w.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.Invoices.Where(i => requests.Contains(i.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.TravelRequests.Where(r => requests.Contains(r.Id)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         var users = scope.ServiceProvider.GetRequiredService<UserManager<Administrator>>(); var user = await users.FindByIdAsync(userId); if (user is not null) Assert.True((await users.DeleteAsync(user)).Succeeded);

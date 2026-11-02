@@ -1,4 +1,29 @@
+const RequestDetailPage = lazy(() =>
+  import('../features/admin/RequestDetailPage').then((m) => ({
+    default: m.RequestDetailPage,
+  })),
+);
 import { lazy, Suspense } from 'react';
+const AdminResearchPage = lazy(() =>
+  import('../features/travel-research/AdminResearchPage').then((m) => ({
+    default: m.AdminResearchPage,
+  })),
+);
+const AdminProposalListPage = lazy(() =>
+  import('../features/travel-research/AdminProposalListPage').then((m) => ({
+    default: m.AdminProposalListPage,
+  })),
+);
+const AdminProposalPage = lazy(() =>
+  import('../features/travel-research/AdminProposalPage').then((m) => ({
+    default: m.AdminProposalPage,
+  })),
+);
+const CustomerProposalPage = lazy(() =>
+  import('../features/travel-research/CustomerProposalPage').then((m) => ({
+    default: m.CustomerProposalPage,
+  })),
+);
 const AdminInvoiceListPage = lazy(() =>
   import('../features/payments/AdminInvoiceListPage').then((m) => ({
     default: m.AdminInvoiceListPage,
@@ -28,7 +53,6 @@ import { AdminLayout } from '../features/admin/AdminLayout';
 import { LoginPage } from '../features/admin/LoginPage';
 import { DashboardPage } from '../features/admin/DashboardPage';
 import { RequestsPage } from '../features/admin/RequestsPage';
-import { RequestDetailPage } from '../features/admin/RequestDetailPage';
 import { AppLayout } from '../layouts/AppLayout';
 import { FoundationPage } from '../pages/FoundationPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -62,6 +86,16 @@ export function App() {
             >
               <Route element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route
+                  path="requests/:id/research"
+                  element={<AdminResearchPage />}
+                />
+                <Route path="proposals" element={<AdminProposalListPage />} />
+                <Route path="proposals/:id" element={<AdminProposalPage />} />
+                <Route
+                  path="proposals/:id/edit"
+                  element={<AdminProposalPage />}
+                />
                 <Route path="requests" element={<RequestsPage />} />
                 <Route path="invoices" element={<AdminInvoiceListPage />} />
                 <Route
@@ -92,6 +126,7 @@ export function App() {
             {import.meta.env.DEV && (
               <Route path="/payment/sandbox" element={<SandboxPaymentPage />} />
             )}
+            <Route path="/travel-proposal" element={<CustomerProposalPage />} />
             <Route path="/quote" element={<CustomerQuotationPage />} />
             <Route element={<AppLayout />}>
               <Route index element={<HomePage />} />

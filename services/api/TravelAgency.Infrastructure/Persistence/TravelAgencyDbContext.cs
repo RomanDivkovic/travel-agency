@@ -4,15 +4,24 @@ using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Payments;
 using TravelAgency.Domain.Quotations;
 using TravelAgency.Domain.Requests;
+using TravelAgency.Domain.Research;
 using TravelAgency.Infrastructure.Admin;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
+using TravelAgency.Infrastructure.Research;
 
 namespace TravelAgency.Infrastructure.Persistence;
 
 public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext> options) : IdentityDbContext<Administrator>(options)
 {
+    public DbSet<ResearchWorkspace> ResearchWorkspaces => Set<ResearchWorkspace>();
+    public DbSet<ResearchOption> ResearchOptions => Set<ResearchOption>();
+    public DbSet<ProposalSeries> ProposalSeries => Set<ProposalSeries>();
+    public DbSet<TravelProposal> TravelProposals => Set<TravelProposal>();
+    public DbSet<ProposalItem> ProposalItems => Set<ProposalItem>();
+    public DbSet<ProposalAccessToken> ProposalTokens => Set<ProposalAccessToken>();
+    public DbSet<ProposalDecision> ProposalDecisions => Set<ProposalDecision>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<PaymentTransaction> Payments => Set<PaymentTransaction>();
     public DbSet<PaymentEventRecord> PaymentEvents => Set<PaymentEventRecord>();
@@ -33,6 +42,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         base.OnModelCreating(model);
         model.ConfigureQuotations();
         model.ConfigurePayments();
+        model.ConfigureResearch();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);
@@ -42,6 +52,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         note.HasOne<Administrator>().WithMany().HasForeignKey(n => n.AdministratorId).OnDelete(DeleteBehavior.Restrict);
         var activity = model.Entity<RequestActivity>();
         activity.HasKey(a => a.Id);
+        activity.HasOne<TravelProposal>().WithMany().HasForeignKey(a => a.ProposalId).OnDelete(DeleteBehavior.Cascade);
         activity.HasOne<Quotation>().WithMany().HasForeignKey(a => a.QuotationId).OnDelete(DeleteBehavior.Cascade);
         activity.Property(a => a.Type).HasMaxLength(20).IsRequired();
         activity.Property(a => a.PreviousValue).HasMaxLength(24);
@@ -96,10 +107,12 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         key.HasOne<TravelInquiry>().WithMany().HasForeignKey(k => k.RequestId).OnDelete(DeleteBehavior.Cascade);
         var notification = model.Entity<NotificationRecord>();
         notification.HasKey(n => n.Id);
+        notification.HasIndex(n => new { n.ProposalId, n.Kind }).IsUnique().HasFilter("\"ProposalId\" IS NOT NULL");
+        notification.HasOne<TravelProposal>().WithMany().HasForeignKey(n => n.ProposalId).OnDelete(DeleteBehavior.Cascade);
         notification.HasIndex(n => new { n.InvoiceId, n.Kind }).IsUnique().HasFilter("\"InvoiceId\" IS NOT NULL");
         notification.HasOne<Invoice>().WithMany().HasForeignKey(n => n.InvoiceId).OnDelete(DeleteBehavior.Cascade);
         notification.Property(n => n.Kind).HasMaxLength(32).IsRequired();
-        notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL");
+        notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL AND \"ProposalId\" IS NULL");
         notification.HasIndex(n => new { n.QuotationId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NOT NULL");
         notification.HasOne<Quotation>().WithMany().HasForeignKey(n => n.QuotationId).OnDelete(DeleteBehavior.Cascade);
         notification.HasIndex(n => n.NextAttemptAt).HasFilter("\"SentAt\" IS NULL AND \"DeadLetterAt\" IS NULL");

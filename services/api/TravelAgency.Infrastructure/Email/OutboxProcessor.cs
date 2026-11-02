@@ -4,10 +4,11 @@ using TravelAgency.Application.Requests;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
+using TravelAgency.Infrastructure.Research;
 
 namespace TravelAgency.Infrastructure.Email;
 
-public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null) : INotificationProcessor
+public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null, ProposalTokenCodec? proposalCodec = null) : INotificationProcessor
 {
     public static TimeSpan RetryDelay(int attempts) => TimeSpan.FromSeconds(Math.Min(3600, 30 * Math.Pow(2, Math.Clamp(attempts - 1, 0, 20))));
     public async Task<bool> ProcessOneAsync(CancellationToken ct)
@@ -24,7 +25,13 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         try
         {
             EmailMessage? message;
-            if (notification.InvoiceId is { } invoiceId)
+            if (notification.ProposalId is { } proposalId)
+            {
+                var proposal = await db.TravelProposals.AsNoTracking().Include(p => p.Alternatives).SingleAsync(p => p.Id == proposalId, ct);
+                var number = await db.ProposalSeries.Where(s => s.Id == proposal.SeriesId).Select(s => s.Number).SingleAsync(ct);
+                message = ProposalNotificationTemplates.Create(notification, proposal, number, settings, proposalCodec!, clock.GetUtcNow());
+            }
+            else if (notification.InvoiceId is { } invoiceId)
             {
                 var invoice = await db.Invoices.AsNoTracking().SingleAsync(i => i.Id == invoiceId, ct);
                 message = InvoiceNotificationTemplates.Create(notification, invoice, settings, invoiceCodec!);

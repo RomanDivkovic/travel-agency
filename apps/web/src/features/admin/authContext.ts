@@ -17,10 +17,12 @@ export function useAdminAuth() {
   return useContext(AuthContext);
 }
 export function safeAdminReturn(value: unknown) {
-  return typeof value === 'string' &&
-    /^\/admin(?:\/(?:requests|quotations|invoices)(?:\/[0-9a-f-]{36})?)?$/i.test(
-      value,
-    )
+  if (typeof value !== 'string') return '/admin';
+  return /^\/admin(?:\/(?:requests|quotations|invoices|proposals)(?:\/[0-9a-f-]{36})?)?$/i.test(
+    value,
+  ) ||
+    /^\/admin\/requests\/[0-9a-f-]{36}\/research$/i.test(value) ||
+    /^\/admin\/proposals\/[0-9a-f-]{36}\/edit$/i.test(value)
     ? value
     : '/admin';
 }

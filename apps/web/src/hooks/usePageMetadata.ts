@@ -9,13 +9,15 @@ export function usePageMetadata(title: string, description?: string) {
   const text = description ?? t.meta.description;
   const { pathname } = useLocation();
   useEffect(() => {
+    const privatePath = pathname.replace(/\/+$/, '') || '/';
     document.title = `${title} | ${branding.name}`;
     const tags: Record<string, string> = {
       description: text,
       robots:
         !pathname.startsWith('/admin') &&
-        pathname !== '/quote' &&
-        pathname !== '/invoice' &&
+        privatePath !== '/quote' &&
+        privatePath !== '/travel-proposal' &&
+        privatePath !== '/invoice' &&
         !pathname.startsWith('/payment/') &&
         branding.isPublicLaunch
           ? 'index, follow'
@@ -49,8 +51,9 @@ export function usePageMetadata(title: string, description?: string) {
       const origin = new URL(String(import.meta.env.VITE_SITE_URL));
       if (
         pathname.startsWith('/admin') ||
-        pathname === '/quote' ||
-        pathname === '/invoice' ||
+        privatePath === '/quote' ||
+        privatePath === '/travel-proposal' ||
+        privatePath === '/invoice' ||
         pathname.startsWith('/payment/') ||
         origin.protocol !== 'https:' ||
         origin.username ||
