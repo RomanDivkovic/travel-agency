@@ -1,3 +1,4 @@
+import { ConversationContact } from '../messaging/MessagingIntegration';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { Button } from '../../components/ui/Button';
@@ -83,6 +84,7 @@ function RequestPage({ id }: { id: string }) {
             <p className={styles.badge}>{t.statuses[d.request.status]}</p>
             <JourneyProgress journey={d.request.journey} />
             <RequestFields request={d.request} />
+            <ConversationContact kind="request" id={id} />
             <section className={styles.panel}>
               <h2>{t.related}</h2>
               <PortalCards items={d.related} />
@@ -305,6 +307,7 @@ function BookingPage({ id }: { id: string }) {
         </Link>
       </nav>
       <h1>{b?.reference ?? t.bookings}</h1>
+      {b && <ConversationContact kind="booking" id={id} />}
       <PortalLoad
         error={state.error}
         loading={!b}

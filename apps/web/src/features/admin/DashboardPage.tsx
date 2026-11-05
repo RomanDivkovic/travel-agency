@@ -1,3 +1,4 @@
+import { MessagingOverview } from '../messaging/MessagingIntegration';
 import { BookingOverview } from '../bookings/BookingIntegration';
 import { PaymentOverview } from '../payments/PaymentOverview';
 import { useCallback, useState } from 'react';
@@ -45,6 +46,7 @@ export function DashboardPage() {
           </div>
           <PaymentOverview />
           <BookingOverview />
+          <MessagingOverview admin />
           <h2>{t.recent}</h2>
           <RequestCards nested items={state.data.recentlyUpdated} />
         </>

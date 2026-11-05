@@ -1,3 +1,4 @@
+import { MessagingOverview } from '../messaging/MessagingIntegration';
 import { useCallback, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { Button } from '../../components/ui/Button';
@@ -123,6 +124,7 @@ export function CustomerDashboardPage() {
           </>
         )}
       </PortalLoad>
+      <MessagingOverview />
       <ClaimRequestForm />
     </>
   );

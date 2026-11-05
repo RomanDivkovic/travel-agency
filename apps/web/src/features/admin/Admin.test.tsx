@@ -12,6 +12,23 @@ import { quotationApi } from '../quotations/api';
 import { safeAdminReturn, useAdminAuth } from './authContext';
 import { AuthProvider } from './AuthProvider';
 import type { AdminUser, RequestDetail, RequestItem } from './model';
+vi.mock('../messaging/api', () => ({
+  messagingApi: {
+    summary: async () => ({
+      unreadCount: 0,
+      awaitingReply: 0,
+      highPriority: 0,
+      recent: [],
+    }),
+    list: async () => ({
+      items: [],
+      page: 1,
+      pageSize: 20,
+      totalCount: 0,
+      totalPages: 0,
+    }),
+  },
+}));
 vi.mock('./api', () => ({
   expiredEvent: 'travel-admin-session-ended',
   adminApi: {

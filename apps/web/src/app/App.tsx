@@ -1,3 +1,18 @@
+const MessagingInboxPage = lazy(() =>
+  import('../features/messaging/InboxPage').then((m) => ({
+    default: m.InboxPage,
+  })),
+);
+const MessagingConversationPage = lazy(() =>
+  import('../features/messaging/ConversationPage').then((m) => ({
+    default: m.ConversationPage,
+  })),
+);
+const NewConversationPage = lazy(() =>
+  import('../features/messaging/NewConversationPage').then((m) => ({
+    default: m.NewConversationPage,
+  })),
+);
 const DocumentsPage = lazy(() =>
   import('../features/travel-documents/DocumentPages').then((m) => ({
     default: m.DocumentsPage,
@@ -236,6 +251,15 @@ export function App() {
                     path="bookings/:id/itinerary"
                     element={<ItineraryPage />}
                   />
+                  <Route path="messages" element={<MessagingInboxPage />} />
+                  <Route
+                    path="messages/new"
+                    element={<NewConversationPage />}
+                  />
+                  <Route
+                    path="messages/:id"
+                    element={<MessagingConversationPage />}
+                  />
                   <Route path="profile" element={<CustomerProfilePage />} />
                   <Route path="security" element={<CustomerSecurityPage />} />
                 </Route>
@@ -274,6 +298,11 @@ export function App() {
                 <Route
                   path="proposals/:id/edit"
                   element={<AdminProposalPage />}
+                />
+                <Route path="messages" element={<MessagingInboxPage admin />} />
+                <Route
+                  path="messages/:id"
+                  element={<MessagingConversationPage admin />}
                 />
                 <Route path="requests" element={<RequestsPage />} />
                 <Route path="invoices" element={<AdminInvoiceListPage />} />

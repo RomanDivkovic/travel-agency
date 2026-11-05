@@ -259,10 +259,12 @@ test('private documents and controlled itineraries reach only the verified owner
     customer.getByText('TEST private revision', { exact: true }),
   ).toHaveCount(0);
   for (const language of ['en', 'sv']) {
-    for (const p of [admin, customer])
+    for (const p of [admin, customer]) {
       await p
         .getByRole('combobox', { name: /^(Language|Språk)$/ })
         .selectOption(language);
+      await expect(p.locator('html')).toHaveAttribute('lang', language);
+    }
     for (const width of [375, 768, 1024, 1440]) {
       for (const [p, base] of [
         [admin, adminBase],
@@ -271,6 +273,7 @@ test('private documents and controlled itineraries reach only the verified owner
         await p.setViewportSize({ width, height: 900 });
         for (const suffix of ['/documents', '/itinerary']) {
           await p.goto(base + suffix);
+          await expect(p.locator('html')).toHaveAttribute('lang', language);
           await expect(
             p.locator('h1'),
             language +

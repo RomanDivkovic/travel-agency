@@ -6,6 +6,7 @@ using TravelAgency.Domain.Bookings;
 using TravelAgency.Infrastructure.Bookings;
 using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Documents;
+using TravelAgency.Infrastructure.Messaging;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
@@ -13,7 +14,7 @@ using TravelAgency.Infrastructure.Research;
 
 namespace TravelAgency.Infrastructure.Email;
 
-public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null, ProposalTokenCodec? proposalCodec = null, CustomerTokenCodec? customerCodec = null) : INotificationProcessor
+public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null, ProposalTokenCodec? proposalCodec = null, CustomerTokenCodec? customerCodec = null, MessagingSettings? messagingSettings = null) : INotificationProcessor
 {
     public static TimeSpan RetryDelay(int attempts) => TimeSpan.FromSeconds(Math.Min(3600, 30 * Math.Pow(2, Math.Clamp(attempts - 1, 0, 20))));
     public async Task<bool> ProcessOneAsync(CancellationToken ct)
@@ -29,7 +30,15 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         try
         {
             EmailMessage? message;
-            if (notification.Kind.StartsWith("document-published-", StringComparison.Ordinal) || notification.Kind.StartsWith("itinerary-published-", StringComparison.Ordinal))
+            MessagingDelivery? delivery = null;
+            if (notification.ConversationId is { } conversationId)
+            {
+                await db.Database.SqlQuery<Guid>($"SELECT \"Id\" AS \"Value\" FROM \"Conversations\" WHERE \"Id\" = {conversationId} FOR NO KEY UPDATE").ToArrayAsync(ct);
+                delivery = await MessagingNotifications.PrepareAsync(notification, db, messagingSettings ?? new(), settings, now, ct);
+                if (delivery.DeferUntil is { } until) { notification.NextAttemptAt = until; notification.Attempts--; await db.SaveChangesAsync(ct); await transaction.CommitAsync(ct); return true; }
+                message = delivery.Message;
+            }
+            else if (notification.Kind.StartsWith("document-published-", StringComparison.Ordinal) || notification.Kind.StartsWith("itinerary-published-", StringComparison.Ordinal))
             {
                 await db.Database.SqlQuery<Guid>($"SELECT \"Id\" AS \"Value\" FROM \"Bookings\" WHERE \"Id\" = {notification.BookingId} FOR NO KEY UPDATE").ToArrayAsync(ct);
                 message = await DocumentNotifications.MessageAsync(notification, db, settings, ct);
@@ -64,7 +73,7 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
             if (message is null) { notification.DeadLetterAt = clock.GetUtcNow(); notification.ProtectedLink = null; }
             else
             {
-                await sender.SendAsync(message, ct); notification.SentAt = clock.GetUtcNow(); notification.ProtectedLink = null;
+                await sender.SendAsync(message, ct); delivery?.Complete(clock.GetUtcNow(), messagingSettings ?? new()); notification.SentAt = clock.GetUtcNow(); notification.ProtectedLink = null;
                 if (notification.BookingId is { } booking) db.RequestActivities.Add(new RequestActivity { RequestId = notification.RequestId!.Value, BookingId = booking, Type = "BookingMailSent", CreatedAt = clock.GetUtcNow() });
             }
         }

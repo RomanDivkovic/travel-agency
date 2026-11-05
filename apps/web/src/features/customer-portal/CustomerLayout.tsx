@@ -1,3 +1,5 @@
+import { MessagingProvider } from '../messaging/MessagingProvider';
+import { MessagesNavigation } from '../messaging/MessagingIntegration';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { BrandLogo } from '../../components/layout/BrandLogo';
@@ -27,6 +29,7 @@ function CustomerNavigation() {
           {label}
         </NavLink>
       ))}
+      <MessagesNavigation />
     </nav>
   );
 }
@@ -96,7 +99,7 @@ function AccountLanguage() {
     </div>
   );
 }
-export function CustomerLayout() {
+function CustomerLayoutContent() {
   const t = useCustomerCopy();
   const { pathname } = useLocation();
   const main = useRef<HTMLElement>(null);
@@ -135,5 +138,13 @@ export function CustomerLayout() {
         </main>
       </div>
     </>
+  );
+}
+
+export function CustomerLayout() {
+  return (
+    <MessagingProvider admin={false}>
+      <CustomerLayoutContent />
+    </MessagingProvider>
   );
 }

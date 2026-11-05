@@ -4,6 +4,7 @@ using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Bookings;
 using TravelAgency.Domain.Customers;
 using TravelAgency.Domain.Documents;
+using TravelAgency.Domain.Messaging;
 using TravelAgency.Domain.Payments;
 using TravelAgency.Domain.Quotations;
 using TravelAgency.Domain.Requests;
@@ -12,6 +13,7 @@ using TravelAgency.Infrastructure.Admin;
 using TravelAgency.Infrastructure.Bookings;
 using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Documents;
+using TravelAgency.Infrastructure.Messaging;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
@@ -21,6 +23,10 @@ namespace TravelAgency.Infrastructure.Persistence;
 
 public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext> options) : IdentityDbContext<Administrator>(options)
 {
+    public DbSet<CustomerConversation> Conversations => Set<CustomerConversation>();
+    public DbSet<ConversationMessage> ConversationMessages => Set<ConversationMessage>();
+    public DbSet<ConversationReadState> ConversationReads => Set<ConversationReadState>();
+    public DbSet<ConversationEvent> ConversationEvents => Set<ConversationEvent>();
     public DbSet<TravelDocument> TravelDocuments => Set<TravelDocument>();
     public DbSet<TravelDocumentVersion> DocumentVersions => Set<TravelDocumentVersion>();
     public DbSet<DocumentBlob> DocumentBlobs => Set<DocumentBlob>();
@@ -63,6 +69,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         model.ConfigureBookings();
         model.ConfigureCustomers();
         model.ConfigureDocuments();
+        model.ConfigureMessaging();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);
