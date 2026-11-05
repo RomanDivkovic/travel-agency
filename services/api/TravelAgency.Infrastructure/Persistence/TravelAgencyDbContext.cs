@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Bookings;
 using TravelAgency.Domain.Customers;
+using TravelAgency.Domain.Documents;
 using TravelAgency.Domain.Payments;
 using TravelAgency.Domain.Quotations;
 using TravelAgency.Domain.Requests;
@@ -10,6 +11,7 @@ using TravelAgency.Domain.Research;
 using TravelAgency.Infrastructure.Admin;
 using TravelAgency.Infrastructure.Bookings;
 using TravelAgency.Infrastructure.Customers;
+using TravelAgency.Infrastructure.Documents;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
@@ -19,6 +21,11 @@ namespace TravelAgency.Infrastructure.Persistence;
 
 public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext> options) : IdentityDbContext<Administrator>(options)
 {
+    public DbSet<TravelDocument> TravelDocuments => Set<TravelDocument>();
+    public DbSet<TravelDocumentVersion> DocumentVersions => Set<TravelDocumentVersion>();
+    public DbSet<DocumentBlob> DocumentBlobs => Set<DocumentBlob>();
+    public DbSet<ItinerarySeries> Itineraries => Set<ItinerarySeries>();
+    public DbSet<TravelItinerary> ItineraryVersions => Set<TravelItinerary>();
     public DbSet<CustomerRequestOwnership> CustomerRequests => Set<CustomerRequestOwnership>();
     public DbSet<CustomerAccountAction> CustomerActions => Set<CustomerAccountAction>();
     public DbSet<CustomerSecurityEvent> CustomerSecurityEvents => Set<CustomerSecurityEvent>();
@@ -55,6 +62,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         model.ConfigureResearch();
         model.ConfigureBookings();
         model.ConfigureCustomers();
+        model.ConfigureDocuments();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);
@@ -130,7 +138,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         notification.HasOne<TravelProposal>().WithMany().HasForeignKey(n => n.ProposalId).OnDelete(DeleteBehavior.Cascade);
         notification.HasIndex(n => new { n.InvoiceId, n.Kind }).IsUnique().HasFilter("\"InvoiceId\" IS NOT NULL");
         notification.HasOne<Invoice>().WithMany().HasForeignKey(n => n.InvoiceId).OnDelete(DeleteBehavior.Cascade);
-        notification.Property(n => n.Kind).HasMaxLength(32).IsRequired();
+        notification.Property(n => n.Kind).HasMaxLength(64).IsRequired();
         notification.HasIndex(n => new { n.RequestId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NULL AND \"InvoiceId\" IS NULL AND \"ProposalId\" IS NULL AND \"BookingId\" IS NULL");
         notification.HasIndex(n => new { n.QuotationId, n.Kind }).IsUnique().HasFilter("\"QuotationId\" IS NOT NULL");
         notification.HasOne<Quotation>().WithMany().HasForeignKey(n => n.QuotationId).OnDelete(DeleteBehavior.Cascade);

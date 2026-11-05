@@ -1,3 +1,13 @@
+const DocumentsPage = lazy(() =>
+  import('../features/travel-documents/DocumentPages').then((m) => ({
+    default: m.DocumentsPage,
+  })),
+);
+const ItineraryPage = lazy(() =>
+  import('../features/travel-documents/DocumentPages').then((m) => ({
+    default: m.ItineraryPage,
+  })),
+);
 const RequestDetailPage = lazy(() =>
   import('../features/admin/RequestDetailPage').then((m) => ({
     default: m.RequestDetailPage,
@@ -218,6 +228,14 @@ export function App() {
                     path="bookings/:id"
                     element={<CustomerDetailPage kind="bookings" />}
                   />
+                  <Route
+                    path="bookings/:id/documents"
+                    element={<DocumentsPage />}
+                  />
+                  <Route
+                    path="bookings/:id/itinerary"
+                    element={<ItineraryPage />}
+                  />
                   <Route path="profile" element={<CustomerProfilePage />} />
                   <Route path="security" element={<CustomerSecurityPage />} />
                 </Route>
@@ -242,6 +260,14 @@ export function App() {
                 <Route
                   path="bookings/:id"
                   element={<AdminBookingDetailPage />}
+                />
+                <Route
+                  path="bookings/:id/documents"
+                  element={<DocumentsPage admin />}
+                />
+                <Route
+                  path="bookings/:id/itinerary"
+                  element={<ItineraryPage admin />}
                 />
                 <Route path="proposals" element={<AdminProposalListPage />} />
                 <Route path="proposals/:id" element={<AdminProposalPage />} />

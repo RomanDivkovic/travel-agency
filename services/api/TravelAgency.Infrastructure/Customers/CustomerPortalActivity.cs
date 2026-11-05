@@ -7,7 +7,7 @@ namespace TravelAgency.Infrastructure.Customers;
 
 public sealed partial class CustomerPortalQueries
 {
-    private static readonly string[] PublicEvents = ["Submitted", "QuotationSent", "QuotationAccepted", "QuotationDeclined", "InvoiceIssued", "InvoiceOverdue", "ServiceFeeVerified", "ResearchStarted", "ProposalSent", "ProposalApproved", "ProposalRejected", "ProposalExpired", "CustomerLinked"];
+    private static readonly string[] PublicEvents = ["Submitted", "QuotationSent", "QuotationAccepted", "QuotationDeclined", "InvoiceIssued", "InvoiceOverdue", "ServiceFeeVerified", "ResearchStarted", "ProposalSent", "ProposalApproved", "ProposalRejected", "ProposalExpired", "CustomerLinked", "DocumentPublished", "ItineraryPublished"];
     public async Task<PageResult<PortalActivity>> ActivityAsync(string owner, Guid? requestId, int page, CancellationToken ct)
     {
         if (page is < 1 or > 100000) throw new CustomerOperationException(400); if (requestId is { } request) await ownership.RequireAsync(owner, request, ct);

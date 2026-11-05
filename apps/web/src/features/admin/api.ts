@@ -36,6 +36,7 @@ export async function adminMutation<T>(
   path: string,
   method: 'post' | 'patch',
   data?: unknown,
+  timeout?: number,
 ): Promise<T> {
   const token = await adminRead<{ token: string }>('/auth/csrf');
   try {
@@ -44,6 +45,7 @@ export async function adminMutation<T>(
         url: '/api/admin' + path,
         method,
         data,
+        timeout,
         withCredentials: true,
         headers: { 'X-CSRF-TOKEN': token.token },
       })

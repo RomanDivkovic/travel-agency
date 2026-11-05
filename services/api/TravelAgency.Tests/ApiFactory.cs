@@ -12,9 +12,11 @@ internal sealed class ApiFactory(
     string environment = "Development",
     string? connectionString = null) : WebApplicationFactory<Program>
 {
+    private readonly string documentRoot = Path.Combine(Path.GetTempPath(), "travel-document-tests-" + Guid.NewGuid().ToString("N"));
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(environment);
+        builder.UseSetting("TravelDocuments:StorageRoot", documentRoot);
         builder.UseSetting("ConnectionStrings:TravelAgency", connectionString
             ?? "Host=127.0.0.1;Port=1;Database=unavailable_tests;Username=unused;Timeout=1;Command Timeout=1");
         builder.UseSetting("Cors:AllowedOrigins:0", "http://localhost:5173");
