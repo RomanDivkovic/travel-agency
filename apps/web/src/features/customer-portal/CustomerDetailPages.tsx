@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { useApiResource } from '../../hooks/useApiResource';
 import { usePageMetadata } from '../../hooks/usePageMetadata';
 import { ApiError } from '../../services/apiClient';
+import { useDocumentCopy } from '../travel-documents/copy';
 import { useDateFormat } from '../admin/useDateFormat';
 import { RequestFields } from '../admin/RequestFields';
 import { QuotationSummary } from '../quotations/QuotationSummary';
@@ -281,6 +282,7 @@ function ProposalPage({ id }: { id: string }) {
   );
 }
 function BookingPage({ id }: { id: string }) {
+  const docs = useDocumentCopy();
   const t = useCustomerCopy();
   const date = useDateFormat();
   usePageMetadata(t.bookings);
@@ -294,6 +296,14 @@ function BookingPage({ id }: { id: string }) {
   return (
     <>
       <Link to="/account/bookings">← {t.bookings}</Link>
+      <nav className={styles.actions}>
+        <Link to={'/account/bookings/' + id + '/documents'}>
+          {docs.documents}
+        </Link>
+        <Link to={'/account/bookings/' + id + '/itinerary'}>
+          {docs.itinerary}
+        </Link>
+      </nav>
       <h1>{b?.reference ?? t.bookings}</h1>
       <PortalLoad
         error={state.error}

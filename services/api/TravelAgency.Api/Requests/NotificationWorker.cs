@@ -1,5 +1,6 @@
 using TravelAgency.Application.Quotations;
 using TravelAgency.Application.Requests;
+using TravelAgency.Infrastructure.Documents;
 using TravelAgency.Infrastructure.Email;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Requests;
@@ -29,6 +30,8 @@ public sealed class NotificationWorker(IServiceScopeFactory scopes, EmailSetting
                     await paymentScope.ServiceProvider.GetRequiredService<PaymentMaintenance>().RunAsync(stoppingToken);
                 await using (var proposalScope = scopes.CreateAsyncScope())
                     await proposalScope.ServiceProvider.GetRequiredService<ProposalMaintenance>().RunAsync(stoppingToken);
+                try { await using var documentScope = scopes.CreateAsyncScope(); await documentScope.ServiceProvider.GetRequiredService<DocumentMaintenance>().RunAsync(stoppingToken); }
+                catch (Exception e) when (e is not OperationCanceledException) { logger.LogWarning("Document cleanup unavailable; pending deletions remain stored."); }
                 for (var i = 0; i < 10; i++)
                 {
                     await using var scope = scopes.CreateAsyncScope();

@@ -49,16 +49,21 @@ export default defineConfig({
         Email__PollSeconds: '1',
         Email__CaptureDirectory: path.join(directory, 'mail'),
         Logging__LogLevel__Default: 'Warning',
+        TravelDocuments__StorageRoot: process.env.TRAVEL_E2E_STORAGE_ROOT!,
+        TravelDocuments__ScannerPort:
+          process.env.TRAVEL_E2E_SCANNER_PORT ?? '3310',
       },
     },
     {
-      command: 'npm run build && npm run preview -- --port 5177',
+      command:
+        'npm run build -- --outDir "$TRAVEL_E2E_BUILD_DIRECTORY" && npm run preview -- --port 5177 --outDir "$TRAVEL_E2E_BUILD_DIRECTORY"',
       stdout: 'pipe',
       url: 'http://localhost:5177',
       timeout: 120000,
       reuseExistingServer: false,
       env: {
         VITE_API_BASE_URL: 'http://localhost:5084',
+        TRAVEL_E2E_BUILD_DIRECTORY: path.join(directory, 'bundle'),
         CHOKIDAR_USEPOLLING: 'true',
       },
     },

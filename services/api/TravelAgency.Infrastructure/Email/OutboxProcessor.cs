@@ -5,6 +5,7 @@ using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Bookings;
 using TravelAgency.Infrastructure.Bookings;
 using TravelAgency.Infrastructure.Customers;
+using TravelAgency.Infrastructure.Documents;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
@@ -28,7 +29,12 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         try
         {
             EmailMessage? message;
-            if (notification.CustomerId is not null) message = await CustomerNotificationTemplates.CreateAsync(notification, db, customerCodec!, settings, clock.GetUtcNow(), ct);
+            if (notification.Kind.StartsWith("document-published-", StringComparison.Ordinal) || notification.Kind.StartsWith("itinerary-published-", StringComparison.Ordinal))
+            {
+                await db.Database.SqlQuery<Guid>($"SELECT \"Id\" AS \"Value\" FROM \"Bookings\" WHERE \"Id\" = {notification.BookingId} FOR NO KEY UPDATE").ToArrayAsync(ct);
+                message = await DocumentNotifications.MessageAsync(notification, db, settings, ct);
+            }
+            else if (notification.CustomerId is not null) message = await CustomerNotificationTemplates.CreateAsync(notification, db, customerCodec!, settings, clock.GetUtcNow(), ct);
             else if (notification.BookingId is { } bookingId)
             {
                 // Lock this aggregate through delivery. Mutations never lock outbox rows, avoiding reverse lock ordering.

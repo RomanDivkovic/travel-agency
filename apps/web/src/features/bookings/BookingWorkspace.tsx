@@ -11,6 +11,7 @@ import { ResearchOptionSummary } from '../travel-research/ResearchOptionSummary'
 import { ProposalSummary } from '../travel-research/ProposalSummary';
 import { TextArea } from '../travel-research/ResearchShared';
 import { bookingApi } from './api';
+import { useDocumentCopy } from '../travel-documents/copy';
 import { useBookingCopy } from './copy';
 import { BookingError, ConfirmAction } from './BookingShared';
 import { ReservationActions } from './ReservationActions';
@@ -197,6 +198,7 @@ function History({ id, revision }: { id: string; revision: number }) {
   );
 }
 export function AdminBookingDetailPage() {
+  const docs = useDocumentCopy();
   const { id = '' } = useParams();
   const t = useBookingCopy();
   usePageMetadata(t.workspace);
@@ -223,6 +225,14 @@ export function AdminBookingDetailPage() {
         <>
           <section className={styles.panel}>
             <h2>{d.booking.reference}</h2>
+            <nav className={styles.actions}>
+              <Link to={'/admin/bookings/' + d.booking.id + '/documents'}>
+                {docs.manageDocuments}
+              </Link>
+              <Link to={'/admin/bookings/' + d.booking.id + '/itinerary'}>
+                {docs.manageItinerary}
+              </Link>
+            </nav>
             <p>
               {d.booking.customerName} · {d.booking.destination} ·{' '}
               {d.booking.departure} – {d.booking.return}
