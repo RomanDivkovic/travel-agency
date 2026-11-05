@@ -4,6 +4,7 @@ using TravelAgency.Application.Requests;
 using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Bookings;
 using TravelAgency.Infrastructure.Bookings;
+using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
@@ -11,7 +12,7 @@ using TravelAgency.Infrastructure.Research;
 
 namespace TravelAgency.Infrastructure.Email;
 
-public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null, ProposalTokenCodec? proposalCodec = null) : INotificationProcessor
+public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sender, EmailSettings settings, TimeProvider clock, ILogger<OutboxProcessor>? logger = null, QuotationTokenCodec? quotationCodec = null, InvoiceTokenCodec? invoiceCodec = null, ProposalTokenCodec? proposalCodec = null, CustomerTokenCodec? customerCodec = null) : INotificationProcessor
 {
     public static TimeSpan RetryDelay(int attempts) => TimeSpan.FromSeconds(Math.Min(3600, 30 * Math.Pow(2, Math.Clamp(attempts - 1, 0, 20))));
     public async Task<bool> ProcessOneAsync(CancellationToken ct)
@@ -23,12 +24,12 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
         if (notification is null) return false;
         notification.Attempts++;
         logger?.LogInformation("Notification {NotificationId} attempt {Attempt}", notification.Id, notification.Attempts);
-        var request = await db.TravelRequests.SingleAsync(r => r.Id == notification.RequestId, ct);
         var retryable = true;
         try
         {
             EmailMessage? message;
-            if (notification.BookingId is { } bookingId)
+            if (notification.CustomerId is not null) message = await CustomerNotificationTemplates.CreateAsync(notification, db, customerCodec!, settings, clock.GetUtcNow(), ct);
+            else if (notification.BookingId is { } bookingId)
             {
                 // Lock this aggregate through delivery. Mutations never lock outbox rows, avoiding reverse lock ordering.
                 await db.Database.SqlQuery<Guid>($"SELECT \"Id\" AS \"Value\" FROM \"Bookings\" WHERE \"Id\" = {bookingId} FOR NO KEY UPDATE").ToArrayAsync(ct);
@@ -53,12 +54,12 @@ public sealed class OutboxProcessor(TravelAgencyDbContext db, IEmailSender sende
                 var number = await db.QuotationSeries.Where(s => s.Id == quote.SeriesId).Select(s => s.Number).SingleAsync(ct);
                 message = QuotationNotificationTemplates.Create(notification, quote, number, settings, quotationCodec!, clock.GetUtcNow());
             }
-            else message = NotificationTemplates.Create(notification.Id, notification.Kind, request, settings);
+            else message = NotificationTemplates.Create(notification.Id, notification.Kind, await db.TravelRequests.SingleAsync(r => r.Id == notification.RequestId, ct), settings);
             if (message is null) { notification.DeadLetterAt = clock.GetUtcNow(); notification.ProtectedLink = null; }
             else
             {
                 await sender.SendAsync(message, ct); notification.SentAt = clock.GetUtcNow(); notification.ProtectedLink = null;
-                if (notification.BookingId is { } booking) db.RequestActivities.Add(new RequestActivity { RequestId = notification.RequestId, BookingId = booking, Type = "BookingMailSent", CreatedAt = clock.GetUtcNow() });
+                if (notification.BookingId is { } booking) db.RequestActivities.Add(new RequestActivity { RequestId = notification.RequestId!.Value, BookingId = booking, Type = "BookingMailSent", CreatedAt = clock.GetUtcNow() });
             }
         }
         catch (EmailDeliveryException failure) { retryable = failure.Retryable; }

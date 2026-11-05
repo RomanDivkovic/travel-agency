@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import {
   LanguageContext,
   readLanguage,
@@ -10,14 +10,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
-  function setLanguage(next: Language) {
+  const setLanguage = useCallback((next: Language) => {
     updateLanguage(next);
     try {
       localStorage.setItem(languageStorageKey, next);
     } catch {
       /* Switching still works when storage is blocked. */
     }
-  }
+  }, []);
   return (
     <LanguageContext value={{ language, setLanguage }}>
       {children}

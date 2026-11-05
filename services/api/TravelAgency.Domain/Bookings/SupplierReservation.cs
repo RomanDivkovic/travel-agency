@@ -94,6 +94,7 @@ public sealed class BookingEvent
     public Guid BookingId { get; set; }
     public Guid? ReservationId { get; set; }
     public string Type { get; set; } = "";
+    public string? CustomerStatus { get; set; }
     public string ActorId { get; set; } = "";
     public DateTimeOffset CreatedAt { get; set; }
     public string SnapshotJson { get; set; } = "";

@@ -12,11 +12,17 @@ export function ProposalDecision({
   token,
   onConfirmed,
   onRefresh,
+  onRespond,
 }: {
   proposal: CustomerProposal;
   token: string;
   onConfirmed: (p: CustomerProposal) => void;
   onRefresh: () => void;
+  onRespond?: (
+    approve: boolean,
+    alternativeId: string | null,
+    feedback: string,
+  ) => Promise<CustomerProposal>;
 }) {
   const t = useResearchCopy();
   const [selected, setSelected] = useState('');
@@ -39,13 +45,19 @@ export function ProposalDecision({
     setError(undefined);
     try {
       onConfirmed(
-        await publicProposalApi.respond(
-          token,
-          p,
-          confirm === 'approve',
-          confirm === 'approve' ? selected : null,
-          feedback,
-        ),
+        await (onRespond
+          ? onRespond(
+              confirm === 'approve',
+              confirm === 'approve' ? selected : null,
+              feedback,
+            )
+          : publicProposalApi.respond(
+              token,
+              p,
+              confirm === 'approve',
+              confirm === 'approve' ? selected : null,
+              feedback,
+            )),
       );
     } catch (e) {
       setError(e instanceof ApiError ? (e.status ?? 0) : 0);

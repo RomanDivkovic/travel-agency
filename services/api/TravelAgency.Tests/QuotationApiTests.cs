@@ -66,6 +66,7 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
         await db.ResearchWorkspaces.Where(w => requests.Contains(w.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.Invoices.Where(i => requests.Contains(i.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.TravelRequests.Where(r => requests.Contains(r.Id)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.Users.Where(u => customerIds.Contains(u.Id)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         var users = scope.ServiceProvider.GetRequiredService<UserManager<Administrator>>(); var user = await users.FindByIdAsync(userId); if (user is not null) Assert.True((await users.DeleteAsync(user)).Succeeded);
         await factory.DisposeAsync(); await original.DisposeAsync();
     }
@@ -77,9 +78,10 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
         return await client.SendAsync(request, TestContext.Current.CancellationToken);
     }
     private async Task Login(HttpClient client) { using var response = await Mutate(client, "/api/admin/auth/login", new { email, password }); Assert.Equal(HttpStatusCode.OK, response.StatusCode); }
-    private async Task<AdminQuotationDto> Create(HttpClient client, string language = "sv")
+    private async Task<AdminQuotationDto> Create(HttpClient client, string language = "sv", string? contactEmail = null)
     {
-        using var post = new HttpRequestMessage(HttpMethod.Post, "/api/travel-requests") { Content = JsonContent.Create(RequestExamples.Input("complete", language)) }; post.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString("D"));
+        var submission = RequestExamples.Input("complete", language); if (contactEmail is not null) submission = submission with { Contact = submission.Contact! with { Email = contactEmail } };
+        using var post = new HttpRequestMessage(HttpMethod.Post, "/api/travel-requests") { Content = JsonContent.Create(submission) }; post.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString("D"));
         using var result = await client.SendAsync(post, TestContext.Current.CancellationToken); Assert.Equal(HttpStatusCode.Created, result.StatusCode); var receipt = (await result.Content.ReadFromJsonAsync<SubmissionReceipt>(TestContext.Current.CancellationToken))!;
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>(); var id = await db.TravelRequests.Where(r => r.ReferenceNumber == receipt.ReferenceNumber).Select(r => r.Id).SingleAsync(TestContext.Current.CancellationToken); requests.Add(id);
         using var created = await Mutate(client, $"/api/admin/travel-requests/{id}/quotations"); Assert.Equal(HttpStatusCode.Created, created.StatusCode);
@@ -87,9 +89,9 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
     }
     private static async Task<AdminQuotationDto> Detail(HttpClient client, Guid id) => (await client.GetFromJsonAsync<AdminQuotationDto>($"/api/admin/quotations/{id}", TestContext.Current.CancellationToken))!;
     private static QuotationDraftInput Input(AdminQuotationDto q, DateTimeOffset? until = null) => new(q.VersionToken, "TEST service <script>untrusted</script>", "TEST included", "TEST excluded", "TEST TERMS – not legal terms.", "TEST customer note", "SEK", "VatExclusive", until ?? DateTimeOffset.UtcNow.AddDays(14), [new("TEST service", 3, 1995, 2500)]);
-    private async Task<AdminQuotationDto> Prepare(HttpClient client, string language = "sv", DateTimeOffset? until = null)
+    private async Task<AdminQuotationDto> Prepare(HttpClient client, string language = "sv", DateTimeOffset? until = null, string? contactEmail = null)
     {
-        var q = await Create(client, language); using var saved = await Mutate(client, $"/api/admin/quotations/{q.Id}", Input(q, until), HttpMethod.Patch); Assert.Equal(HttpStatusCode.NoContent, saved.StatusCode); return await Detail(client, q.Id);
+        var q = await Create(client, language, contactEmail); using var saved = await Mutate(client, $"/api/admin/quotations/{q.Id}", Input(q, until), HttpMethod.Patch); Assert.Equal(HttpStatusCode.NoContent, saved.StatusCode); return await Detail(client, q.Id);
     }
     private async Task<string> Send(HttpClient client, AdminQuotationDto q)
     {

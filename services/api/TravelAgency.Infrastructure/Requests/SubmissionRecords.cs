@@ -9,6 +9,8 @@ public sealed class IdempotencyRecord
 }
 public sealed class NotificationRecord
 {
+    public string? CustomerId { get; set; }
+    public Guid? CustomerActionId { get; set; }
     public Guid? BookingId { get; set; }
     public int? BookingRevision { get; set; }
     public string? PayloadJson { get; set; }
@@ -17,7 +19,7 @@ public sealed class NotificationRecord
     public Guid? QuotationId { get; set; }
     public string? ProtectedLink { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid RequestId { get; set; }
+    public Guid? RequestId { get; set; }
     public string Kind { get; set; } = "";
     public int Attempts { get; set; }
     public DateTimeOffset NextAttemptAt { get; set; }

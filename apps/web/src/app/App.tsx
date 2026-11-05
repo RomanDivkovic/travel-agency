@@ -79,6 +79,56 @@ const AdminBookingDetailPage = lazy(() =>
     default: m.AdminBookingDetailPage,
   })),
 );
+const CustomerRoot = lazy(() =>
+  import('../features/customer-portal/session').then((m) => ({
+    default: m.CustomerRoot,
+  })),
+);
+const RequireCustomer = lazy(() =>
+  import('../features/customer-portal/session').then((m) => ({
+    default: m.RequireCustomer,
+  })),
+);
+const CustomerLayout = lazy(() =>
+  import('../features/customer-portal/CustomerLayout').then((m) => ({
+    default: m.CustomerLayout,
+  })),
+);
+const CustomerAuthPage = lazy(() =>
+  import('../features/customer-portal/AuthPages').then((m) => ({
+    default: m.CustomerAuthPage,
+  })),
+);
+const CustomerTokenPage = lazy(() =>
+  import('../features/customer-portal/AuthPages').then((m) => ({
+    default: m.CustomerTokenPage,
+  })),
+);
+const CustomerDashboardPage = lazy(() =>
+  import('../features/customer-portal/CustomerDashboardPage').then((m) => ({
+    default: m.CustomerDashboardPage,
+  })),
+);
+const CustomerListPage = lazy(() =>
+  import('../features/customer-portal/CustomerListPage').then((m) => ({
+    default: m.CustomerListPage,
+  })),
+);
+const CustomerDetailPage = lazy(() =>
+  import('../features/customer-portal/CustomerDetailPages').then((m) => ({
+    default: m.CustomerDetailPage,
+  })),
+);
+const CustomerProfilePage = lazy(() =>
+  import('../features/customer-portal/CustomerSettingsPages').then((m) => ({
+    default: m.CustomerProfilePage,
+  })),
+);
+const CustomerSecurityPage = lazy(() =>
+  import('../features/customer-portal/CustomerSettingsPages').then((m) => ({
+    default: m.CustomerSecurityPage,
+  })),
+);
 export function App() {
   return (
     <LanguageProvider>
@@ -86,6 +136,94 @@ export function App() {
         <RouteFocus />
         <Suspense fallback={<p role="status">Hämtar… / Loading…</p>}>
           <Routes>
+            <Route element={<CustomerRoot />}>
+              <Route
+                path="/login"
+                element={<CustomerAuthPage mode="login" />}
+              />
+              <Route
+                path="/register"
+                element={<CustomerAuthPage mode="register" />}
+              />
+              <Route
+                path="/forgot-password"
+                element={<CustomerAuthPage mode="forgot-password" />}
+              />
+              <Route
+                path="/resend-verification"
+                element={<CustomerAuthPage mode="resend-verification" />}
+              />
+              <Route
+                path="/verify-email"
+                element={<CustomerTokenPage action="verify" />}
+              />
+              <Route
+                path="/reset-password"
+                element={<CustomerTokenPage action="reset" />}
+              />
+              <Route
+                path="/confirm-request"
+                element={<CustomerTokenPage action="claim" />}
+              />
+              <Route element={<RequireCustomer />}>
+                <Route path="/account" element={<CustomerLayout />}>
+                  <Route index element={<CustomerDashboardPage />} />
+                  <Route
+                    path="requests"
+                    element={
+                      <CustomerListPage key="requests" kind="requests" />
+                    }
+                  />
+                  <Route
+                    path="quotations"
+                    element={
+                      <CustomerListPage key="quotations" kind="quotations" />
+                    }
+                  />
+                  <Route
+                    path="invoices"
+                    element={
+                      <CustomerListPage key="invoices" kind="invoices" />
+                    }
+                  />
+                  <Route
+                    path="proposals"
+                    element={
+                      <CustomerListPage key="proposals" kind="proposals" />
+                    }
+                  />
+                  <Route
+                    path="bookings"
+                    element={
+                      <CustomerListPage key="bookings" kind="bookings" />
+                    }
+                  />
+                  <Route
+                    path="requests/:id"
+                    element={<CustomerDetailPage kind="requests" />}
+                  />
+                  <Route
+                    path="quotations/:id"
+                    element={<CustomerDetailPage kind="quotations" />}
+                  />
+                  <Route
+                    path="invoices/:id"
+                    element={<CustomerDetailPage kind="invoices" />}
+                  />
+                  <Route
+                    path="proposals/:id"
+                    element={<CustomerDetailPage kind="proposals" />}
+                  />
+                  <Route
+                    path="bookings/:id"
+                    element={<CustomerDetailPage kind="bookings" />}
+                  />
+                  <Route path="profile" element={<CustomerProfilePage />} />
+                  <Route path="security" element={<CustomerSecurityPage />} />
+                </Route>
+              </Route>
+            </Route>
+
             <Route
               path="/admin"
               element={

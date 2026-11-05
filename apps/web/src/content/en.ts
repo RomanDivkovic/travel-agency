@@ -7,6 +7,7 @@ export const en = {
       'Personal help with finding, planning and booking flights, accommodation and holidays. Explore our services and learn how tailored travel planning works.',
   },
   navigation: {
+    account: 'My account',
     label: 'Main navigation',
     mobileLabel: 'Mobile navigation',
     open: 'Open menu',

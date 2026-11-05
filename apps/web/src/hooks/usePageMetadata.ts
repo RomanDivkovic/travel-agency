@@ -10,10 +10,22 @@ export function usePageMetadata(title: string, description?: string) {
   const { pathname } = useLocation();
   useEffect(() => {
     const privatePath = pathname.replace(/\/+$/, '') || '/';
+    const accountPath =
+      privatePath.startsWith('/account') ||
+      [
+        '/login',
+        '/register',
+        '/forgot-password',
+        '/resend-verification',
+        '/verify-email',
+        '/reset-password',
+        '/confirm-request',
+      ].includes(privatePath);
     document.title = `${title} | ${branding.name}`;
     const tags: Record<string, string> = {
       description: text,
       robots:
+        !accountPath &&
         !pathname.startsWith('/admin') &&
         privatePath !== '/quote' &&
         privatePath !== '/travel-proposal' &&
@@ -50,6 +62,7 @@ export function usePageMetadata(title: string, description?: string) {
     try {
       const origin = new URL(String(import.meta.env.VITE_SITE_URL));
       if (
+        accountPath ||
         pathname.startsWith('/admin') ||
         privatePath === '/quote' ||
         privatePath === '/travel-proposal' ||

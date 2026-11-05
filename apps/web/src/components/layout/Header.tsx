@@ -33,16 +33,23 @@ export function Header() {
   }, []);
 
   function links(onSelect?: () => void) {
-    return t.navigation.items.map(({ label, destination }) => (
-      <NavLink
-        key={destination}
-        to={routes[destination]}
-        onClick={onSelect}
-        end
-      >
-        {label}
-      </NavLink>
-    ));
+    return (
+      <>
+        {t.navigation.items.map(({ label, destination }) => (
+          <NavLink
+            key={destination}
+            to={routes[destination]}
+            onClick={onSelect}
+            end
+          >
+            {label}
+          </NavLink>
+        ))}
+        <NavLink to="/account" onClick={onSelect}>
+          {t.navigation.account}
+        </NavLink>
+      </>
+    );
   }
 
   return (

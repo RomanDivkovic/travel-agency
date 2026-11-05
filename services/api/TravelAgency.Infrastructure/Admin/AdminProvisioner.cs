@@ -18,7 +18,7 @@ public sealed class AdminProvisioner(TravelAgencyDbContext db, UserManager<Admin
             if (!await users.IsInRoleAsync(existing, "Administrator")) throw new InvalidOperationException("Existing account is not an administrator; no changes made.");
             return false;
         }
-        if (await db.UserRoles.AnyAsync(ct) || await db.Users.AnyAsync(ct)) throw new InvalidOperationException("An account already exists. Provisioning does not create additional administrators or overwrite credentials.");
+        if (await db.Users.AnyAsync(u => !u.IsCustomer, ct) || await db.UserRoles.AnyAsync(ur => db.Roles.Any(r => r.Id == ur.RoleId && r.NormalizedName == "ADMINISTRATOR"), ct)) throw new InvalidOperationException("An account already exists. Provisioning does not create additional administrators or overwrite credentials.");
         if (string.IsNullOrEmpty(password) || password.Length > 256) throw new InvalidOperationException("Supply an initial administrator password through secure configuration.");
         if (!await roles.RoleExistsAsync("Administrator")) Ensure(await roles.CreateAsync(new IdentityRole("Administrator")));
         var admin = new Administrator { UserName = email, Email = email, EmailConfirmed = true, DisplayName = displayName };

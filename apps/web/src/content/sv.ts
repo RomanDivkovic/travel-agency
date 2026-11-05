@@ -5,6 +5,7 @@ export const sv = {
       'Få personlig hjälp att hitta, planera och boka flyg, boende och semesterresor. Läs om personlig resehjälp, våra tjänster och hur prissättningen fungerar.',
   },
   navigation: {
+    account: 'Mitt konto',
     label: 'Huvudnavigation',
     mobileLabel: 'Mobilnavigation',
     open: 'Öppna menyn',

@@ -92,7 +92,7 @@ public sealed class BookingOperations(TravelAgencyDbContext db, ResearchTransact
     }
     private void Event(TravelBooking b, SupplierReservation? r, string type, string actor, object snapshot)
     {
-        db.BookingEvents.Add(new BookingEvent { BookingId = b.Id, ReservationId = r?.Id, Type = type, ActorId = actor, CreatedAt = clock.GetUtcNow(), SnapshotJson = JsonSerializer.Serialize(snapshot) });
+        db.BookingEvents.Add(new BookingEvent { BookingId = b.Id, ReservationId = r?.Id, Type = type, CustomerStatus = type == "BookingStatusChanged" ? b.Status.ToString() : null, ActorId = actor, CreatedAt = clock.GetUtcNow(), SnapshotJson = JsonSerializer.Serialize(snapshot) });
         if (type != "BeforeChange") db.RequestActivities.Add(new RequestActivity { RequestId = b.RequestId, BookingId = b.Id, Type = "BookingUpdated", ActorId = actor, NewValue = b.Status.ToString(), CreatedAt = clock.GetUtcNow() });
     }
 }

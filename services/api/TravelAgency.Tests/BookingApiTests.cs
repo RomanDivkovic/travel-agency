@@ -14,9 +14,9 @@ namespace TravelAgency.Tests;
 public sealed partial class QuotationApiTests
 {
     private async Task<BookingDto> BookingDetail(HttpClient c, Guid id) => (await c.GetFromJsonAsync<BookingDto>($"/api/admin/bookings/{id}", Ct))!;
-    private async Task<BookingDto> ApprovedBooking(HttpClient c, string language = "sv")
+    private async Task<BookingDto> ApprovedBooking(HttpClient c, string language = "sv", string? contactEmail = null)
     {
-        var p = await ProposalDraft(c, language); var token = await SendProposal(c, p); using var approved = await ProposalPublic(c, token, "approve", Approve(p)); Assert.Equal(HttpStatusCode.OK, approved.StatusCode);
+        var p = await ProposalDraft(c, language, contactEmail); var token = await SendProposal(c, p); using var approved = await ProposalPublic(c, token, "approve", Approve(p)); Assert.Equal(HttpStatusCode.OK, approved.StatusCode);
         using var created = await Mutate(c, $"/api/admin/proposals/{p.Id}/bookings", new CreateBookingInput(BookingDomainTests.Evidence())); Assert.Equal(HttpStatusCode.Created, created.StatusCode); var id = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetGuid(); return await BookingDetail(c, id);
     }
     private async Task<BookingDto> SaveReservation(HttpClient c, BookingDto b, Guid rid, long? increase = null)
@@ -51,7 +51,7 @@ public sealed partial class QuotationApiTests
         b = await SaveReservation(c, b, first); b = await BookingAction(c, b, first, "start"); b = await BookingAction(c, b, first, "confirm"); Assert.Equal("PartiallyConfirmed", b.Booking.Status);
         b = await SaveReservation(c, b, second); b = await BookingAction(c, b, second, "start"); b = await BookingAction(c, b, second, "fail"); Assert.Equal("PartiallyConfirmed", b.Booking.Status); Assert.Equal("Confirmed", b.Reservations.Single(r => r.Id == first).Status);
         b = await SaveReservation(c, b, second, 1000); using var unauthorized = await Mutate(c, $"/api/admin/bookings/{b.Booking.Id}/reservations/{second}/start", new BookingVersionInput(b.VersionToken)); Assert.Equal(HttpStatusCode.BadRequest, unauthorized.StatusCode);
-        b = await BookingAction(c, b, second, "reapprove"); b = await BookingAction(c, b, second, "start"); b = await BookingAction(c, b, second, "await"); b = await BookingAction(c, b, second, "confirm"); Assert.Equal("Confirmed", b.Booking.Status); Assert.Equal(original.TotalMinorUnits, b.Reservations[0].Approved.TotalMinorUnits);
+        b = await BookingAction(c, b, second, "reapprove"); b = await BookingAction(c, b, second, "start"); b = await BookingAction(c, b, second, "await"); b = await BookingAction(c, b, second, "confirm"); Assert.Equal("Confirmed", b.Booking.Status); Assert.Equal(original.TotalMinorUnits, b.Reservations.Single(r => r.Id == first).Approved.TotalMinorUnits);
         using var sent = await Mutate(c, $"/api/admin/bookings/{b.Booking.Id}/send-confirmation", new BookingVersionInput(b.VersionToken)); Assert.Equal(HttpStatusCode.NoContent, sent.StatusCode);
         using var replay = await Mutate(c, $"/api/admin/bookings/{b.Booking.Id}/send-confirmation", new BookingVersionInput(b.VersionToken)); Assert.Equal(HttpStatusCode.NoContent, replay.StatusCode);
         b = await BookingAction(c, b, second, "cancel"); Assert.Equal("PartiallyConfirmed", b.Booking.Status); Assert.Equal("Confirmed", b.Reservations.Single(r => r.Id == first).Status);

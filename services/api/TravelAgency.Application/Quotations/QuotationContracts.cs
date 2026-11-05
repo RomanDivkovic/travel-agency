@@ -47,6 +47,7 @@ public interface IQuotationIssuance
 }
 public interface IQuotationCustomers
 {
+    Task<QuotationResult> OwnedAsync(string owner, Guid id, bool? decision, bool confirmed, CancellationToken ct);
     Task<QuotationResult> ReviewAsync(string token, CancellationToken ct);
     Task<QuotationResult> RespondAsync(string token, bool accept, bool confirmed, CancellationToken ct);
 }
