@@ -8,15 +8,17 @@ namespace TravelAgency.Infrastructure.Payments;
 
 public sealed class PaymentProcessing(TravelAgencyDbContext db, InvoiceOperations invoices, IPaymentProvider provider, PaymentSettings settings, TimeProvider clock)
 {
-    public async Task<PaymentSessionResult> SessionAsync(string raw, CancellationToken ct)
+    public Task<PaymentSessionResult> SessionAsync(string raw, CancellationToken ct) => SessionCoreAsync(() => invoices.CustomerAsync(raw, ct), settings.PublicOrigin + "/payment/result#" + raw, ct);
+    public Task<PaymentSessionResult> SessionOwnedAsync(Guid id, string owner, CancellationToken ct) => SessionCoreAsync(() => invoices.OwnedAsync(id, owner, ct), settings.PublicOrigin + "/account/invoices/" + id, ct);
+    private async Task<PaymentSessionResult> SessionCoreAsync(Func<Task<Invoice>> load, string returnUrl, CancellationToken ct)
     {
-        await using var tx = await db.Database.BeginTransactionAsync(ct); var i = await invoices.CustomerAsync(raw, ct);
+        await using var tx = await db.Database.BeginTransactionAsync(ct); var i = await load();
         if (i.Status is not (InvoiceStatus.Issued or InvoiceStatus.PaymentPending or InvoiceStatus.Overdue) || i.IsSimulated != provider.IsSimulated || provider.Name == "Disabled") throw new InvoiceOperationException(409);
         var now = Quotation.Utc(clock.GetUtcNow());
         var attempt = await db.Payments.Where(p => p.InvoiceId == i.Id && p.Status == PaymentStatus.Pending && p.ExpiresAt > now).SingleOrDefaultAsync(ct);
         var attemptId = attempt?.Id ?? Guid.NewGuid();
         // Adapter must use AttemptId as its provider idempotency key. Sandbox creates in this same transaction.
-        var session = await provider.CreateSessionAsync(new(attemptId, i.Id, i.TotalMinorUnits, i.Currency, settings.PublicOrigin + "/payment/result#" + raw), ct);
+        var session = await provider.CreateSessionAsync(new(attemptId, i.Id, i.TotalMinorUnits, i.Currency, returnUrl), ct);
         if (attempt is null)
         {
             attempt = new PaymentTransaction

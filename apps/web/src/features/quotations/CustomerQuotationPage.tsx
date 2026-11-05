@@ -13,16 +13,18 @@ import { QuotationSummary } from './QuotationSummary';
 import { QuotationError } from './QuotationError';
 import type { CustomerQuotation } from './types';
 import styles from './Quotations.module.scss';
-function CustomerDecision({
+export function CustomerQuotationDecision({
   quotation: q,
   token,
   onConfirmed,
   onRefresh,
+  onRespond,
 }: {
   quotation: CustomerQuotation;
   token: string;
   onConfirmed: (q: CustomerQuotation) => void;
   onRefresh: () => void;
+  onRespond?: (accept: boolean) => Promise<CustomerQuotation>;
 }) {
   const t = useQuotationCopy();
   const [ack, setAck] = useState(false);
@@ -36,7 +38,11 @@ function CustomerDecision({
     setBusy(true);
     setError(undefined);
     try {
-      onConfirmed(await publicQuotationApi.respond(token, accept));
+      onConfirmed(
+        await (onRespond
+          ? onRespond(accept)
+          : publicQuotationApi.respond(token, accept)),
+      );
     } catch (e) {
       setError(e instanceof ApiError ? (e.status ?? 0) : 0);
     } finally {
@@ -155,7 +161,7 @@ function CustomerView({ token }: { token: string }) {
             ) : null}
             <QuotationSummary quotation={quote} />
             {quote.status === 'Sent' ? (
-              <CustomerDecision
+              <CustomerQuotationDecision
                 key={`${quote.number}-${quote.version}`}
                 quotation={quote}
                 token={token}

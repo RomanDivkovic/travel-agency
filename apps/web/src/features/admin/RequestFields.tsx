@@ -15,7 +15,11 @@ function Rows({ rows }: { rows: [string, ReactNode][] }) {
     </dl>
   );
 }
-export function RequestFields({ request: r }: { request: RequestDetail }) {
+export function RequestFields({
+  request: r,
+}: {
+  request: Pick<RequestDetail, 'contact' | 'plan' | 'language'>;
+}) {
   const t = useAdminCopy();
   const w = useWizardCopy();
   const p = r.plan;

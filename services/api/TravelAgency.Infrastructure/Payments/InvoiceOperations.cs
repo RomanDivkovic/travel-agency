@@ -3,6 +3,7 @@ using TravelAgency.Application.Payments;
 using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Payments;
 using TravelAgency.Domain.Quotations;
+using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Persistence;
 using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
@@ -66,9 +67,18 @@ public sealed class InvoiceOperations(TravelAgencyDbContext db, PaymentSettings 
         if (i.MarkOverdue(clock.GetUtcNow())) Activity(i, "InvoiceOverdue", null);
         return i;
     }
-    public async Task<InvoiceView> ReviewAsync(string raw, CancellationToken ct)
+    public async Task<Invoice> OwnedAsync(Guid id, string owner, CancellationToken ct)
     {
-        await using var tx = await db.Database.BeginTransactionAsync(ct); var i = await CustomerAsync(raw, ct); await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); var lastStatus = await db.Payments.Where(p => p.InvoiceId == i.Id).OrderByDescending(p => p.CreatedAt).Select(p => (PaymentStatus?)p.Status).FirstOrDefaultAsync(ct);
+        var i = await LockAsync(id, ct); await new CustomerOwnership(db).RequireAsync(owner, i.RequestId, ct);
+        if (i.IssuedAt is null || i.Status is InvoiceStatus.Draft or InvoiceStatus.Cancelled) throw new InvoiceOperationException(404);
+        if (i.MarkOverdue(clock.GetUtcNow())) Activity(i, "InvoiceOverdue", null); return i;
+    }
+    public Task<InvoiceView> ReviewAsync(string raw, CancellationToken ct) => ReviewCoreAsync(() => CustomerAsync(raw, ct), ct);
+    public Task<InvoiceView> ReviewOwnedAsync(Guid id, string owner, CancellationToken ct) => ReviewCoreAsync(() => OwnedAsync(id, owner, ct), ct);
+    private async Task<InvoiceView> ReviewCoreAsync(Func<Task<Invoice>> load, CancellationToken ct)
+    {
+        await using var tx = await db.Database.BeginTransactionAsync(ct); var i = await load(); await db.SaveChangesAsync(ct); await tx.CommitAsync(ct);
+        var lastStatus = await db.Payments.Where(p => p.InvoiceId == i.Id).OrderByDescending(p => p.CreatedAt).Select(p => (PaymentStatus?)p.Status).FirstOrDefaultAsync(ct);
         return InvoiceDtos.Customer(i) with { LastPaymentStatus = lastStatus?.ToString() };
     }
     public void Activity(Invoice i, string type, string? actor) => db.RequestActivities.Add(new RequestActivity { RequestId = i.RequestId, QuotationId = i.QuotationId, ActorId = actor, Type = type, NewValue = i.Status.ToString(), CreatedAt = Quotation.Utc(clock.GetUtcNow()) });

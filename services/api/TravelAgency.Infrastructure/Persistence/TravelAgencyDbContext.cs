@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Bookings;
+using TravelAgency.Domain.Customers;
 using TravelAgency.Domain.Payments;
 using TravelAgency.Domain.Quotations;
 using TravelAgency.Domain.Requests;
 using TravelAgency.Domain.Research;
 using TravelAgency.Infrastructure.Admin;
 using TravelAgency.Infrastructure.Bookings;
+using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Payments;
 using TravelAgency.Infrastructure.Quotations;
 using TravelAgency.Infrastructure.Requests;
@@ -17,6 +19,9 @@ namespace TravelAgency.Infrastructure.Persistence;
 
 public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext> options) : IdentityDbContext<Administrator>(options)
 {
+    public DbSet<CustomerRequestOwnership> CustomerRequests => Set<CustomerRequestOwnership>();
+    public DbSet<CustomerAccountAction> CustomerActions => Set<CustomerAccountAction>();
+    public DbSet<CustomerSecurityEvent> CustomerSecurityEvents => Set<CustomerSecurityEvent>();
     public DbSet<TravelBooking> Bookings => Set<TravelBooking>();
     public DbSet<SupplierReservation> SupplierReservations => Set<SupplierReservation>();
     public DbSet<BookingEvent> BookingEvents => Set<BookingEvent>();
@@ -49,6 +54,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         model.ConfigurePayments();
         model.ConfigureResearch();
         model.ConfigureBookings();
+        model.ConfigureCustomers();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);
@@ -114,6 +120,9 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         key.HasOne<TravelInquiry>().WithMany().HasForeignKey(k => k.RequestId).OnDelete(DeleteBehavior.Cascade);
         var notification = model.Entity<NotificationRecord>();
         notification.HasKey(n => n.Id);
+        notification.HasOne<Administrator>().WithMany().HasForeignKey(n => n.CustomerId).OnDelete(DeleteBehavior.Cascade);
+        notification.HasOne<CustomerAccountAction>().WithMany().HasForeignKey(n => n.CustomerActionId).OnDelete(DeleteBehavior.Cascade);
+        notification.HasIndex(n => n.CustomerActionId);
         notification.HasOne<TravelBooking>().WithMany().HasForeignKey(n => n.BookingId).OnDelete(DeleteBehavior.Cascade);
         notification.Property(n => n.PayloadJson).HasColumnType("jsonb");
         notification.HasIndex(n => new { n.BookingId, n.Kind }).IsUnique().HasFilter("\"BookingId\" IS NOT NULL");

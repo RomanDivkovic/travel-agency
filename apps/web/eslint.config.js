@@ -20,4 +20,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
     },
   },
+  {
+    files: ['*.config.ts', 'e2e/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
 );

@@ -16,9 +16,9 @@ namespace TravelAgency.Tests;
 public sealed partial class QuotationApiTests
 {
     // Synthetic provider evidence is inserted only into the isolated test database; no app bypass exists.
-    private async Task<Guid> ResearchPaidFixture(HttpClient c, string language = "sv", bool simulated = false)
+    private async Task<Guid> ResearchPaidFixture(HttpClient c, string language = "sv", bool simulated = false, string? contactEmail = null)
     {
-        var q = await Prepare(c, language); var raw = await Send(c, q); using var accepted = await Public(c, raw, "accept"); Assert.Equal(HttpStatusCode.OK, accepted.StatusCode);
+        var q = await Prepare(c, language, contactEmail: contactEmail); var raw = await Send(c, q); using var accepted = await Public(c, raw, "accept"); Assert.Equal(HttpStatusCode.OK, accepted.StatusCode);
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>(); var quote = await db.Quotations.Include(x => x.Lines).SingleAsync(x => x.Id == q.Id, Ct); var now = DateTimeOffset.UtcNow;
         var invoice = Invoice.Create(quote, q.RequestId, q.Quotation.Number, simulated, now); invoice.Edit(new("TEST address", "TEST future service", now.AddDays(14)), now); invoice.Issue("FIX-" + Guid.NewGuid().ToString("N"), "TEST", "TEST", "TEST", "TEST", "TEST", "TEST", now); invoice.MarkPaid(invoice.TotalMinorUnits, invoice.Currency, now); db.Invoices.Add(invoice);
         var payment = new PaymentTransaction { InvoiceId = invoice.Id, Provider = simulated ? "Sandbox" : "IsolatedFixtureEvidence", ProviderSessionId = Guid.NewGuid().ToString("N"), AmountMinorUnits = invoice.TotalMinorUnits, Currency = invoice.Currency, CreatedAt = now, ExpiresAt = now.AddDays(1), NextReconcileAt = now.AddDays(1) }; payment.Apply(PaymentStatus.Succeeded, Guid.NewGuid().ToString("N"), now); db.Payments.Add(payment); db.ResearchEligibility.Add(new() { RequestId = q.RequestId, InvoiceId = invoice.Id, IsSimulated = simulated, VerifiedAt = now }); await db.SaveChangesAsync(Ct); return q.RequestId;
@@ -28,9 +28,9 @@ public sealed partial class QuotationApiTests
         using var r = await Mutate(c, $"/api/admin/travel-requests/{requestId}/research/options", input); Assert.Equal(HttpStatusCode.Created, r.StatusCode); return (await r.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetGuid();
     }
     private static async Task<AdminProposalDto> ProposalDetail(HttpClient c, Guid id) => (await c.GetFromJsonAsync<AdminProposalDto>($"/api/admin/proposals/{id}", Ct))!;
-    private async Task<AdminProposalDto> ProposalDraft(HttpClient c, string language = "sv")
+    private async Task<AdminProposalDto> ProposalDraft(HttpClient c, string language = "sv", string? contactEmail = null)
     {
-        var id = await ResearchPaidFixture(c, language); using var start = await Mutate(c, $"/api/admin/travel-requests/{id}/research/start"); Assert.Equal(HttpStatusCode.NoContent, start.StatusCode);
+        var id = await ResearchPaidFixture(c, language, contactEmail: contactEmail); using var start = await Mutate(c, $"/api/admin/travel-requests/{id}/research/start"); Assert.Equal(HttpStatusCode.NoContent, start.StatusCode);
         var flight = await Option(c, id, ResearchDomainTests.Flight()); var stay = await Option(c, id, ResearchDomainTests.Stay()); var extra = await Option(c, id, ResearchDomainTests.Extra("EUR"));
         using var created = await Mutate(c, $"/api/admin/travel-requests/{id}/proposals"); Assert.Equal(HttpStatusCode.Created, created.StatusCode); var proposalId = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetGuid(); var p = await ProposalDetail(c, proposalId);
         using var saved = await Mutate(c, $"/api/admin/proposals/{proposalId}", new ProposalDraftInput(p.VersionToken, "TEST proposal <script>x</script>", "TEST intro", "TEST summary", "TEST proposal terms — NOT LEGAL.", DateTimeOffset.UtcNow.AddDays(14), [new("Option A", "TEST budget", true, [flight, stay]), new("Option B", "TEST extra", false, [flight, extra])]), HttpMethod.Patch); Assert.Equal(HttpStatusCode.NoContent, saved.StatusCode); return await ProposalDetail(c, proposalId);

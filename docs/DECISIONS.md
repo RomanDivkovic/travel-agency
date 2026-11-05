@@ -349,3 +349,16 @@ Phase 8 references: [PostgreSQL lock compatibility](https://www.postgresql.org/d
 **Reason:** Partial trips and later amendments must not produce misleading complete-trip confirmation. Queued is not delivered; supplier details must come from recorded evidence.
 
 **Consequences:** Local capture verifies application delivery, not an external inbox. At-least-once delivery remains possible on transport/commit uncertainty. No new job platform, upload system, payment integration or supplier fetcher is introduced.
+
+## Phase 10 — verified customer Identity accounts and explicit ownership
+
+- The specific Phase 10 implementation brief takes precedence over the master plan's older passwordless direction: use Identity password hashing, verified email, lockout and secure recovery. No custom credential/token cryptography or new auth provider.
+- Reuse the Identity database with explicit customer markers/roles and a separate customer cookie/policy. Administrator provisioning may proceed when only customer accounts exist, but cannot promote an existing customer or overwrite an administrator. The historical `Administrator` entity name is retained to avoid unrelated Identity migration churn.
+- Require an explicit request-bound email claim after verified login. Matching an email never automatically imports guest requests. Keep narrow guest tokens working independently; customer ownership is not a broadened quotation/proposal token.
+- Use absolute, non-sliding sessions and security-stamp global revocation instead of a new device-session store. No pretend per-device history. Email is read-only in the profile until a separate verified-change process is designed.
+- Reuse existing acceptance/payment/proposal engines through owner-checked entry points. Preserve current-version, expiry, explicit-consent, payment eligibility and concurrency rules. Never infer paid status from editable request state or simulated provider transactions.
+- Project an allowlisted customer timeline in SQL and persist a safe booking-status field. Raw internal audit records and unconfirmed replacement arrangements are not customer DTOs.
+- Reuse the transactional notification outbox for account messages. Action hash/purpose/expiry/consumption/revocation plus a stamp snapshot narrow access; protected delivery envelopes are cleared after processing. Local capture confirms application delivery only, not external inbox delivery.
+- Keep a persistent Playwright suite in the repository. An opt-in backend fixture orchestrates browser execution against a separate `*_e2e_tests` database, cleans synthetic business/account records, and introduces no production seed endpoint or eligibility bypass. Browser traces are disabled and private email/screenshot/report artifacts stay outside Git.
+
+Customer first/last names each retain their independent 100-character limit. Their combined value may exceed the historical 100-character administrator display-name column, so the legacy display value falls back to the first name when necessary; neither customer profile field is truncated. Registration and profile boundary tests cover this behavior.
