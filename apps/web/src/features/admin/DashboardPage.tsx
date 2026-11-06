@@ -1,3 +1,4 @@
+import { ManagementLinks } from '../business-management/ManagementLinks';
 import { MessagingOverview } from '../messaging/MessagingIntegration';
 import { BookingOverview } from '../bookings/BookingIntegration';
 import { PaymentOverview } from '../payments/PaymentOverview';
@@ -21,6 +22,7 @@ export function DashboardPage() {
     <>
       <p className={styles.eyebrow}>{t.admin}</p>
       <h1>{t.dashboard}</h1>
+      <ManagementLinks />
       {state.error !== undefined ? (
         <ErrorState
           status={state.error}

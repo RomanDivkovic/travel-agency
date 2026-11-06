@@ -34,6 +34,7 @@ export default defineConfig({
       command:
         'dotnet run --project services/api/TravelAgency.Api --no-launch-profile --urls http://localhost:5084',
       cwd: '../..',
+      stdout: 'pipe',
       url: 'http://localhost:5084/api/health/ready',
       timeout: 120000,
       reuseExistingServer: false,

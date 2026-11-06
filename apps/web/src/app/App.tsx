@@ -1,3 +1,24 @@
+const ManagementPage = lazy(() =>
+  import('../features/business-management/ManagementPages').then((m) => ({
+    default: m.ManagementPage,
+  })),
+);
+const ContentEditorPage = lazy(() =>
+  import('../features/business-management/ManagementPages').then((m) => ({
+    default: m.ContentEditorPage,
+  })),
+);
+const MediaLibraryPage = lazy(() =>
+  import('../features/business-management/MediaLibraryPage').then((m) => ({
+    default: m.MediaLibraryPage,
+  })),
+);
+const ContentPreviewPage = lazy(() =>
+  import('../features/business-management/ContentPreviewPage').then((m) => ({
+    default: m.ContentPreviewPage,
+  })),
+);
+import { PolicyPage } from '../features/business-management/PublishedComponents';
 const MessagingInboxPage = lazy(() =>
   import('../features/messaging/InboxPage').then((m) => ({
     default: m.InboxPage,
@@ -274,7 +295,37 @@ export function App() {
                 </AuthProvider>
               }
             >
+              <Route
+                path="content/preview/:key"
+                element={<ContentPreviewPage />}
+              />
               <Route element={<AdminLayout />}>
+                <Route
+                  path="settings/business"
+                  element={<ContentEditorPage documentKey="business" />}
+                />
+                <Route
+                  path="settings/preferences"
+                  element={<ContentEditorPage documentKey="preferences" />}
+                />
+                <Route
+                  path="settings/services"
+                  element={<ManagementPage kind="services" />}
+                />
+                <Route path="content" element={<ManagementPage />} />
+                <Route
+                  path="content/faqs"
+                  element={<ManagementPage kind="faqs" />}
+                />
+                <Route
+                  path="content/policies"
+                  element={<ManagementPage kind="policies" />}
+                />
+                <Route path="content/media" element={<MediaLibraryPage />} />
+                <Route
+                  path="content/edit/:key"
+                  element={<ContentEditorPage />}
+                />
                 <Route index element={<DashboardPage />} />
                 <Route
                   path="requests/:id/research"
@@ -337,6 +388,7 @@ export function App() {
             <Route path="/travel-proposal" element={<CustomerProposalPage />} />
             <Route path="/quote" element={<CustomerQuotationPage />} />
             <Route element={<AppLayout />}>
+              <Route path="/policies/:type" element={<PolicyPage />} />
               <Route index element={<HomePage />} />
               <Route path={routes.services} element={<ServicesPage />} />
               <Route path={routes.pricing} element={<PricingPage />} />

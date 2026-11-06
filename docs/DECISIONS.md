@@ -387,3 +387,16 @@ References: [ASP.NET upload security](https://learn.microsoft.com/en-us/aspnet/c
 - Keep refresh data scoped to the current resource and preserve unsent reply text during same-thread refresh. In-memory composers avoid retaining sensitive messages in browser storage. Reuse layout-scoped summaries for desktop/mobile badges and dashboards, without continuous polling.
 
 References: [EF concurrency](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), [EF transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions), [PostgreSQL row locks](https://www.postgresql.org/docs/current/explicit-locking.html). Phase 13 remains outside this change.
+
+## Phase 13 — structured publishing without a page builder
+
+- Reuse one versioned editing aggregate for each independently published resource. Use strict kind-specific JSON schemas and existing stable identifiers rather than translated names, executable HTML, arbitrary routes or an unrestricted page builder.
+- Preserve current website copy as an embedded baseline; save it into a draft only on an explicit administrator action. Do not seed invented business registration, prices, testimonials, qualifications or legal policies.
+- Serialize saves/publishes/restores per key and require optimistic tokens. Publish immutable bilingual snapshots atomically, including image references and audit events; restore through a new draft. Publication and effective dates are distinct for policies and fees.
+- Keep CMS fees independent of customer-specific financial documents. Existing quotations/invoices retain snapshots. Never use settings changes to alter accepted contracts, tax configuration or payment credentials.
+- Store a small bounded public media library in the existing PostgreSQL database, with an explicit public-after-publication policy separate from private encrypted travel documents. No new dependency, storage credential, remote URL fetch, image transformation or cloud integration is required. Archive only images not used by a current publication; preserve historical associations and alt snapshots.
+- Use a single published website response and HTTP revalidation rather than distributed caching. Do not cache drafts publicly or continue showing stale configured fees after an API failure. Reuse public components for authenticated previews.
+- Require a recorded legal-review attestation before publishing policy text; do not claim the CMS validates legal compliance or a reviewer's qualifications. Hide reviewer information from public responses and retain existing contractual terms separately.
+- Expose only messaging notification preferences in the UI; operational delivery limits, authentication, financial settings and secrets remain environment managed. Existing outbox and per-customer opt-outs continue to apply.
+
+References: [EF Core concurrency](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), [ASP.NET Core file uploads](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-10.0), [React context](https://react.dev/reference/react/useContext). Phase 14 security audit and Phase 15 deployment are not part of this implementation.

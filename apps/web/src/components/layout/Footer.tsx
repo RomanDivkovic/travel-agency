@@ -1,5 +1,19 @@
+import {
+  useWebsite,
+  isServiceEnabled,
+} from '../../features/business-management/contentContext';
+import {
+  serviceCodes,
+  cardIds,
+} from '../../features/business-management/types';
+import { useContent } from '../../features/business-management/contentContext';
+import type { BusinessData } from '../../features/business-management/types';
+import {
+  PolicyLinks,
+  WebsiteImage,
+} from '../../features/business-management/PublishedComponents';
 import { Link } from 'react-router';
-import { contactEmail } from '../../app/config/contact';
+import { contactEmail as fallbackEmail } from '../../app/config/contact';
 import { branding } from '../../app/config/branding';
 import { routes } from '../../app/config/routes';
 import { useTranslations } from '../../localization/useLanguage';
@@ -9,6 +23,13 @@ import styles from './Footer.module.scss';
 
 export function Footer() {
   const t = useTranslations();
+  const { documents } = useWebsite();
+  const business = useContent<BusinessData>('business');
+  const contactEmail = business
+    ? business.publicContactVisible
+      ? business.contactEmail
+      : ''
+    : fallbackEmail;
   return (
     <footer id="kontakt" tabIndex={-1} className={styles.footer}>
       <Container>
@@ -16,6 +37,7 @@ export function Footer() {
           <div className={styles.brand}>
             <BrandLogo />
             <p>{t.footer.description}</p>
+            <WebsiteImage page="footer" />
           </div>
           <div>
             <h2>{t.footer.explore}</h2>
@@ -31,11 +53,18 @@ export function Footer() {
           <div>
             <h2>{t.footer.services}</h2>
             <nav aria-label={t.footer.services}>
-              {t.services.items.map((item) => (
-                <Link key={item.id} to={`${routes.services}#${item.id}`}>
-                  {item.title}
-                </Link>
-              ))}
+              {t.services.items
+                .filter((s) =>
+                  isServiceEnabled(
+                    documents,
+                    serviceCodes[cardIds.indexOf(s.id)] || '',
+                  ),
+                )
+                .map((item) => (
+                  <Link key={item.id} to={`${routes.services}#${item.id}`}>
+                    {item.title}
+                  </Link>
+                ))}
             </nav>
           </div>
           <div>
@@ -51,11 +80,13 @@ export function Footer() {
         </div>
         <div className={styles.bottom}>
           <p>
-            © {new Date().getFullYear()} {branding.name}
+            © {new Date().getFullYear()}{' '}
+            {business?.businessName || branding.name}
           </p>
           <div>
-            <span>{t.footer.privacy}</span>
-            <span>{t.footer.terms}</span>
+            <PolicyLinks />
+            {!documents['policy:Privacy'] && <span>{t.footer.privacy}</span>}
+            {!documents['policy:Terms'] && <span>{t.footer.terms}</span>}
           </div>
         </div>
       </Container>

@@ -1,3 +1,5 @@
+import { useContent } from '../features/business-management/contentContext';
+import type { BusinessData } from '../features/business-management/types';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { branding } from '../app/config/branding';
@@ -5,6 +7,8 @@ import { useLanguage, useTranslations } from '../localization/useLanguage';
 
 export function usePageMetadata(title: string, description?: string) {
   const { language } = useLanguage();
+  const siteName =
+    useContent<BusinessData>('business')?.businessName || branding.name;
   const t = useTranslations();
   const text = description ?? t.meta.description;
   const { pathname } = useLocation();
@@ -21,7 +25,7 @@ export function usePageMetadata(title: string, description?: string) {
         '/reset-password',
         '/confirm-request',
       ].includes(privatePath);
-    document.title = `${title} | ${branding.name}`;
+    document.title = `${title} | ${siteName}`;
     const tags: Record<string, string> = {
       description: text,
       robots:
@@ -38,7 +42,7 @@ export function usePageMetadata(title: string, description?: string) {
       'og:description': text,
       'og:type': 'website',
       'og:locale': language === 'sv' ? 'sv_SE' : 'en_GB',
-      'og:site_name': branding.name,
+      'og:site_name': siteName,
       'twitter:card': 'summary',
       'twitter:title': document.title,
       'twitter:description': text,
@@ -82,5 +86,5 @@ export function usePageMetadata(title: string, description?: string) {
     } catch {
       canonical?.remove();
     }
-  }, [title, text, language, pathname]);
+  }, [title, text, language, pathname, siteName]);
 }

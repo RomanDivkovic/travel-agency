@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Bookings;
+using TravelAgency.Domain.BusinessManagement;
 using TravelAgency.Domain.Customers;
 using TravelAgency.Domain.Documents;
 using TravelAgency.Domain.Messaging;
@@ -11,6 +12,7 @@ using TravelAgency.Domain.Requests;
 using TravelAgency.Domain.Research;
 using TravelAgency.Infrastructure.Admin;
 using TravelAgency.Infrastructure.Bookings;
+using TravelAgency.Infrastructure.BusinessManagement;
 using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Documents;
 using TravelAgency.Infrastructure.Messaging;
@@ -60,6 +62,11 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
     public DbSet<QuotationSeries> QuotationSeries => Set<QuotationSeries>();
     public DbSet<Quotation> Quotations => Set<Quotation>();
     public DbSet<QuotationAccessToken> QuotationTokens => Set<QuotationAccessToken>();
+    public DbSet<ManagedContent> ManagedContents => Set<ManagedContent>();
+    public DbSet<ContentRevision> ContentRevisions => Set<ContentRevision>();
+    public DbSet<ContentAudit> ContentAudits => Set<ContentAudit>();
+    public DbSet<WebsiteMedia> WebsiteMedia => Set<WebsiteMedia>();
+    public DbSet<PublishedMediaReference> PublishedMediaReferences => Set<PublishedMediaReference>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
@@ -70,6 +77,7 @@ public sealed class TravelAgencyDbContext(DbContextOptions<TravelAgencyDbContext
         model.ConfigureCustomers();
         model.ConfigureDocuments();
         model.ConfigureMessaging();
+        model.ConfigureContent();
         model.Entity<Administrator>().Property(a => a.DisplayName).HasMaxLength(100);
         var note = model.Entity<RequestNote>();
         note.HasKey(n => n.Id);

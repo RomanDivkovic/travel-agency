@@ -17,7 +17,10 @@ public sealed partial class QuotationApiTests
     public static bool RunMessagingBrowser => HasDatabase && Environment.GetEnvironmentVariable("TRAVEL_MESSAGING_E2E") == "1";
     [Fact(Skip = "Opt in with TRAVEL_MESSAGING_E2E=1 and an isolated *_e2e_tests database.", SkipUnless = nameof(RunMessagingBrowser))]
     public Task MessagingBrowserJourney() => RunBrowserAsync(true, true);
-    private async Task RunBrowserAsync(bool documents, bool messaging = false)
+    public static bool RunCmsBrowser => HasDatabase && Environment.GetEnvironmentVariable("TRAVEL_CMS_E2E") == "1";
+    [Fact(Skip = "Opt in with TRAVEL_CMS_E2E=1 and an isolated *_e2e_tests database.", SkipUnless = nameof(RunCmsBrowser))]
+    public Task CmsBrowserJourney() => RunBrowserAsync(true, true, true);
+    private async Task RunBrowserAsync(bool documents, bool messaging = false, bool cms = false)
     {
         Assert.EndsWith("_e2e_tests", new NpgsqlConnectionStringBuilder(Connection).Database);
         using var c = Client(); await Login(c); var email = "phase10-e2e-" + Guid.NewGuid().ToString("N") + "@example.test";
@@ -59,6 +62,8 @@ public sealed partial class QuotationApiTests
         var start = new ProcessStartInfo("npm") { WorkingDirectory = Path.Combine(root.FullName, "apps", "web"), RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
         start.ArgumentList.Add("run"); start.ArgumentList.Add("test:e2e");
         if (messaging && Environment.GetEnvironmentVariable("TRAVEL_E2E_SPEC") == "messaging") { start.ArgumentList.Add("--"); start.ArgumentList.Add("e2e/messaging.spec.ts"); }
+        if (cms && Environment.GetEnvironmentVariable("TRAVEL_E2E_SPEC") == "cms") { start.ArgumentList.Add("--"); start.ArgumentList.Add("e2e/website-management.spec.ts"); }
+        start.Environment["TRAVEL_CMS_E2E"] = cms ? "1" : "0";
         start.Environment["TRAVEL_E2E_DIRECTORY"] = folder;
         start.Environment["TRAVEL_CUSTOMER_E2E"] = "1";
         start.Environment["TRAVEL_MESSAGING_E2E"] = messaging ? "1" : "0";

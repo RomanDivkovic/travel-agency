@@ -65,7 +65,7 @@ const svPublic = {
       'Flyg, boende, aktiviteter och andra leverantörskostnader tillkommer separat. Du godkänner aktuella priser och villkor innan bokning.',
     quote: 'Personlig offert',
     quoteText:
-      'Pris lämnas efter att dina behov gåtts igenom. Inga fasta servicepriser är publicerade ännu.',
+      'Din personliga offert bekräftar omfattning, serviceavgift och villkor innan du bestämmer dig. Publicerade avgifter är vägledande; leverantörskostnader tillkommer separat.',
     columns: ['Tjänst', 'Omfattning', 'Serviceavgift'],
     scrollHint: 'Svep i tabellen för att jämföra alla kolumner.',
     scopes: [
@@ -124,7 +124,7 @@ const svPublic = {
     error:
       'Kontrollera fälten: ange namn, giltig e-postadress, ämne och ett meddelande. Använd inte enbart blanksteg.',
     availability:
-      'Svarstider och öppettider publiceras inför lansering. Inga akuta reseärenden hanteras här.',
+      'Ingen omedelbar svarstid garanteras. Inga akuta reseärenden hanteras här.',
     wizard:
       'I reseplaneraren kan du förbereda, granska och skicka en kostnadsfri reseförfrågan.',
   },
@@ -151,7 +151,7 @@ const svPublic = {
       {
         question: 'När börjar arbetet med min resa?',
         answer:
-          'Research påbörjas när du har godkänt offerten och betalat den överenskomna serviceavgiften. Ingen betalning tas emot på den här webbplatsen ännu.',
+          'Research påbörjas när du har godkänt offerten och betalningen av den överenskomna serviceavgiften har verifierats. Följ instruktionerna i din faktura.',
       },
       {
         question: 'Bokar ni något utan mitt godkännande?',
@@ -171,7 +171,7 @@ const svPublic = {
       {
         question: 'Kan jag boka eller betala på webbplatsen nu?',
         answer:
-          'Du kan skicka en reseförfrågan, men du kan inte boka eller betala här. En förfrågan innebär ingen bokning. Betalningar och kundkonton är inte aktiverade. Det allmänna kontaktformuläret förbereder bara ett e-postutkast.',
+          'Du kan skicka en reseförfrågan och använda ett verifierat kundkonto för att följa dina ärenden, offerter och fakturor. Följ betalningsinstruktionerna i din faktura. En förfrågan är ingen bokning och inga leverantörsbokningar sker automatiskt. Det allmänna kontaktformuläret förbereder bara ett e-postutkast.',
       },
       {
         question: 'Kan jag få hjälp på engelska?',
@@ -248,7 +248,7 @@ const enPublic = {
       'Flights, accommodation, activities and other supplier costs are separate. You approve current prices and conditions before booking.',
     quote: 'Personal quote',
     quoteText:
-      'Pricing is provided after reviewing your needs. No fixed service fees have been published yet.',
+      'Your personal quotation confirms scope, service fee and conditions before you decide. Published fees are guidance; supplier travel costs are separate.',
     columns: ['Service', 'Scope', 'Service fee'],
     scrollHint: 'Swipe across the table to compare all columns.',
     scopes: [
@@ -307,7 +307,7 @@ const enPublic = {
     error:
       'Check the fields: enter a name, valid email address, subject and message. Do not use only spaces.',
     availability:
-      'Response times and opening hours will be published before launch. Urgent travel issues are not handled here.',
+      'An immediate response is not guaranteed. Urgent travel issues are not handled here.',
     wizard:
       'The travel wizard lets you prepare, review and send a free travel enquiry.',
   },
@@ -334,7 +334,7 @@ const enPublic = {
       {
         question: 'When does work on my trip begin?',
         answer:
-          'Research begins once you accept the quote and pay the agreed service fee. No payments are accepted on this website yet.',
+          'Research begins once you accept the quote and payment of the agreed service fee has been verified. Follow the instructions on your invoice.',
       },
       {
         question: 'Will you book anything without my approval?',
@@ -354,7 +354,7 @@ const enPublic = {
       {
         question: 'Can I book or pay on the website now?',
         answer:
-          'You can send a travel enquiry, but cannot book or pay here. An enquiry does not make a booking. Payments and customer accounts are not activated. The general contact form only prepares an email draft.',
+          'You can send a travel enquiry and use a verified customer account to follow your requests, quotations and invoices. Follow the payment instructions on your invoice. An enquiry is not a booking and supplier bookings are never automatic. The general contact form only prepares an email draft.',
       },
       {
         question: 'Can I use the website in English?',

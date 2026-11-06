@@ -492,6 +492,149 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.ContentAudit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ActorId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("Key", "CreatedAt");
+
+                    b.ToTable("ContentAudits");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.ContentRevision", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DataJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PublishedBy")
+                        .HasColumnType("text");
+
+                    b.HasKey("Key", "Version");
+
+                    b.HasIndex("PublishedAt");
+
+                    b.HasIndex("PublishedBy");
+
+                    b.ToTable("ContentRevisions");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.ManagedContent", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DraftJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("PublishedVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Key");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("ManagedContents");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.WebsiteMedia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AltEn")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("AltSv")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("Archived")
+                        .HasColumnType("boolean");
+
+                    b.Property<byte[]>("Bytes")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Decorative")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("Archived", "CreatedAt");
+
+                    b.ToTable("WebsiteMedia");
+                });
+
             modelBuilder.Entity("TravelAgency.Domain.Customers.CustomerAccountAction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2088,6 +2231,24 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TravelAgency.Infrastructure.BusinessManagement.PublishedMediaReference", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("MediaId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Key", "Version", "MediaId");
+
+                    b.HasIndex("MediaId");
+
+                    b.ToTable("PublishedMediaReferences");
+                });
+
             modelBuilder.Entity("TravelAgency.Infrastructure.Documents.DocumentBlob", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2481,6 +2642,44 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("RequestId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.ContentAudit", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.ContentRevision", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.BusinessManagement.ManagedContent", null)
+                        .WithMany()
+                        .HasForeignKey("Key")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("PublishedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.ManagedContent", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.BusinessManagement.WebsiteMedia", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("TravelAgency.Domain.Customers.CustomerAccountAction", b =>
@@ -2942,6 +3141,21 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Infrastructure.BusinessManagement.PublishedMediaReference", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.BusinessManagement.WebsiteMedia", null)
+                        .WithMany()
+                        .HasForeignKey("MediaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.BusinessManagement.ContentRevision", null)
+                        .WithMany()
+                        .HasForeignKey("Key", "Version")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

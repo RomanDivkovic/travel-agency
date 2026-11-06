@@ -1,5 +1,8 @@
+import { useContent } from '../business-management/contentContext';
+import type { BusinessData } from '../business-management/types';
+import { BusinessContact } from '../business-management/PublishedComponents';
 import { useState, type FormEvent } from 'react';
-import { contactEmail } from '../../app/config/contact';
+import { contactEmail as fallbackEmail } from '../../app/config/contact';
 import { Button } from '../../components/ui/Button';
 import { Section } from '../../components/ui/Section';
 import { PageIntro } from './PageIntro';
@@ -8,6 +11,12 @@ import { buildContactDraft } from './contactDraft';
 import styles from './PublicPages.module.scss';
 export function ContactPage() {
   const p = usePublicCopy().contact;
+  const business = useContent<BusinessData>('business');
+  const contactEmail = business
+    ? business.publicContactVisible
+      ? business.contactEmail
+      : ''
+    : fallbackEmail;
   const [status, setStatus] = useState<'idle' | 'draft' | 'invalid'>('idle');
   const [draft, setDraft] = useState<string>();
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -48,6 +57,7 @@ export function ContactPage() {
             ) : (
               <p className={styles.notice}>{p.unavailable}</p>
             )}
+            <BusinessContact />
             <p>{p.availability}</p>
             <p>{p.wizard}</p>
           </aside>

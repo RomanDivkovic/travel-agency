@@ -1,3 +1,6 @@
+import { WebsiteImage } from '../../business-management/PublishedComponents';
+import { useContent } from '../../business-management/contentContext';
+import type { PageData } from '../../business-management/types';
 import { Fragment } from 'react';
 import { routes } from '../../../app/config/routes';
 import { useTranslations } from '../../../localization/useLanguage';
@@ -9,6 +12,7 @@ import styles from './Hero.module.scss';
 
 export function Hero() {
   const t = useTranslations();
+  const cms = useContent<PageData>('page:home');
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <Container className={styles.grid}>
@@ -36,20 +40,26 @@ export function Hero() {
           </div>
         </div>
         <div className={styles.visual}>
-          <picture>
-            <source
-              type="image/avif"
-              srcSet={heroAvifSrcSet}
-              sizes="(min-width: 1024px) 42vw, (min-width: 768px) 70vw, 90vw"
-            />
-            <img
-              {...images.coast}
-              className={styles.coast}
-              alt={t.hero.imageAlt}
-              fetchPriority="high"
-              sizes="(min-width: 1024px) 42vw, (min-width: 768px) 70vw, 90vw"
-            />
-          </picture>
+          <>
+            {cms?.image ? (
+              <WebsiteImage page="home" className={styles.coast} />
+            ) : (
+              <picture>
+                <source
+                  type="image/avif"
+                  srcSet={heroAvifSrcSet}
+                  sizes="(min-width: 1024px) 42vw, (min-width: 768px) 70vw, 90vw"
+                />
+                <img
+                  {...images.coast}
+                  className={styles.coast}
+                  alt={t.hero.imageAlt}
+                  fetchPriority="high"
+                  sizes="(min-width: 1024px) 42vw, (min-width: 768px) 70vw, 90vw"
+                />
+              </picture>
+            )}
+          </>
           <img
             {...images.beach}
             className={styles.inset}

@@ -1,4 +1,9 @@
 import {
+  useWebsite,
+  isServiceEnabled,
+} from '../business-management/contentContext';
+import { serviceCodes, wizardServices } from '../business-management/types';
+import {
   useEffect,
   useLayoutEffect,
   useReducer,
@@ -60,6 +65,7 @@ function TravelWizard({
   onServiceChange: (service: Service | '') => void;
 }) {
   const t = useWizardCopy();
+  const { documents } = useWebsite();
   const submitCopy = useSubmissionCopy();
   const [busy, setBusy] = useState(false);
   const [initial] = useState(() => {
@@ -108,6 +114,17 @@ function TravelWizard({
   }
   function forward(event: FormEvent) {
     event.preventDefault();
+    if (
+      data.service &&
+      !isServiceEnabled(
+        documents,
+        serviceCodes[wizardServices.indexOf(data.service)] || '',
+      )
+    ) {
+      setStep('service');
+      showErrors({ service: 'choice' });
+      return;
+    }
     const invalid = validateStep(step, data);
     if (Object.keys(invalid).length) {
       showErrors(invalid);

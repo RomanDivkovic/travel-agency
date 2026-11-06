@@ -3,9 +3,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using TravelAgency.Application.BusinessManagement;
 using TravelAgency.Application.Requests;
 using TravelAgency.Domain.Admin;
 using TravelAgency.Domain.Requests;
+using TravelAgency.Infrastructure.BusinessManagement;
 using TravelAgency.Infrastructure.Persistence;
 
 namespace TravelAgency.Infrastructure.Requests;
@@ -32,6 +34,10 @@ public sealed class PostgresTravelRequestStore(TravelAgencyDbContext db, Submiss
         await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({lockId})", ct);
         var replay = await FindAsync(hash, payloadHash, ct);
         if (replay is not null) return replay;
+        var code = input.Service switch { "flights" => "FlightsOnly", "accommodation" => "AccommodationOnly", "flight-accommodation" => "FlightsAndAccommodation", _ => "CompleteTrip" };
+        var serviceKey = "service:" + code;
+        var configured = await (from d in db.ManagedContents join v in db.ContentRevisions on new { d.Key, Version = d.PublishedVersion } equals new { v.Key, v.Version } where d.Key == serviceKey select v.DataJson).SingleOrDefaultAsync(ct);
+        if (configured is not null && !ContentSchema.Read<ServiceData>(ContentOperations.Parse(configured)).Enabled) return new(Errors: new() { ["service"] = ["choice"] });
         await db.IdempotencyRecords.Where(k => k.KeyHash == hash).ExecuteDeleteAsync(ct);
         var number = await db.Database.SqlQuery<long>($"SELECT nextval('travel_request_reference') AS \"Value\"").SingleAsync(ct);
         var now = clock.GetUtcNow();
