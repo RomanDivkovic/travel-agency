@@ -1,3 +1,4 @@
+import { RelatedConversations } from '../messaging/MessagingIntegration';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { Button } from '../../components/ui/Button';
@@ -225,6 +226,7 @@ export function AdminBookingDetailPage() {
         <>
           <section className={styles.panel}>
             <h2>{d.booking.reference}</h2>
+            <RelatedConversations kind="booking" id={d.booking.id} />
             <nav className={styles.actions}>
               <Link to={'/admin/bookings/' + d.booking.id + '/documents'}>
                 {docs.manageDocuments}

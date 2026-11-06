@@ -49,6 +49,8 @@ export default defineConfig({
         Email__PollSeconds: '1',
         Email__CaptureDirectory: path.join(directory, 'mail'),
         Logging__LogLevel__Default: 'Warning',
+        Messaging__NotificationDelaySeconds: '0',
+        Messaging__NotificationCooldownSeconds: '30',
         TravelDocuments__StorageRoot: process.env.TRAVEL_E2E_STORAGE_ROOT!,
         TravelDocuments__ScannerPort:
           process.env.TRAVEL_E2E_SCANNER_PORT ?? '3310',

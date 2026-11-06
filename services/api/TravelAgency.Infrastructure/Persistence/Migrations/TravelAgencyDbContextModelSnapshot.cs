@@ -811,6 +811,211 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.ToTable("ItineraryVersions");
                 });
 
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.ConversationEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActorId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Current")
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<long?>("MessageSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Previous")
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("ConversationId", "CreatedAt", "Id");
+
+                    b.ToTable("ConversationEvents");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.ConversationMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("character varying(20000)");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SenderId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SenderRole")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ConversationId", "Sequence")
+                        .IsUnique();
+
+                    b.HasIndex("ConversationId", "SenderId", "ClientId")
+                        .IsUnique();
+
+                    b.HasIndex("ConversationId", "SenderRole", "Sequence");
+
+                    b.ToTable("ConversationMessages");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.ConversationReadState", b =>
+                {
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ParticipantId")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EmailNotifications")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("LastReadSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.HasKey("ConversationId", "ParticipantId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("ConversationReads");
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.CustomerConversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("AgentNotifiedSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("AgentNotifyAfter")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreationHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("CustomerNotifiedSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("CustomerNotifyAfter")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("LastMessageAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("LastSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
+                    b.Property<Guid?>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VersionToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("ClosedAt");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("CustomerId", "ClientId")
+                        .IsUnique();
+
+                    b.HasIndex("Priority", "LastMessageAt");
+
+                    b.HasIndex("CustomerId", "LastMessageAt", "Id");
+
+                    b.HasIndex("Status", "LastMessageAt", "Id");
+
+                    b.ToTable("Conversations");
+                });
+
             modelBuilder.Entity("TravelAgency.Domain.Payments.Invoice", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2044,6 +2249,9 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.Property<int?>("BookingRevision")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("ConversationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("CustomerActionId")
                         .HasColumnType("uuid");
 
@@ -2094,6 +2302,10 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasIndex("BookingId", "Kind")
                         .IsUnique()
                         .HasFilter("\"BookingId\" IS NOT NULL");
+
+                    b.HasIndex("ConversationId", "Kind")
+                        .IsUnique()
+                        .HasFilter("\"ConversationId\" IS NOT NULL");
 
                     b.HasIndex("InvoiceId", "Kind")
                         .IsUnique()
@@ -2366,6 +2578,68 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.ConversationEvent", b =>
+                {
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("TravelAgency.Domain.Messaging.CustomerConversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.ConversationMessage", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Messaging.CustomerConversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.ConversationReadState", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Messaging.CustomerConversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TravelAgency.Domain.Messaging.CustomerConversation", b =>
+                {
+                    b.HasOne("TravelAgency.Domain.Bookings.TravelBooking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("TravelAgency.Infrastructure.Admin.Administrator", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Domain.Requests.TravelInquiry", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("TravelAgency.Domain.Payments.Invoice", b =>
@@ -2711,6 +2985,11 @@ namespace TravelAgency.Infrastructure.Persistence.Migrations
                     b.HasOne("TravelAgency.Domain.Bookings.TravelBooking", null)
                         .WithMany()
                         .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("TravelAgency.Domain.Messaging.CustomerConversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("TravelAgency.Domain.Customers.CustomerAccountAction", null)

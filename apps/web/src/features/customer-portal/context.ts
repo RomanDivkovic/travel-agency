@@ -9,7 +9,7 @@ export const CustomerSessionContext = createContext<{
 export const useCustomerSession = () => useContext(CustomerSessionContext);
 export function safeCustomerReturn(value: unknown) {
   return typeof value === 'string' &&
-    /^\/account(?:\/(?:profile|security|(?:requests|quotations|invoices|proposals|bookings)(?:\/[0-9a-f-]{36}(?:\/(?:documents|itinerary))?)?))?$/.test(
+    /^\/account(?:\/(?:profile|security|messages(?:\/(?:new|[0-9a-f-]{36}))?|(?:requests|quotations|invoices|proposals|bookings)(?:\/[0-9a-f-]{36}(?:\/(?:documents|itinerary))?)?))?$/.test(
       value,
     )
     ? value

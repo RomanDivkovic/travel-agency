@@ -596,3 +596,71 @@ PDFs contain selectable text and embedded fonts but are not tagged PDF/UA docume
 - Real malware-engine/signature effectiveness, external inbox delivery, production private storage and PDF/UA were not verified. Development's explicit scanner integration fails closed when no daemon is available. Prior commercial payment/business prerequisites still apply. No Phase 12 work was started.
 
 The final isolated-bundle rerun passed all three Chromium tests, including keyboard activation of confirmation controls, saved customer preview, and captured document/itinerary publication emails. All 32 Phase 11 screenshots/scans were regenerated after the final UI copy/checkbox fixes. The normal development smoke check on 5173 switched language and redirected an unauthenticated document route to `/login` with zero page errors. The final Release API was restored on 5080. Completed Phase 11 work is committed on `phase-11-travel-documents-itineraries`; pushing/PR creation remains a separate explicit action.
+
+## Phase 12 — customer messaging
+
+Apply migration `20261105190813_CustomerMessaging` using the repository-root EF command above. The additive schema introduces conversations, append-only messages, participant read positions and private audit history, plus the existing outbox's nullable conversation association. Never reset the database. Existing requests, accounts, quotations, payments, bookings, documents and itineraries remain separate and operational.
+
+### Messaging configuration
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `Messaging__MaxMessageLength` | 5000 | Plain-text limit, configurable 100–5000 UTF-16 characters; subject limit is 150. |
+| `Messaging__NotificationDelaySeconds` | 30 | Initial aggregation delay, 0–300 seconds. |
+| `Messaging__NotificationCooldownSeconds` | 300 | Minimum interval between conversation/recipient notifications, 30–3600 seconds. |
+| `Messaging__CustomerEmailNotifications` | true | Enable customer notification triggers. |
+| `Messaging__AgentEmailNotifications` | true | Enable agent notification triggers. |
+| `Messaging__AgentLanguage` | sv | Agent email language, `sv` or `en`; customer mail uses account preference. |
+| `Messaging__ClosedRetentionDays` | 365 | Closed-history policy, 30–3650 days after closure. |
+| `Messaging__PurgeClosedConversations` | false | Explicit operational approval gate for automatic closed-history deletion. |
+
+Messaging email reuses `CustomerPortal__PublicOrigin`, `Email__AgentRecipient`, branding and the existing sender/capture/retry infrastructure. An approved portal origin is required when queuing notifications. Credentials and secrets never belong in frontend variables. Local Capture delivery is not proof of external inbox delivery. The existing provider's stable notification idempotency keys support retries; external delivery/commit uncertainty retains the inherited transport semantics.
+
+Review/approve the closed-history policy and backup/deletion procedures before enabling purge. Active conversations are never purged by this worker. Closed conversations past the cutoff are deleted in bounded batches under locks, including their message/read/audit/notification graph. Reopening clears the closure timestamp and makes them ineligible. Cleanup waits for pending outbox jobs; expired closed-thread notices are suppressed, then a later cleanup pass safely deletes their history. A cleanup failure does not block unrelated email delivery. Related request/booking deletion nulls references and preserves conversation history; explicit account erasure cascades owned communication. Future GDPR export/deletion processes must include these tables and backups. The engineering default is not a legal retention recommendation.
+
+### Customer and administrator workflow
+
+Customers sign in to `/account/messages`, start a general conversation or choose an owned travel request/booking, provide subject and initial message, then read and reply in `/account/messages/:id`. Request and booking detail actions preselect associations. Owner-filtered reference selection supports server pagination/search. Email preference can be changed per conversation without changing read state. New conversation and reply text is held only in memory. Reply text remains while the same thread refreshes or a send fails; retry retains its submission ID. Leaving the route does not persist a message draft to browser storage.
+
+The agent uses `/admin/messages` with server-side status/priority/unread/customer/reference filters and recent-message sorting. Open a thread, reply, set priority, close or reopen through status controls. Detail pages link to existing request/booking management and show recent private audit history. Both dashboards/navigation use backend summary counts; desktop/mobile navigation share a layout-scoped summary request.
+
+Lists do not mark messages read. A visible thread acknowledges only its displayed message sequence; new arrivals remain unread until displayed/refreshed. Each administrator has an independent read position. Page load, return-to-page/focus, visibility and explicit refresh update threads and counts; there is no polling, WebSocket or SignalR connection. Threads load the newest 50 messages and allow earlier pages by sequence cursor. Inbox pages contain 20 rows.
+
+Customer sends set `AwaitingAgent`, agent replies set `AwaitingCustomer`, and a closed conversation rejects new messages. The agent can explicitly reopen it; customers can instead start a new one. Status/priority updates require the current version token and stale changes conflict. Every create/send has a UUID client submission key; retries with unchanged normalized content return the same record, while changing content under the same key conflicts. Sender account/role is server-derived and unknown JSON fields are rejected. New submissions are limited to 20 per authenticated participant per minute; security limits are enforced on the backend.
+
+Messages are discussion only. They never accept quotations, settle payments, approve proposals, authorize supplier cost changes, execute reservations or cancel bookings. Those actions continue through their existing formal workflows. Messages support plain text/newlines only, with escaped rendering, no rich HTML or attachments. Travel documents stay in Phase 11.
+
+### Notifications
+
+Customer messages queue an agent notification; agent replies queue a customer notification. Each trigger has a unique stable ID. At dispatch, the worker groups unread messages, suppresses already-read/disabled/already-notified work, and defers during the cooldown. Notification watermarks advance only after successful sender acceptance; delivery failures retain normal retry/backoff behavior. Notification delivery does not mark anything read. Team mail can be suppressed after any administrator reads a conversation, while that administrator's read action does not clear another administrator's personal unread badge.
+
+Swedish/English email includes conversation subject, appropriate greeting and a sign-in portal/admin link. It excludes the message body, sensitive attachments and direct storage links. Customer language/preference is checked at delivery. Customer email opt-out suppresses notifications for that thread. Outbox state is durable, but a queued trigger is not a delivered email.
+
+### Persistent messaging browser suite
+
+The guarded `MessagingBrowserJourney` backend test extends the existing runner with explicitly seeded verified customer ownership and an unrelated customer's private thread. It runs the customer/public/document regressions and `e2e/messaging.spec.ts` against a dedicated `*_e2e_tests` database, real API, private production frontend bundle and captured mail. The test-only scanner fixture remains confined to Phase 11 harmless document checks. No production seed endpoints, financial eligibility overrides or external emails are used. Private screenshots, mail and reports stay outside Git; traces remain disabled.
+
+```bash
+./scripts/with-env.sh bash -c 'export TEST_DATABASE_CONNECTION="Host=127.0.0.1;Port=$POSTGRES_PORT;Database=travel_agency_phase12_e2e_tests;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD;Timeout=3;Command Timeout=10"; export DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false DOTNET_USE_POLLING_FILE_WATCHER=1 TRAVEL_MESSAGING_E2E=1; dotnet test --solution TravelAgency.sln --filter-method "*MessagingBrowserJourney"'
+```
+
+Create the isolated database first. The test suite refuses unguarded Playwright invocation or an unsafe database name. Optional `TRAVEL_AXE_PATH` points to an approved local axe-core script. Browser plugin tooling was unavailable, so repository Playwright/Chromium is the verification path. No Phase 13 CMS, live chat, supplier integrations, mobile app or AI planning is included.
+
+For focused iteration, set `TRAVEL_E2E_SPEC=messaging` together with the guarded messaging fixture. This allowlisted test-only option runs just the messaging spec; omit it for the final customer/public/document/messaging regression run. Language assertions wait for the account preference save and verify `html[lang]` again after every navigation, so screenshot filenames alone are never treated as localization proof.
+
+### Phase 12 verification — 5 November 2026
+
+- Locked restore, Release build with warnings treated as errors, .NET formatting, frontend lint, strict type checking, Prettier and production build succeeded. The full Release backend suite passed **182 tests**, with three guarded browser orchestrators skipped in that run. Frontend **195 tests across 20 files** passed. npm and NuGet audits reported zero vulnerabilities.
+- The messaging browser orchestrator was separately executed against isolated PostgreSQL, a real API, captured mail and a private production bundle. All **four Chromium tests** passed, including existing customer/public/document regressions. Messaging covered customer creation, keyboard sending, agent replies, unread/read updates, close/reopen, booking association and cross-customer denial. No unexpected page errors or server failures were recorded by the suite.
+- **40 messaging route/language/width combinations** covered customer inbox/thread/new and administrator inbox/thread at 375, 768, 1024 and 1440px in Swedish and English, with language assertions after navigation, no horizontal overflow and zero selected axe A/AA violations. Existing portal/document checks bring the total to **104 axe scans**; public regressions cover another 72 route/language/width combinations. Swedish mobile thread and English desktop inbox screenshots were visually inspected. This is Chromium/automated accessibility and limited keyboard evidence, not full WCAG certification or a screen-reader, physical-device or cross-browser audit.
+- Additive migration `20261105190813_CustomerMessaging` applied to integration, browser and existing development databases. Counts and original-column fingerprints across all **42 pre-existing tables** were preserved; the outbox gained only its nullable conversation association. EF reported no pending model changes. No database reset occurred. Tests cover retry idempotency, rollback, independent administrator reads, ownership, rate limiting, stale updates, notification suppression/retry and guarded retention.
+- The final Release development API was started on 5080 and its readiness endpoint returned healthy. An extra smoke check on 5173 timed out because that port belongs to a different checkout, `/Users/Roman.Divkovic/Downloads/travel-agency/frontend`; its server was left untouched. Rendered verification above used this repository's isolated production preview on 5177.
+- External inbox delivery remains unverified; notification evidence uses local Capture. Automatic closed-history purge remains disabled until the operator approves retention/backup procedures. No Phase 13 implementation was started. Completed phase work is committed on `phase-12-customer-messaging`; push and pull-request creation require a separate request.
+
+### Required merge checks — 6 November 2026
+
+GitHub branch protection on `main` requires a pull request and successful `frontend` and `backend` checks from the GitHub Actions app. The branch must be up to date with `main`; administrators are subject to the same requirements. Force pushes and branch deletion are disabled. No additional reviewer approval is required for the current single-maintainer workflow. These are GitHub repository settings, not settings enforced by this documentation or the workflow YAML alone.
+
+The Phase 12 CI failure was an itinerary integration test's diagnostic write to the macOS-only `/private/tmp` directory. PDF responses are now validated in memory for both languages; routine tests do not save those manual inspection artifacts. Keep temporary artifacts platform-independent and isolated when explicitly needed. The antiforgery no-cache warnings in the failed log were unrelated to the failure.
+
+Required CI checks reduce regression risk but do not guarantee production correctness. The current workflow checks formatting, lint, types, unit/integration tests, builds, migrations and dependencies; guarded browser journeys must still be run explicitly as documented. A future production deployment must depend on successful CI and target the verified commit, with production secrets and environment protections configured separately.

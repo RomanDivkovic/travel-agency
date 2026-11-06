@@ -1,3 +1,4 @@
+import { RelatedConversations } from '../messaging/MessagingIntegration';
 import { RequestBookings } from '../bookings/BookingIntegration';
 import { RequestResearch } from '../travel-research/RequestResearch';
 import { useDateFormat } from './useDateFormat';
@@ -58,6 +59,7 @@ export function RequestDetailPage() {
             </p>
           </section>
           <RequestFields request={r} />
+          <RelatedConversations kind="request" id={id} />
           <RequestQuotations requestId={id} closed={r.status === 'Closed'} />
           <RequestResearch requestId={id} />
           <RequestBookings requestId={id} />

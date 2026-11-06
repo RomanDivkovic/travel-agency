@@ -1,3 +1,5 @@
+import { MessagingProvider } from '../messaging/MessagingProvider';
+import { MessagesNavigation } from '../messaging/MessagingIntegration';
 import { useBookingCopy } from '../bookings/copy';
 import { usePaymentCopy } from '../payments/copy';
 import { useState } from 'react';
@@ -10,7 +12,7 @@ import { useAdminCopy } from './copy';
 import { useQuotationCopy } from '../quotations/copy';
 import { adminApi } from './api';
 import styles from './Admin.module.scss';
-export function AdminLayout() {
+function AdminLayoutContent() {
   const t = useAdminCopy();
   const bookings = useBookingCopy();
   const payments = usePaymentCopy();
@@ -47,6 +49,7 @@ export function AdminLayout() {
           <NavLink to="/admin/invoices">{payments.title}</NavLink>
           <NavLink to="/admin/bookings">{bookings.title}</NavLink>
           <NavLink to="/admin/proposals">{t.proposals}</NavLink>
+          <MessagesNavigation admin />
         </nav>
         <Link to="/">{t.home}</Link>
         <Button variant="outline" disabled={busy} onClick={() => void logout()}>
@@ -64,5 +67,13 @@ export function AdminLayout() {
         </main>
       </div>
     </div>
+  );
+}
+
+export function AdminLayout() {
+  return (
+    <MessagingProvider admin>
+      <AdminLayoutContent />
+    </MessagingProvider>
   );
 }

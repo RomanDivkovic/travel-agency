@@ -9,6 +9,7 @@ public sealed class IdempotencyRecord
 }
 public sealed class NotificationRecord
 {
+    public Guid? ConversationId { get; set; }
     public string? CustomerId { get; set; }
     public Guid? CustomerActionId { get; set; }
     public Guid? BookingId { get; set; }
