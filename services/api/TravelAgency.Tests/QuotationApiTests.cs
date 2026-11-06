@@ -59,6 +59,11 @@ public sealed partial class QuotationApiTests : IAsyncLifetime
     {
         if (factory is null) return;
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<TravelAgencyDbContext>();
+        await db.PublishedMediaReferences.Where(r => db.ContentRevisions.Any(v => v.Key == r.Key && v.Version == r.Version && v.PublishedBy == userId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.ContentRevisions.Where(v => v.PublishedBy == userId).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.ManagedContents.Where(d => d.UpdatedBy == userId).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.WebsiteMedia.Where(m => m.CreatedBy == userId).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await db.ContentAudits.Where(a => a.ActorId == userId).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.BookingEvents.Where(e => db.Bookings.Any(b => b.Id == e.BookingId && requests.Contains(b.RequestId))).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.Bookings.Where(b => requests.Contains(b.RequestId)).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await scope.ServiceProvider.GetRequiredService<TravelAgency.Infrastructure.Documents.DocumentMaintenance>().RunAsync(TestContext.Current.CancellationToken);

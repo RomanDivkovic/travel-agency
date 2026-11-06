@@ -1,0 +1,25 @@
+using System.Text.Json;
+namespace TravelAgency.Application.BusinessManagement;
+
+public sealed record OpeningRange(int Day, string Opens, string Closes);
+public sealed record OpeningException(DateOnly Date, bool Closed, string Opens, string Closes);
+public sealed record BusinessData(string BusinessName, string LegalBusinessName, string OrganizationNumber, string ContactEmail, string ContactPhone, string WebsiteUrl, string Address, string PostalCode, string City, string Country, string DefaultLanguage, string DefaultCurrency, string TimeZone, bool PublicContactVisible, OpeningRange[] OpeningHours, OpeningException[] Exceptions);
+public sealed record BusinessPreferences(bool AgentMessageEmail, bool CustomerMessageEmail);
+public sealed record ServiceText(string Name, string ShortDescription, string FullDescription, string Included, string Excluded, string Suitable, string Cta);
+public sealed record ServicePrice(string Type, long? AmountMinor, string Currency, DateTimeOffset? EffectiveFrom, DateTimeOffset? EffectiveUntil);
+public sealed record ServiceData(string Code, bool Enabled, int DisplayOrder, ServiceText Sv, ServiceText En, ServicePrice Pricing);
+public sealed record ContentImage(Guid Id, string AltSv, string AltEn, bool Decorative);
+public sealed record PageData(Dictionary<string, string> Sv, Dictionary<string, string> En, ContentImage? Image);
+public sealed record FaqText(string Question, string Answer);
+public sealed record FaqData(bool Enabled, int DisplayOrder, FaqText Sv, FaqText En);
+public sealed record PolicyText(string Title, string Content);
+public sealed record PublicPolicyData(PolicyText Sv, PolicyText En, DateOnly EffectiveFrom);
+public sealed record PolicyData(PolicyText Sv, PolicyText En, DateOnly EffectiveFrom, bool LegallyReviewed, string ReviewedBy, DateOnly? ReviewedOn);
+public sealed record ContentDraftInput(Guid VersionToken, JsonElement Data);
+public sealed record ContentAction(Guid VersionToken, bool Confirmed = false, int? RestoreVersion = null);
+public sealed record ContentVersionDto(int Version, JsonElement Data, DateTimeOffset PublishedAt, string? PublishedBy);
+public sealed record ContentDetail(string Key, Guid VersionToken, JsonElement Draft, int PublishedVersion, DateTimeOffset? UpdatedAt, string? UpdatedBy, ContentVersionDto[] Versions);
+public sealed record ContentListItem(string Key, int PublishedVersion, DateTimeOffset? UpdatedAt, string? TitleSv = null, string? TitleEn = null);
+public sealed record PublicContent(Dictionary<string, JsonElement> Documents);
+public sealed record MediaDto(Guid Id, string FileName, string ContentType, string AltSv, string AltEn, bool Decorative, bool Archived, Guid VersionToken);
+public sealed record MediaChange(Guid VersionToken, string AltSv, string AltEn, bool Decorative, bool Archived);

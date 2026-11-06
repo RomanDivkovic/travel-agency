@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Application.Requests;
 using TravelAgency.Domain.Messaging;
+using TravelAgency.Infrastructure.BusinessManagement;
 using TravelAgency.Infrastructure.Customers;
 using TravelAgency.Infrastructure.Email;
 using TravelAgency.Infrastructure.Persistence;
@@ -28,7 +29,10 @@ public sealed class MessagingNotifications(TravelAgencyDbContext db, MessagingSe
     public static async Task<MessagingDelivery> PrepareAsync(NotificationRecord job, TravelAgencyDbContext db, MessagingSettings settings, EmailSettings email, DateTimeOffset now, CancellationToken ct)
     {
         var c = await db.Conversations.SingleOrDefaultAsync(c => c.Id == job.ConversationId, ct); if (c is null) return new(null, null, null, false, 0); if (settings.PurgeClosedConversations && c.Status == ConversationStatus.Closed && c.ClosedAt < now.AddDays(-settings.ClosedRetentionDays)) return new(null, null, null, false, 0);
-        var payload = JsonSerializer.Deserialize<ConversationMail>(job.PayloadJson!)!; var customer = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == c.CustomerId && u.IsCustomer && u.EmailConfirmed && !u.CustomerDisabled, ct); if (customer is null) return new(null, null, null, false, 0);
+        var payload = JsonSerializer.Deserialize<ConversationMail>(job.PayloadJson!)!;
+        var preferences = await new ContentOperations(db, TimeProvider.System).Preferences(ct);
+        if (payload.ToCustomer ? !preferences.CustomerMessageEmail : !preferences.AgentMessageEmail) return new(null, null, null, false, 0);
+        var customer = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == c.CustomerId && u.IsCustomer && u.EmailConfirmed && !u.CustomerDisabled, ct); if (customer is null) return new(null, null, null, false, 0);
         var recipient = payload.ToCustomer ? MessageSender.Customer : MessageSender.Administrator; var source = payload.ToCustomer ? MessageSender.Administrator : MessageSender.Customer;
         var notified = payload.ToCustomer ? c.CustomerNotifiedSequence : c.AgentNotifiedSequence; var last = await db.ConversationMessages.Where(m => m.ConversationId == c.Id && m.SenderRole == source).Select(m => (long?)m.Sequence).MaxAsync(ct) ?? 0;
         var read = payload.ToCustomer ? (await db.ConversationReads.Where(r => r.ConversationId == c.Id && r.ParticipantId == c.CustomerId).Select(r => (long?)r.LastReadSequence).SingleOrDefaultAsync(ct) ?? 0) : (await db.ConversationReads.Where(r => r.ConversationId == c.Id && r.Role == recipient).Select(r => (long?)r.LastReadSequence).MaxAsync(ct) ?? 0);

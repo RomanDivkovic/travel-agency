@@ -1,0 +1,529 @@
+{
+  "page:home": {
+    "sv": {
+      "shared.hero.title.0": "Din nästa resa",
+      "shared.hero.title.1": "börjar här.",
+      "shared.hero.description": "Berätta vart du vill resa och vad du behöver hjälp med. Jag hjälper dig att hitta, planera och boka en resa som passar dina önskemål och din budget.",
+      "shared.hero.imageAlt": "Illustrativ medelhavsby med terrakottatak vid en turkos vik.",
+      "shared.actions.plan": "Planera min resa",
+      "shared.actions.services": "Se våra tjänster",
+      "shared.actions.learnMore": "Läs mer",
+      "shared.actions.about": "Läs mer om mig",
+      "shared.actions.home": "Till startsidan",
+      "shared.process.title": "Så fungerar det",
+      "shared.process.description": "Från första tanke till färdig resplan.",
+      "shared.process.items.0.title": "Berätta om din resa",
+      "shared.process.items.0.description": "Berätta vart du vill resa, när du vill åka och vad du behöver hjälp med. Din första förfrågan är kostnadsfri.",
+      "shared.process.items.1.title": "Få ett personligt erbjudande",
+      "shared.process.items.1.description": "Jag går igenom din förfrågan och återkommer med ett personligt erbjudande.",
+      "shared.process.items.2.title": "Planeringen börjar",
+      "shared.process.items.2.description": "När du har godkänt erbjudandet och betalat serviceavgiften börjar jag ta fram passande resealternativ.",
+      "shared.process.items.3.title": "Godkänn & boka",
+      "shared.process.items.3.description": "Du får ta ställning till reseförslaget innan de överenskomna bokningarna genomförs.",
+      "shared.process.note": "Serviceavgiften är separat från kostnaden för flyg och boende. Resekostnader och bokningsvillkor godkänns separat innan bokning.",
+      "shared.benefits.title.0": "Mer tid att längta.",
+      "shared.benefits.title.1": "Mindre tid att leta.",
+      "shared.benefits.items.0.title": "Personlig service",
+      "shared.benefits.items.0.description": "Din resa planeras utifrån dina egna önskemål.",
+      "shared.benefits.items.1.title": "Spara tid",
+      "shared.benefits.items.1.description": "Slipp lägga timmar på att jämföra flyg och boenden.",
+      "shared.benefits.items.2.title": "Erfarenhet från resebranschen",
+      "shared.benefits.items.2.description": "Få hjälp av någon med erfarenhet från resebranschen.",
+      "shared.benefits.items.3.title": "Med din budget i åtanke",
+      "shared.benefits.items.3.description": "Få förslag som tar hänsyn till din budget.",
+      "shared.about.title": "Personlig hjälp med din nästa resa",
+      "shared.about.description": "Jag har erfarenhet från resebranschen och tycker om att hjälpa människor att hitta resor som passar just dem. Oavsett om du planerar en weekend, familjesemester eller längre resa hjälper jag dig gärna med att hitta rätt alternativ.",
+      "shared.about.portrait": "Porträtt kommer snart",
+      "shared.inspiration.title": "Vart går nästa resa?",
+      "shared.inspiration.description": "Lite inspiration till din nästa ledighet.",
+      "shared.inspiration.items.0.title": "En weekend i Europa",
+      "shared.inspiration.items.0.description": "Upptäck charmiga städer, god mat och nya perspektiv – perfekt för en långhelg.",
+      "shared.inspiration.items.0.alt": "Illustrativ europeisk kanalstad med pastellfärgade fasader och en stenbro.",
+      "shared.inspiration.items.1.title": "Sol, hav & lugna dagar",
+      "shared.inspiration.items.1.description": "Njut av varma stränder, kristallklart vatten och tid att bara vara.",
+      "shared.inspiration.items.1.alt": "Illustrativ lugn sandstrand med klart vatten, klippor och ett parasoll.",
+      "shared.inspiration.items.2.title": "Tid tillsammans",
+      "shared.inspiration.items.2.description": "Resor som skapar minnen – upplevelser för hela familjen i en lugnare takt.",
+      "shared.inspiration.items.2.alt": "Illustrativ familj som promenerar längs havet i en liten kuststad.",
+      "shared.inspiration.note": "AI-genererade inspirationsbilder. Inga bokningsbara erbjudanden eller aktuell tillgänglighet visas.",
+      "shared.finalCta.title": "Redo att planera din nästa resa?",
+      "shared.finalCta.description": "Skicka en kostnadsfri förfrågan och berätta vad du behöver hjälp med. Du får ett personligt erbjudande innan du bestämmer dig.",
+      "shared.meta.homeTitle": "Personlig reseplanering & bokningshjälp",
+      "shared.meta.description": "Få personlig hjälp att hitta, planera och boka flyg, boende och semesterresor. Läs om personlig resehjälp, våra tjänster och hur prissättningen fungerar."
+    },
+    "en": {
+      "shared.hero.title.0": "Your next journey",
+      "shared.hero.title.1": "starts here.",
+      "shared.hero.description": "Tell me where you want to go and what you need help with. I help you find, plan and book a trip that fits your wishes and your budget.",
+      "shared.hero.imageAlt": "Illustrative Mediterranean village with terracotta roofs beside a turquoise bay.",
+      "shared.actions.plan": "Plan my trip",
+      "shared.actions.services": "Explore our services",
+      "shared.actions.learnMore": "Learn more",
+      "shared.actions.about": "More about me",
+      "shared.actions.home": "Back to home",
+      "shared.process.title": "How it works",
+      "shared.process.description": "From the first idea to a considered travel plan.",
+      "shared.process.items.0.title": "Tell me about your trip",
+      "shared.process.items.0.description": "Share where and when you want to travel and what you need help with. Your initial enquiry is free.",
+      "shared.process.items.1.title": "Receive a personal quote",
+      "shared.process.items.1.description": "I review your enquiry and return with a quote tailored to your needs.",
+      "shared.process.items.2.title": "Planning begins",
+      "shared.process.items.2.description": "Once you accept the quote and pay the service fee, I start researching suitable travel options.",
+      "shared.process.items.3.title": "Approve & book",
+      "shared.process.items.3.description": "You review the proposal before any agreed bookings are made.",
+      "shared.process.note": "The service fee is separate from flights and accommodation. Travel costs and booking conditions must be approved separately before booking.",
+      "shared.benefits.title.0": "More time to look forward.",
+      "shared.benefits.title.1": "Less time searching.",
+      "shared.benefits.items.0.title": "Personal service",
+      "shared.benefits.items.0.description": "Your journey is planned around your own wishes.",
+      "shared.benefits.items.1.title": "Save time",
+      "shared.benefits.items.1.description": "Spend less time comparing flights and places to stay.",
+      "shared.benefits.items.2.title": "Travel industry experience",
+      "shared.benefits.items.2.description": "Get help from someone with experience in the travel industry.",
+      "shared.benefits.items.3.title": "Your budget in mind",
+      "shared.benefits.items.3.description": "Receive suggestions that take your budget into account.",
+      "shared.about.title": "Personal help with your next journey",
+      "shared.about.description": "I have experience in the travel industry and enjoy helping people find journeys that suit them. Whether you are planning a weekend away, a family holiday or a longer adventure, I can help you explore the right options.",
+      "shared.about.portrait": "Portrait coming soon",
+      "shared.inspiration.title": "Where will you go next?",
+      "shared.inspiration.description": "A little inspiration for your next escape.",
+      "shared.inspiration.items.0.title": "A European weekend",
+      "shared.inspiration.items.0.description": "Discover charming cities, good food and fresh perspectives on a long weekend.",
+      "shared.inspiration.items.0.alt": "Illustrative European canal city with pastel buildings and a stone bridge.",
+      "shared.inspiration.items.1.title": "Sun, sea & slower days",
+      "shared.inspiration.items.1.description": "Enjoy warm beaches, clear water and time to simply unwind.",
+      "shared.inspiration.items.1.alt": "Illustrative quiet sandy beach with clear water, rocks and a parasol.",
+      "shared.inspiration.items.2.title": "Time together",
+      "shared.inspiration.items.2.description": "Make memories with experiences for the whole family at a gentler pace.",
+      "shared.inspiration.items.2.alt": "Illustrative family walking beside the sea in a small coastal town.",
+      "shared.inspiration.note": "AI-generated inspiration images. These are not bookable offers or a display of current availability.",
+      "shared.finalCta.title": "Ready to plan your next journey?",
+      "shared.finalCta.description": "Your initial enquiry will be free. You will receive a personal quote before deciding whether to proceed.",
+      "shared.meta.homeTitle": "Personal travel planning & booking assistance",
+      "shared.meta.description": "Personal help with finding, planning and booking flights, accommodation and holidays. Explore our services and learn how tailored travel planning works."
+    },
+    "image": null
+  },
+  "page:about": {
+    "sv": {
+      "public.about.title": "En människa bakom resplanen.",
+      "public.about.description": "Personlig resehjälp börjar med att lyssna. På vad du längtar efter, vad som är viktigt för dig och hur du vill använda din resebudget.",
+      "public.about.storyTitle": "Planering med omtanke",
+      "public.about.story": "Med erfarenhet från resebranschen vill jag göra reseplaneringen mer överskådlig. Jag hjälper dig att jämföra alternativ och förstå skillnaderna, så att du kan fatta beslut som passar dig.",
+      "public.about.approachTitle": "Dina önskemål sätter riktningen",
+      "public.about.approach": "En weekend för två, en familjesemester eller flera stopp på samma resa kräver olika lösningar. Vi kommer överens om vilken hjälp du behöver, och du behåller kontrollen över besluten.",
+      "public.about.identity": "Namn, personligt porträtt och mer information om verksamheten publiceras inför lansering. Inga specifika certifieringar, partnerskap eller antal år i branschen anges innan de har bekräftats.",
+      "public.about.values.0": "Lyhördhet framför standardpaket",
+      "public.about.values.1": "Tydliga förväntningar och kostnader",
+      "public.about.values.2": "Ditt godkännande före bokning"
+    },
+    "en": {
+      "public.about.title": "A person behind the travel plan.",
+      "public.about.description": "Personal travel planning starts with listening. To what you look forward to, what matters to you and how you want to use your travel budget.",
+      "public.about.storyTitle": "Planning with care",
+      "public.about.story": "With experience in the travel industry, I want to make planning easier to understand. I help you compare options and see the differences so you can make decisions that suit you.",
+      "public.about.approachTitle": "Your wishes set the direction",
+      "public.about.approach": "A weekend for two, a family holiday or a journey with several stops calls for different solutions. We agree on the help you need, and you stay in control of the decisions.",
+      "public.about.identity": "A name, personal portrait and further business details will be published before launch. Specific certifications, partnerships and years of experience are not listed until confirmed.",
+      "public.about.values.0": "Listening before standard packages",
+      "public.about.values.1": "Clear expectations and costs",
+      "public.about.values.2": "Your approval before booking"
+    },
+    "image": null
+  },
+  "page:services": {
+    "sv": {
+      "public.services.title": "Rätt hjälp. För din resa.",
+      "public.services.description": "Välj den hjälp du behöver – från en enskild flygresa till en genomtänkt semester. Vi kommer överens om omfattningen innan arbetet börjar.",
+      "public.services.includes": "Det här kan ingå",
+      "public.services.suitable": "Passar dig som",
+      "public.services.extrasTitle": "Lite mer än resan dit",
+      "public.services.extras": "Aktiviteter, upplevelser och praktiska detaljer kan ingå i en överenskommen reseplan. Säg till vad du vill ha hjälp med så tar vi med det i offerten.",
+      "public.services.boundary": "Inga bokningar genomförs utan ditt godkännande. Tillgänglighet, slutpriser och leverantörsvillkor bekräftas separat."
+    },
+    "en": {
+      "public.services.title": "The right help. For your journey.",
+      "public.services.description": "Choose the help you need, from a single flight to a carefully considered holiday. We agree on the scope before work begins.",
+      "public.services.includes": "What can be included",
+      "public.services.suitable": "For travellers who",
+      "public.services.extrasTitle": "Beyond getting there",
+      "public.services.extras": "Activities, experiences and practical details can be included in an agreed travel plan. Tell me what you need help with so it can be covered in your quote.",
+      "public.services.boundary": "No bookings are made without your approval. Availability, final prices and supplier conditions are confirmed separately."
+    },
+    "image": null
+  },
+  "page:contact": {
+    "sv": {
+      "public.contact.title": "Låt oss prata om din nästa resa.",
+      "public.contact.description": "Har du en allmän fråga om resehjälp eller hur tjänsten fungerar? Här hittar du kontaktvägar när verksamheten öppnar.",
+      "public.contact.infoTitle": "Personlig kontakt",
+      "public.contact.unavailable": "Kontaktuppgifter är ännu inte publicerade. Formuläret är därför stängt och inga meddelanden skickas eller sparas.",
+      "public.contact.emailLabel": "E-post",
+      "public.contact.formTitle": "Skriv ett meddelande",
+      "public.contact.name": "Namn",
+      "public.contact.email": "Din e-postadress",
+      "public.contact.subject": "Ämne",
+      "public.contact.message": "Meddelande",
+      "public.contact.privacy": "Skriv bara det som behövs för en allmän fråga. Skicka inte passnummer, betaluppgifter eller känsliga personuppgifter.",
+      "public.contact.disclosure": "Formuläret förbereder ett utkast i ditt e-postprogram. Det skickas inte härifrån. Du granskar och skickar själv i e-postprogrammet.",
+      "public.contact.prepare": "Förbered e-postutkast",
+      "public.contact.submit": "Öppna e-postutkast",
+      "public.contact.status": "Ditt utkast är förberett. Använd länken nedan för att öppna ditt e-postprogram. Inget meddelande har skickats från webbplatsen.",
+      "public.contact.error": "Kontrollera fälten: ange namn, giltig e-postadress, ämne och ett meddelande. Använd inte enbart blanksteg.",
+      "public.contact.availability": "Ingen omedelbar svarstid garanteras. Inga akuta reseärenden hanteras här.",
+      "public.contact.wizard": "I reseplaneraren kan du förbereda, granska och skicka en kostnadsfri reseförfrågan."
+    },
+    "en": {
+      "public.contact.title": "Let’s talk about your next journey.",
+      "public.contact.description": "Have a general question about travel planning or how the service works? Contact options will be available here when the business opens.",
+      "public.contact.infoTitle": "Personal contact",
+      "public.contact.unavailable": "Contact details have not been published yet. The form is closed, and no messages are sent or stored.",
+      "public.contact.emailLabel": "Email",
+      "public.contact.formTitle": "Write a message",
+      "public.contact.name": "Name",
+      "public.contact.email": "Your email address",
+      "public.contact.subject": "Subject",
+      "public.contact.message": "Message",
+      "public.contact.privacy": "Only include what is needed for a general question. Do not send passport numbers, payment details or sensitive personal information.",
+      "public.contact.disclosure": "This form prepares a draft in your email application. It does not send from this website. You review and send it yourself in your email application.",
+      "public.contact.prepare": "Prepare email draft",
+      "public.contact.submit": "Open email draft",
+      "public.contact.status": "Your draft is ready. Use the link below to open your email application. No message has been sent from this website.",
+      "public.contact.error": "Check the fields: enter a name, valid email address, subject and message. Do not use only spaces.",
+      "public.contact.availability": "An immediate response is not guaranteed. Urgent travel issues are not handled here.",
+      "public.contact.wizard": "The travel wizard lets you prepare, review and send a free travel enquiry."
+    },
+    "image": null
+  },
+  "page:footer": {
+    "sv": {
+      "shared.footer.description": "Personlig hjälp att hitta, planera och boka en resa som passar just dig.",
+      "shared.footer.explore": "Utforska",
+      "shared.footer.services": "Våra tjänster",
+      "shared.footer.contact": "Kontakt",
+      "shared.footer.contactPlaceholder": "Kontaktuppgifter publiceras inför lansering.",
+      "shared.footer.privacy": "Integritetspolicy – kommer snart",
+      "shared.footer.terms": "Villkor – kommer snart"
+    },
+    "en": {
+      "shared.footer.description": "Personal help finding, planning and booking a journey that suits you.",
+      "shared.footer.explore": "Explore",
+      "shared.footer.services": "Our services",
+      "shared.footer.contact": "Contact",
+      "shared.footer.contactPlaceholder": "Contact details will be published before launch.",
+      "shared.footer.privacy": "Privacy policy – coming soon",
+      "shared.footer.terms": "Terms – coming soon"
+    },
+    "image": null
+  },
+  "page:pricing": {
+    "sv": {
+      "public.pricing.title": "Tydligt från första steget.",
+      "public.pricing.description": "Din resa är personlig. Det är också offerten. Du får veta vad hjälpen kostar och vad som ingår innan du bestämmer dig.",
+      "public.pricing.fee": "Serviceavgift",
+      "public.pricing.feeText": "Ersättningen för research, jämförelser och planering. Avgiften bestäms utifrån uppdragets omfattning och bekräftas i din personliga offert.",
+      "public.pricing.travel": "Resekostnader",
+      "public.pricing.travelText": "Flyg, boende, aktiviteter och andra leverantörskostnader tillkommer separat. Du godkänner aktuella priser och villkor innan bokning.",
+      "public.pricing.quote": "Personlig offert",
+      "public.pricing.quoteText": "Din personliga offert bekräftar omfattning, serviceavgift och villkor innan du bestämmer dig. Publicerade avgifter är vägledande; leverantörskostnader tillkommer separat.",
+      "public.pricing.columns.0": "Tjänst",
+      "public.pricing.columns.1": "Omfattning",
+      "public.pricing.columns.2": "Serviceavgift",
+      "public.pricing.scrollHint": "Svep i tabellen för att jämföra alla kolumner.",
+      "public.pricing.scopes.0": "Flygalternativ och biljettvillkor",
+      "public.pricing.scopes.1": "Boendealternativ och läge",
+      "public.pricing.scopes.2": "Samordning av resa och vistelse",
+      "public.pricing.scopes.3": "Resrutt, boende och upplevelser",
+      "public.pricing.stepsTitle": "Du bestämmer innan vi börjar",
+      "public.pricing.steps.0": "En första förfrågan blir kostnadsfri och innebär ingen bokning.",
+      "public.pricing.steps.1": "Du får en offert med omfattning, serviceavgift och överenskommen tidsplan.",
+      "public.pricing.steps.2": "Research börjar efter godkänd offert och betald serviceavgift.",
+      "public.pricing.note": "Vi lovar inte marknadens lägsta pris. Målet är lämpliga alternativ, sparad tid och tydliga beslut. Avbokning och återbetalning beror på överenskommet uppdrag och leverantörernas villkor."
+    },
+    "en": {
+      "public.pricing.title": "Clarity from the first step.",
+      "public.pricing.description": "Your journey is personal. So is your quote. You will know what the help costs and what is included before you decide.",
+      "public.pricing.fee": "Service fee",
+      "public.pricing.feeText": "Payment for research, comparisons and planning. The fee depends on the scope of the work and is confirmed in your personal quote.",
+      "public.pricing.travel": "Travel costs",
+      "public.pricing.travelText": "Flights, accommodation, activities and other supplier costs are separate. You approve current prices and conditions before booking.",
+      "public.pricing.quote": "Personal quote",
+      "public.pricing.quoteText": "Your personal quotation confirms scope, service fee and conditions before you decide. Published fees are guidance; supplier travel costs are separate.",
+      "public.pricing.columns.0": "Service",
+      "public.pricing.columns.1": "Scope",
+      "public.pricing.columns.2": "Service fee",
+      "public.pricing.scrollHint": "Swipe across the table to compare all columns.",
+      "public.pricing.scopes.0": "Flight options and ticket conditions",
+      "public.pricing.scopes.1": "Accommodation options and location",
+      "public.pricing.scopes.2": "Coordinating your journey and stay",
+      "public.pricing.scopes.3": "Routes, accommodation and experiences",
+      "public.pricing.stepsTitle": "You decide before we begin",
+      "public.pricing.steps.0": "An initial enquiry will be free and does not make a booking.",
+      "public.pricing.steps.1": "You receive a quote with scope, service fee and an agreed timeline.",
+      "public.pricing.steps.2": "Research begins after you accept the quote and pay the service fee.",
+      "public.pricing.note": "We do not promise the lowest price on the market. The aim is suitable options, saved time and informed decisions. Cancellation and refunds depend on the agreed work and supplier conditions."
+    },
+    "image": null
+  },
+  "page:faq": {
+    "sv": {
+      "public.faq.title": "Bra att veta innan du reser.",
+      "public.faq.description": "Svar på vanliga frågor om personlig resehjälp, serviceavgifter och hur planeringen går till."
+    },
+    "en": {
+      "public.faq.title": "Good to know before you go.",
+      "public.faq.description": "Answers to common questions about personal travel planning, service fees and how the process works."
+    },
+    "image": null
+  },
+  "service:FlightsOnly": {
+    "code": "FlightsOnly",
+    "enabled": true,
+    "displayOrder": 0,
+    "sv": {
+      "name": "Hitta & boka flyg",
+      "shortDescription": "Få hjälp att jämföra flygalternativ och hitta en resa som passar dina datum, önskemål och din budget.",
+      "fullDescription": "Få hjälp att jämföra flygalternativ och hitta en resa som passar dina datum, önskemål och din budget.",
+      "included": "Jämförelse av rutter, tider och mellanlandningar\nGenomgång av bagage och biljettvillkor\nBokningshjälp enligt överenskommelse",
+      "excluded": "Leverantörskostnader tillkommer separat.",
+      "suitable": "vill hitta lämpliga flygalternativ utan att jämföra allt själv.",
+      "cta": "Få hjälp med flyg"
+    },
+    "en": {
+      "name": "Find & book flights",
+      "shortDescription": "Get help comparing flight options and finding a journey that suits your dates, preferences and budget.",
+      "fullDescription": "Get help comparing flight options and finding a journey that suits your dates, preferences and budget.",
+      "included": "Comparison of routes, times and connections\nReview of baggage and ticket conditions\nBooking assistance as agreed",
+      "excluded": "Supplier travel costs are separate.",
+      "suitable": "want suitable flight options without doing all the comparisons themselves.",
+      "cta": "Get help with flights"
+    },
+    "pricing": {
+      "type": "CustomQuotation",
+      "amountMinor": null,
+      "currency": "SEK",
+      "effectiveFrom": null,
+      "effectiveUntil": null
+    }
+  },
+  "service:AccommodationOnly": {
+    "code": "AccommodationOnly",
+    "enabled": true,
+    "displayOrder": 1,
+    "sv": {
+      "name": "Hitta & boka boende",
+      "shortDescription": "Jag hjälper dig att hitta hotell eller andra boenden som passar din resa och dina behov.",
+      "fullDescription": "Jag hjälper dig att hitta hotell eller andra boenden som passar din resa och dina behov.",
+      "included": "Urval av hotell eller andra boenden\nJämförelse av läge, rum och bekvämligheter\nGenomgång av boendets villkor",
+      "excluded": "Leverantörskostnader tillkommer separat.",
+      "suitable": "vill hitta ett boende som passar resans tempo och behov.",
+      "cta": "Få hjälp med boende"
+    },
+    "en": {
+      "name": "Find & book accommodation",
+      "shortDescription": "I help you find hotels or other accommodation that suits your trip and your needs.",
+      "fullDescription": "I help you find hotels or other accommodation that suits your trip and your needs.",
+      "included": "Selection of hotels or other accommodation\nComparison of location, rooms and amenities\nReview of accommodation conditions",
+      "excluded": "Supplier travel costs are separate.",
+      "suitable": "want a place to stay that fits the pace and needs of their trip.",
+      "cta": "Get help with accommodation"
+    },
+    "pricing": {
+      "type": "CustomQuotation",
+      "amountMinor": null,
+      "currency": "SEK",
+      "effectiveFrom": null,
+      "effectiveUntil": null
+    }
+  },
+  "service:FlightsAndAccommodation": {
+    "code": "FlightsAndAccommodation",
+    "enabled": true,
+    "displayOrder": 2,
+    "sv": {
+      "name": "Flyg & boende",
+      "shortDescription": "Få hjälp att planera och boka både resan dit och ett passande boende.",
+      "fullDescription": "Få hjälp att planera och boka både resan dit och ett passande boende.",
+      "included": "Samordning av flygtider och boendedatum\nJämförelse av lämpliga kombinationer\nTydlig översikt över separata resekostnader",
+      "excluded": "Leverantörskostnader tillkommer separat.",
+      "suitable": "vill ha hjälp med både resan och boendet.",
+      "cta": "Planera flyg & boende"
+    },
+    "en": {
+      "name": "Flights & accommodation",
+      "shortDescription": "Get help planning both your journey and a suitable place to stay.",
+      "fullDescription": "Get help planning both your journey and a suitable place to stay.",
+      "included": "Coordination of flights and accommodation dates\nComparison of suitable combinations\nClear overview of separate travel costs",
+      "excluded": "Supplier travel costs are separate.",
+      "suitable": "want help with both the journey and the place to stay.",
+      "cta": "Plan flights & accommodation"
+    },
+    "pricing": {
+      "type": "CustomQuotation",
+      "amountMinor": null,
+      "currency": "SEK",
+      "effectiveFrom": null,
+      "effectiveUntil": null
+    }
+  },
+  "service:CompleteTrip": {
+    "code": "CompleteTrip",
+    "enabled": true,
+    "displayOrder": 3,
+    "sv": {
+      "name": "Komplett reseplanering",
+      "shortDescription": "Från första idé till färdig reseplan – få personlig hjälp med hela din semester.",
+      "fullDescription": "Från första idé till färdig reseplan – få personlig hjälp med hela din semester.",
+      "included": "Planering av resrutt och vistelser\nFörslag på flyg, boende och upplevelser\nEn sammanhängande plan utifrån dina önskemål",
+      "excluded": "Leverantörskostnader tillkommer separat.",
+      "suitable": "vill ha hjälp att sätta ihop helheten, med utrymme för egna val.",
+      "cta": "Planera semestern"
+    },
+    "en": {
+      "name": "Complete travel planning",
+      "shortDescription": "From your first idea to a considered itinerary, get personal help planning your whole holiday.",
+      "fullDescription": "From your first idea to a considered itinerary, get personal help planning your whole holiday.",
+      "included": "Planning routes and stays\nSuggestions for flights, accommodation and experiences\nA connected itinerary based on your preferences",
+      "excluded": "Supplier travel costs are separate.",
+      "suitable": "want help bringing the whole trip together, with room for their own choices.",
+      "cta": "Plan your holiday"
+    },
+    "pricing": {
+      "type": "CustomQuotation",
+      "amountMinor": null,
+      "currency": "SEK",
+      "effectiveFrom": null,
+      "effectiveUntil": null
+    }
+  },
+  "faq:1": {
+    "enabled": true,
+    "displayOrder": 0,
+    "sv": {
+      "question": "Vad kan jag få hjälp med?",
+      "answer": "Du kan få hjälp med flyg, boende, en kombination av båda eller en mer komplett reseplan. Aktiviteter kan ingå efter överenskommelse."
+    },
+    "en": {
+      "question": "What can I get help with?",
+      "answer": "You can get help with flights, accommodation, a combination of both or a more complete itinerary. Activities can be included by agreement."
+    }
+  },
+  "faq:2": {
+    "enabled": true,
+    "displayOrder": 1,
+    "sv": {
+      "question": "Kostar den första förfrågan något?",
+      "answer": "Den första förfrågan blir kostnadsfri. Du får en personlig offert och bestämmer om du vill gå vidare. Du kan skicka en kostnadsfri förfrågan i reseplaneraren."
+    },
+    "en": {
+      "question": "Does the initial enquiry cost anything?",
+      "answer": "The initial enquiry will be free. You receive a personal quote and decide whether to proceed. You can send a free enquiry in the travel wizard."
+    }
+  },
+  "faq:3": {
+    "enabled": true,
+    "displayOrder": 2,
+    "sv": {
+      "question": "Vad är skillnaden mellan serviceavgift och resekostnad?",
+      "answer": "Serviceavgiften ersätter arbetet med att undersöka och planera resan. Flyg, boende och andra resekostnader är separata och godkänns innan bokning."
+    },
+    "en": {
+      "question": "How is the service fee different from travel costs?",
+      "answer": "The service fee pays for the work of researching and planning. Flights, accommodation and other travel costs are separate and approved before booking."
+    }
+  },
+  "faq:4": {
+    "enabled": true,
+    "displayOrder": 3,
+    "sv": {
+      "question": "När börjar arbetet med min resa?",
+      "answer": "Research påbörjas när du har godkänt offerten och betalningen av den överenskomna serviceavgiften har verifierats. Följ instruktionerna i din faktura."
+    },
+    "en": {
+      "question": "When does work on my trip begin?",
+      "answer": "Research begins once you accept the quote and payment of the agreed service fee has been verified. Follow the instructions on your invoice."
+    }
+  },
+  "faq:5": {
+    "enabled": true,
+    "displayOrder": 4,
+    "sv": {
+      "question": "Bokar ni något utan mitt godkännande?",
+      "answer": "Nej. Du granskar reseförslaget, aktuella priser och villkor innan överenskomna bokningar genomförs. En förfrågan eller offert är ingen bekräftad bokning."
+    },
+    "en": {
+      "question": "Will you book anything without my approval?",
+      "answer": "No. You review the proposal, current prices and conditions before agreed bookings are made. An enquiry or quote is not a confirmed booking."
+    }
+  },
+  "faq:6": {
+    "enabled": true,
+    "displayOrder": 5,
+    "sv": {
+      "question": "Garanterar ni det billigaste priset?",
+      "answer": "Nej. Målet är att hitta lämpliga alternativ utifrån dina önskemål och din budget, spara tid och hjälpa dig förstå dina val."
+    },
+    "en": {
+      "question": "Do you guarantee the cheapest price?",
+      "answer": "No. The aim is to find suitable options for your wishes and budget, save you time and help you understand your choices."
+    }
+  },
+  "faq:7": {
+    "enabled": true,
+    "displayOrder": 6,
+    "sv": {
+      "question": "Vad händer om jag behöver avboka eller ändra?",
+      "answer": "Möjligheter och kostnader för ändring, avbokning och återbetalning beror på leverantörens villkor och vårt överenskomna uppdrag. Villkoren ska framgå innan du godkänner bokningen."
+    },
+    "en": {
+      "question": "What if I need to cancel or change my trip?",
+      "answer": "Options and costs for changes, cancellation and refunds depend on supplier conditions and our agreed work. Conditions must be clear before you approve a booking."
+    }
+  },
+  "faq:8": {
+    "enabled": true,
+    "displayOrder": 7,
+    "sv": {
+      "question": "Kan jag boka eller betala på webbplatsen nu?",
+      "answer": "Du kan skicka en reseförfrågan och använda ett verifierat kundkonto för att följa dina ärenden, offerter och fakturor. Följ betalningsinstruktionerna i din faktura. En förfrågan är ingen bokning och inga leverantörsbokningar sker automatiskt. Det allmänna kontaktformuläret förbereder bara ett e-postutkast."
+    },
+    "en": {
+      "question": "Can I book or pay on the website now?",
+      "answer": "You can send a travel enquiry and use a verified customer account to follow your requests, quotations and invoices. Follow the payment instructions on your invoice. An enquiry is not a booking and supplier bookings are never automatic. The general contact form only prepares an email draft."
+    }
+  },
+  "faq:9": {
+    "enabled": true,
+    "displayOrder": 8,
+    "sv": {
+      "question": "Kan jag få hjälp på engelska?",
+      "answer": "Ja, informationen på webbplatsen finns på svenska och engelska. Välj språk i sidhuvudet. Ditt val sparas i webbläsaren om lokal lagring är tillgänglig."
+    },
+    "en": {
+      "question": "Can I use the website in English?",
+      "answer": "Yes. Website information is available in Swedish and English. Choose a language in the header. Your choice is saved in your browser when local storage is available."
+    }
+  },
+  "business": {
+    "businessName": "Your Travel Planner",
+    "legalBusinessName": "",
+    "organizationNumber": "",
+    "contactEmail": "",
+    "contactPhone": "",
+    "websiteUrl": "",
+    "address": "",
+    "postalCode": "",
+    "city": "",
+    "country": "SE",
+    "defaultLanguage": "sv",
+    "defaultCurrency": "SEK",
+    "timeZone": "Europe/Stockholm",
+    "publicContactVisible": true,
+    "openingHours": [],
+    "exceptions": []
+  },
+  "preferences": {
+    "agentMessageEmail": true,
+    "customerMessageEmail": true
+  }
+}

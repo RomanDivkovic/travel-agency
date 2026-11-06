@@ -1,3 +1,10 @@
+import { ServiceFee } from '../business-management/PublishedComponents';
+import type { ServiceData } from '../business-management/types';
+import {
+  useWebsite,
+  isServiceEnabled,
+} from '../business-management/contentContext';
+import { serviceCodes, cardIds } from '../business-management/types';
 import { routes } from '../../app/config/routes';
 import { ButtonLink } from '../../components/ui/Button';
 import { Section } from '../../components/ui/Section';
@@ -7,6 +14,7 @@ import { usePublicCopy } from './usePublicCopy';
 import styles from './PublicPages.module.scss';
 export function PricingPage() {
   const t = useTranslations();
+  const { documents } = useWebsite();
   const copy = usePublicCopy();
   const p = copy.pricing;
   return (
@@ -53,13 +61,29 @@ export function PricingPage() {
               </tr>
             </thead>
             <tbody>
-              {t.services.items.map((service, i) => (
-                <tr key={service.id}>
-                  <th scope="row">{service.title}</th>
-                  <td>{p.scopes[i]}</td>
-                  <td>{p.quote}</td>
-                </tr>
-              ))}
+              {t.services.items
+                .filter((s) =>
+                  isServiceEnabled(
+                    documents,
+                    serviceCodes[cardIds.indexOf(s.id)] || '',
+                  ),
+                )
+                .map((service) => (
+                  <tr key={service.id}>
+                    <th scope="row">{service.title}</th>
+                    <td>{p.scopes[cardIds.indexOf(service.id)]}</td>
+                    <td>
+                      <ServiceFee
+                        service={
+                          documents[
+                            'service:' +
+                              serviceCodes[cardIds.indexOf(service.id)]
+                          ] as ServiceData | undefined
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

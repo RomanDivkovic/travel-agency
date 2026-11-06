@@ -1,10 +1,11 @@
+import { WebsiteProvider } from '../features/business-management/WebsiteProvider';
 import { Outlet } from 'react-router';
 import { useTranslations } from '../localization/useLanguage';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import styles from './AppLayout.module.scss';
 
-export function AppLayout() {
+function PublicLayout() {
   const t = useTranslations();
   return (
     <>
@@ -17,5 +18,13 @@ export function AppLayout() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export function AppLayout() {
+  return (
+    <WebsiteProvider>
+      <PublicLayout />
+    </WebsiteProvider>
   );
 }

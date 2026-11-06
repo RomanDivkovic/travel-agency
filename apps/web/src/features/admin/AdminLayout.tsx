@@ -1,3 +1,4 @@
+import { useCmsCopy } from '../business-management/copy';
 import { MessagingProvider } from '../messaging/MessagingProvider';
 import { MessagesNavigation } from '../messaging/MessagingIntegration';
 import { useBookingCopy } from '../bookings/copy';
@@ -14,6 +15,7 @@ import { adminApi } from './api';
 import styles from './Admin.module.scss';
 function AdminLayoutContent() {
   const t = useAdminCopy();
+  const cms = useCmsCopy();
   const bookings = useBookingCopy();
   const payments = usePaymentCopy();
   const quotations = useQuotationCopy();
@@ -50,6 +52,8 @@ function AdminLayoutContent() {
           <NavLink to="/admin/bookings">{bookings.title}</NavLink>
           <NavLink to="/admin/proposals">{t.proposals}</NavLink>
           <MessagesNavigation admin />
+          <NavLink to="/admin/settings/business">{cms.settings}</NavLink>
+          <NavLink to="/admin/content">{cms.content}</NavLink>
         </nav>
         <Link to="/">{t.home}</Link>
         <Button variant="outline" disabled={busy} onClick={() => void logout()}>

@@ -17,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Documents/Fonts/*.ttf" />
+    <EmbeddedResource Include="BusinessManagement/BaselineContent.json" />
     <Content Include="Documents/Fonts/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Documents/PDFsharp-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
